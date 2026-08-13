@@ -16,6 +16,7 @@
 ### Known Issues
 - [FIXED] iOS Safari print crash (v1.0.2)
 - [WONTFIX] Subjectivity bias in "success" definition
+- [FIXED] The content of the refreshed page disappears and has been added to automatic saving.
 
 # 關於你 · A QUIET PORTRAIT
 
