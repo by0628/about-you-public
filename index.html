@@ -1881,6 +1881,79 @@
 </div>
 
 <script>
+/* ========== 自动存档（localStorage） ========== */
+(function () {
+  const KEY = 'quiet_portrait_v1';
+
+  function save() {
+    try {
+      const data = {
+        inputs:    Array.from(document.querySelectorAll('.text-input')).map(i => i.value),
+        selfFills: Array.from(document.querySelectorAll('.self-fill')).map(i => i.value),
+        textareas: Array.from(document.querySelectorAll('.text-area')).map(i => i.value),
+        slider:    document.getElementById('energySlider')?.value ?? null,
+        chips:     Array.from(document.querySelectorAll('.chip')).map(c => c.classList.contains('active')),
+        colors:    Array.from(document.querySelectorAll('.color-item')).map(c => c.classList.contains('active')),
+        weather:   Array.from(document.querySelectorAll('.weather-item')).map(w => w.classList.contains('active')),
+        mbti:      Array.from(document.querySelectorAll('.mbti-cell')).map(m => m.classList.contains('active'))
+      };
+      localStorage.setItem(KEY, JSON.stringify(data));
+    } catch(e) {}
+  }
+
+  function restore() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+
+      const inputs = document.querySelectorAll('.text-input');
+      data.inputs?.forEach((v, i) => { if (inputs[i]) inputs[i].value = v; });
+
+      const selfFills = document.querySelectorAll('.self-fill');
+      data.selfFills?.forEach((v, i) => { if (selfFills[i]) selfFills[i].value = v; });
+
+      const textareas = document.querySelectorAll('.text-area');
+      data.textareas?.forEach((v, i) => { if (textareas[i]) textareas[i].value = v; });
+
+      if (data.slider && document.getElementById('energySlider')) {
+        document.getElementById('energySlider').value = data.slider;
+        if (typeof updateSlider === 'function') updateSlider();
+      }
+
+      const chips = document.querySelectorAll('.chip');
+      data.chips?.forEach((on, i) => { if (chips[i] && on) chips[i].classList.add('active'); });
+
+      const colors = document.querySelectorAll('.color-item');
+      data.colors?.forEach((on, i) => { if (colors[i] && on) colors[i].classList.add('active'); });
+
+      const weathers = document.querySelectorAll('.weather-item');
+      data.weather?.forEach((on, i) => { if (weathers[i] && on) weathers[i].classList.add('active'); });
+
+      const mbtis = document.querySelectorAll('.mbti-cell');
+      data.mbti?.forEach((on, i) => { if (mbtis[i] && on) mbtis[i].classList.add('active'); });
+    } catch(e) {}
+  }
+
+  function clearSaved() {
+    try { localStorage.removeItem(KEY); } catch(e) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', restore);
+  document.addEventListener('input', save);
+  document.addEventListener('change', save);
+
+  document.querySelectorAll('.chip, .color-item, .weather-item, .mbti-cell').forEach(el => {
+    el.addEventListener('click', () => setTimeout(save, 50));
+  });
+
+  const sliderEl = document.getElementById('energySlider');
+  if (sliderEl) sliderEl.addEventListener('input', save);
+
+  window.clearPortraitSave = clearSaved;
+  console.log('%c✦ 自动存档已启用（本地）', 'color:#A68B5C;font-size:11px;');
+})();
+
   // ===== Chip toggle（多选保留） =====
   document.querySelectorAll('.chip-group').forEach(group => {
     group.addEventListener('click', e => {
@@ -2058,6 +2131,7 @@
 
   // ===== Submit =====
   function handleSubmit() {
+    clearPortraitSave();
     const btn = document.querySelector('.submit-btn span:first-child');
     const btnArrow = document.querySelector('.submit-btn .arrow');
     btn.textContent = '正在整理 ...';
