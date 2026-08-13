@@ -30,7 +30,7 @@
 ## ✦ 預覽
 
 🌐 **線上體驗**  
-https://about-you-public.netlify.app
+https://by0628.github.io/about-you-public/
 
 📱 **建議打開方式**
 - iOS / Android：Safari / Chrome
