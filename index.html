@@ -884,6 +884,52 @@
 
   .print-answer { display: none; }
   .print-value, .print-chips, .print-colors, .print-weather { display: none; }
+/* ============ 优化片段 1：选中态色彩软化与一致性 ============ */
+.chip.active,
+.mbti-cell.active {
+  background: var(--dai-blue) !important; /* 替换原有的 #1A1A1A，提升典雅质感 */
+  border-color: var(--dai-blue) !important;
+  color: #FDFCFA !important;
+  box-shadow: 0 4px 12px rgba(46, 74, 107, 0.2) !important;
+}
+
+/* ============ 优化片段 2：触摸屏防误选与点击体验 ============ */
+.chip,
+.color-item,
+.weather-item,
+.mbti-cell,
+.yn-btn,
+.rating-star {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent; /* 去除移动端点击灰色阴影 */
+}
+
+/* ============ 优化片段 3：字号与层级增强 ============ */
+.q-label {
+  font-size: 16.5px; /* 原 15.5px */
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.q-hint {
+  font-size: 13.5px; /* 原 13px */
+  color: #7A7A7A;   /* 稍微加深灰度，增强可读性 */
+}
+
+/* ============ 优化片段 4：填空状态反馈 ============ */
+.self-fill:not(:placeholder-shown) {
+  border-bottom-style: solid;
+  border-bottom-color: var(--gold);
+  color: var(--dai-blue);
+}
+
+/* ============ 优化片段 5：竖排文字防遮挡微调 ============ */
+@media (max-width: 960px) {
+  .v-text {
+    display: none !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1148,7 +1194,7 @@
       <p class="q-hint">理性分析？直覺？還是問身邊的人？</p>
       <div class="chip-group">
         <span class="chip">理性分析</span>
-        <span class="chip">直覺 gut feeling</span>
+        <span class="chip">直覺 gut instinct</span>
         <span class="chip">問家人</span>
         <span class="chip">問朋友</span>
         <span class="chip">拋硬幣</span>
