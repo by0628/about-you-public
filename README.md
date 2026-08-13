@@ -1,3 +1,22 @@
+# A QUIET PORTRAIT
+## Human Observation Node · v1.0
+
+> **Project Type**: Ambient Questionnaire / Non-invasive Personality Sampling  
+> **Runtime**: Client-side only (Zero backend)  
+> **Stack**: HTML5 / CSS3 / Vanilla JS  
+> **Training Data**: 5 LLMs, 40+ iterations, 7 hours  
+> **Status**: Deployed & Listening
+
+### System Architecture
+- **Input Layer**: 51 sensory & cognitive sampling points
+- **Processing**: Local DOM state (no data exfiltration)
+- **Output**: Plain text / TXT / Print-ready PDF
+- **Security**: Air-gapped by design
+
+### Known Issues
+- [FIXED] iOS Safari print crash (v1.0.2)
+- [WONTFIX] Subjectivity bias in "success" definition
+
 # 關於你 · A QUIET PORTRAIT
 
 > 一份給朋友的靜謐問卷 · 不是測驗，沒有標準答案
