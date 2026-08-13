@@ -930,6 +930,29 @@
     display: none !important;
   }
 }
+.sys-bar {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--elephant);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  opacity: .7;
+}
+.sys-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--sage);
+  animation: sysPulse 2.4s ease-in-out infinite;
+}
+@keyframes sysPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .25; transform: scale(1.4); }
+}
 </style>
 </head>
 <body>
@@ -944,6 +967,14 @@
     <div class="header-eyebrow">PERSONAL · PORTRAIT</div>
     <h1 class="header-title">關於<span class="accent">你</span>的一封信</h1>
     <p class="header-sub">把這份問卷當作一封寫給自己的慢信，慢慢填，不必急</p>
+
+<!-- SYSTEM STATUS -->
+<div class="sys-bar">
+  <span class="sys-dot"></span>
+  <span class="sys-text">
+    SYSTEM ACTIVE · NODE:AUREVNY · PROTOCOL:v1.0
+  </span>
+</div>
 
     <div class="header-welcome">
       這不是測驗，沒有標準答案。<br>
