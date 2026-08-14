@@ -6,6 +6,9 @@
 
 🌐 https://by0628.github.io/about-you-public/
 
+https://img.shields.io/badge/status-已上线-success)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 ## 已上线
 
 | 节点 | 名称 | 状态 |
