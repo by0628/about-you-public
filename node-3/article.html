@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>文章 · Aurevny.Lab</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noto-serif-tc/1.0.0/static/noto-serif-tc.css">
+<link rel="stylesheet" href="./style.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<div class="back-bar">
+  <a href="./index.html">← 返回作品列表</a>
+</div>
+
+<div class="article-shell" id="content">
+  <p class="empty-state">載入中…</p>
+</div>
+
+<div class="footer">
+  <div>© 2026 Aurevny · Local Only · No Telemetry</div>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const file = params.get('file');
+if(!file){ document.getElementById('content').innerHTML = '<p class="empty-state">沒有指定文章。</p>'; }
+else {
+  fetch(`./md/${file}.md`)
+    .then(r => r.ok ? r.text() : Promise.reject())
+    .then(md => {
+      document.getElementById('content').innerHTML = marked.parse(md);
+      // 动态设置标题
+      const h1 = document.querySelector('#content h1');
+      if(h1) document.title = `${h1.textContent.trim()} · Aurevny.Lab`;
+    })
+    .catch(() => {
+      document.getElementById('content').innerHTML = '<p class="empty-state">文章載入失敗。</p>';
+    });
+}
+</script>
+
+</body>
+</html>
