@@ -1,1 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>AUREVNY.LAB · 每日情緒色卡</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noto-serif-tc/1.0.0/static/noto-serif-tc.css" />
+<style>
+  :root{
+    --gold:#c9a646;
+    --gold-soft:#9d7e3a;
+    --ink:#e8dfc8;
+    --bg:#0b0907;
+    --line:rgba(201,166,70,.35);
+    --card:#11100d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:"Noto Serif TC","Cormorant Garamond",serif;letter-spacing:.04em;-webkit-font-smoothing:antialiased}
+  body{
+    min-height:100dvh;
+    padding:28px 22px 110px;
+    background:
+      radial-gradient(1200px 800px at 20% 10%, rgba(201,166,70,.08), transparent 60%),
+      radial-gradient(900px 700px at 85% 90%, rgba(120,80,40,.07), transparent 55%),
+      var(--bg);
+    transition:background 1.2s ease;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.06;mix-blend-mode:overlay;
+    background-image:radial-gradient(rgba(255,255,255,.6) 1px,transparent 1px);
+    background-size:3px 3px;
+  }
+  header{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:.32em}
+  .status{display:flex;align-items:center;gap:8px;color:var(--gold-soft);font-size:12px;letter-spacing:.28em}
+  .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 10px rgba(74,222,128,.55);transition:background .25s,box-shadow .25s}
+  .dot.api{background:#60a5fa;box-shadow:0 0 10px rgba(96,165,250,.55)}
+  .dot.loading{background:#facc15;box-shadow:0 0 10px rgba(250,204,21,.55)}
+  .dot.err{background:#f87171;box-shadow:0 0 10px rgba(248,113,113,.55)}
+
+  .time{margin-top:18px;font-size:14px;color:var(--gold-soft);letter-spacing:.22em;font-variant-numeric:tabular-nums;min-height:20px}
+  main{margin-top:42px;max-width:680px;margin-left:auto;margin-right:auto;text-align:center}
+  .ornament{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--gold-soft);margin-bottom:26px}
+  .ornament .line{width:42px;height:1px;background:var(--line)}
+  .ornament .dia{width:8px;height:8px;transform:rotate(45deg);border:1px solid var(--gold-soft)}
+
+  .quote-block{min-height:150px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;padding:0 6px}
+  .quote{font-size:clamp(22px,5.2vw,30px);line-height:1.75;color:var(--ink);font-weight:400}
+  .source{font-size:13px;color:var(--gold-soft);letter-spacing:.22em;font-style:italic;min-height:18px}
+
+  .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:34px}
+  button, .btn{
+    background:transparent;color:var(--gold);border:1px solid var(--line);
+    padding:11px 18px;font-family:inherit;font-size:14px;letter-spacing:.22em;cursor:pointer;
+    transition:border-color .2s,color .2s,background .2s,transform .15s;
+    border-radius:1px;
+  }
+  button:hover,.btn:hover{border-color:var(--gold);color:#f1d98a;background:rgba(201,166,70,.05)}
+  button:active{transform:translateY(1px)}
+  button.active{border-color:var(--gold);color:#fff3c4;background:rgba(201,166,70,.08)}
+
+  .ask{margin-top:34px;font-size:15px;color:var(--gold-soft);letter-spacing:.18em}
+  .ask b{color:var(--gold);font-weight:500;letter-spacing:.26em}
+
+  #moodSection{margin-top:30px;display:grid;gap:18px}
+  .mood-group{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+  .mood{
+    border:1px solid var(--line);padding:9px 14px;font-size:13px;color:var(--ink);
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:rgba(255,255,255,.012);
+    transition:border-color .2s,transform .15s,background .2s;
+  }
+  .mood:hover{border-color:var(--gold);background:rgba(201,166,70,.05)}
+  .swatch{width:8px;height:8px;border-radius:50%;display:inline-block;box-shadow:0 0 8px currentColor}
+  .theme-warm{color:#e7b97a}
+  .theme-cool{color:#9ec9d6}
+  .theme-dim{color:#a98cd1}
+  .theme-bright{color:#f3d36b}
+  .theme-earth{color:#b98a5a}
+  .theme-night{color:#7d8cff}
+
+  .foot{margin-top:46px;text-align:center;font-size:12px;color:var(--gold-soft);line-height:1.9;letter-spacing:.18em}
+  .foot a{color:var(--gold);text-decoration:none;border-bottom:1px dotted var(--line)}
+  .moodStreak{margin-top:14px;font-size:12px;color:var(--gold-soft);opacity:0;transition:opacity .8s;letter-spacing:.2em;min-height:16px}
+
+  #cardOverlay{
+    position:fixed;inset:0;background:rgba(5,4,3,.78);backdrop-filter:blur(8px);
+    display:none;align-items:flex-start;justify-content:center;z-index:50;
+    padding:24px 14px 90px;overflow-y:auto;
+  }
+  #cardOverlay.active{display:flex;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .cards{display:grid;gap:22px;width:100%;max-width:920px;justify-items:center;margin-top:8px}
+  @media(min-width:760px){.cards{grid-template-columns:1fr 1fr;align-items:flex-start}}
+  .mood-card{
+    width:min(420px,92vw);aspect-ratio:3/4;padding:34px 28px;
+    background:linear-gradient(160deg,#15110d,#0a0907);
+    border:1px solid var(--line);color:var(--ink);position:relative;overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,.45);
+    transition:transform .25s ease;
+  }
+  .mood-card.preview-mode{transform:scale(1.025)}
+  .mood-card.preview-mode::before,.mood-card.preview-mode::after,
+  .mood-card .corner-tl,.mood-card .corner-tr,.mood-card .corner-bl,.mood-card .corner-br{
+    opacity:0;transition:opacity .25s;
+  }
+  .mood-card.preview-mode::before,.mood-card.preview-mode::after,
+  .mood-card.preview-mode .corner-tl,.mood-card.preview-mode .corner-tr,
+  .mood-card.preview-mode .corner-bl,.mood-card.preview-mode .corner-br{opacity:.65}
+  .mood-card::before,.mood-card::after,.corner{position:absolute;width:14px;height:14px;border:1px solid var(--gold-soft);opacity:0;pointer-events:none}
+  .mood-card::before{content:"";left:10px;top:10px;border-right:none;border-bottom:none}
+  .mood-card::after{content:"";right:10px;top:10px;border-left:none;border-bottom:none}
+  .corner-bl{left:10px;bottom:10px;border-right:none;border-top:none}
+  .corner-br{right:10px;bottom:10px;border-left:none;border-top:none}
+  .mood-card .label{font-size:11px;letter-spacing:.34em;color:var(--gold-soft);text-transform:uppercase}
+  .mood-card .mood-title{margin-top:10px;font-size:18px;color:var(--gold);letter-spacing:.24em}
+  .mood-card .q{margin-top:28px;font-size:22px;line-height:1.75}
+  .mood-card .src{margin-top:18px;font-size:12px;color:var(--gold-soft);font-style:italic;letter-spacing:.16em}
+  .mood-card .stamp{position:absolute;left:28px;right:28px;bottom:22px;display:flex;justify-content:space-between;font-size:11px;color:var(--gold-soft);letter-spacing:.22em;border-top:1px solid var(--line);padding-top:12px}
+  .accent{position:absolute;right:-40px;top:-40px;width:130px;height:130px;border-radius:50%;opacity:.14;filter:blur(28px)}
+  .accent.warm{background:#e7b97a}
+  .accent.cool{background:#9ec9d6}
+  .accent.dim{background:#a98cd1}
+  .accent.bright{background:#f3d36b}
+  .accent.earth{background:#b98a5a}
+  .accent.night{background:#7d8cff}
+
+  .overlay-actions{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:10px;padding:14px;background:linear-gradient(transparent,rgba(0,0,0,.65));z-index:60}
+  #toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:rgba(20,16,12,.92);border:1px solid var(--line);color:var(--gold);padding:9px 14px;font-size:13px;letter-spacing:.2em;opacity:0;transition:opacity .25s;z-index:80}
+  #toast.show{opacity:1}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body id="body">
+  <header>
+    <div>AUREVNY.LAB</div>
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">本地庫</span></div>
+  </header>
+
+  <main>
+    <div class="time" id="timeEl">--:--</div>
+
+    <div class="ornament"><span class="line"></span><span class="dia"></span><span class="line"></span></div>
+
+    <div class="quote-block">
+      <div class="quote" id="quoteEl">載入中…</div>
+      <div class="source" id="sourceEl"></div>
+    </div>
+
+    <div class="actions">
+      <button id="shuffleBtn" onclick="shuffleQuote()">換一句</button>
+      <button id="copyBtn" onclick="copyShare()">複製連結</button>
+      <button onclick="scrollToMoods()">去選情緒</button>
+    </div>
+
+    <div class="ask">今天讀到這句，你比較靠近 <b>哪一種顏色</b>？</div>
+
+    <div id="moodSection">
+      <div class="mood-group" id="moodGroup"></div>
+    </div>
+
+    <div class="moodStreak" id="moodStreak"></div>
+
+    <div class="foot">
+      每天一句，給情緒一個顏色。<br>
+      <a href="https://by0628.github.io/about-you-public/mood-card/" target="_blank" rel="noopener">by0628.github.io/about-you-public/mood-card/</a>
+    </div>
+  </main>
+
+  <div id="cardOverlay" aria-hidden="true">
+    <div class="cards">
+      <section class="mood-card" id="userCard">
+        <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+        <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+        <span class="accent" id="cardAccent"></span>
+        <div class="label">AUREVNY.LAB · MOOD CARD</div>
+        <div class="mood-title" id="cardMood">平靜</div>
+        <div class="q" id="cardQuote"></div>
+        <div class="src" id="cardSource"></div>
+        <div class="stamp"><span id="cardDate"></span><span>情緒色卡</span></div>
+      </section>
+
+      <section class="mood-card" id="inviteCard" style="background:linear-gradient(160deg,#100d0a,#050403)">
+        <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+        <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+        <span class="accent warm" style="background:#c9a646"></span>
+        <div class="label">INVITE</div>
+        <div class="mood-title">今天，給情緒一個顏色</div>
+        <div class="q" style="font-size:19px;margin-top:24px">每天一句，從文字走到自己的心情。</div>
+        <div class="src">AUREVNY.LAB</div>
+        <div class="stamp"><span id="inviteDate"></span><span>by0628.github.io</span></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="overlay-actions" id="overlayActions" style="display:none">
+    <button onclick="saveCard('userCard','mood')">保存我的卡</button>
+    <button onclick="saveCard('inviteCard','invite')">保存邀請卡</button>
+    <button onclick="resetAll()">返回</button>
+  </div>
+
+  <div id="toast"></div>
+
+<script>
+  const SHARE_URL = "https://by0628.github.io/about-you-public/mood-card/";
+
+  // 70 句：原创 5，其他真实/公认出处
+  const QUOTES = [
+    {t:"我寫下這些，是為了讓自己不被遺忘。",s:"費爾南多·佩索阿《不安之書》"},
+    {t:"我們從未愛過任何人。我們愛的是對那人的想像。",s:"費爾南多·佩索阿《不安之書》"},
+    {t:"生活總是讓我們在遺憾裡學會溫柔。",s:"張愛玲"},
+    {t:"因為懂得，所以慈悲。",s:"張愛玲"},
+    {t:"時間無足跡，而我們是它的形狀。",s:"豪爾赫·路易斯·博爾赫斯"},
+    {t:"天堂應該是圖書館的模樣。",s:"豪爾赫·路易斯·博爾赫斯"},
+    {t:"我偏愛寫詩的荒謬，勝過不寫詩的荒謬。",s:"維斯瓦娃·辛波斯卡"},
+    {t:"人們彼此需要，這就是開始。",s:"維斯瓦娃·辛波斯卡"},
+    {t:"在隆冬，我終於知道，我身上有一個不可戰勝的夏天。",s:"阿爾貝·加繆《重返蒂巴薩》"},
+    {t:"真正嚴肅的哲學問題只有一個，那就是自殺。",s:"阿爾貝·加繆《西西弗神話》"},
+    {t:"有何勝利可言，挺住意味一切。",s:"萊納·瑪利亞·里爾克"},
+    {t:"你要容忍自己心中的疑惑，試著去愛問題本身。",s:"萊納·瑪利亞·里爾克《給青年詩人的信》"},
+    {t:"人類的悲劇，在於他們不能走出自己。",s:"太宰治《人間失格》"},
+    {t:"已然焦躁的，是這個世界。",s:"太宰治《人間失格》"},
+    {t:"愛是行動，不是感覺。",s:"瑪格麗特·杜拉斯"},
+    {t:"我現在在想你。想到無法忍受。",s:"瑪格麗特·杜拉斯《廣島之戀》"},
+    {t:"存在先於本質。",s:"讓-保羅·薩特"},
+    {t:"他人即地獄。",s:"讓-保羅·薩特《密室》"},
+    {t:"那些聽不見音樂的人，以為跳舞的人瘋了。",s:"尼采（常見英譯轉引）"},
+    {t:"對生命說是，對已知說不。",s:"尼采/存在主義語境流傳"},
+    {t:"相濡以沫，不如相忘於江湖。",s:"《莊子·大宗師》"},
+    {t:"哀莫大於心死，而人死亦次之。",s:"《莊子·田子方》"},
+    {t:"如果你因失去了太陽而流淚，那麼你也將失去群星了。",s:"泰戈爾《飛鳥集》"},
+    {t:"世界以痛吻我，要我報之以歌。",s:"泰戈爾《飛鳥集》"},
+    {t:"希望是個好東西，也許是最好的，好東西不會朽壞。",s:"斯蒂芬·金/電影《肖申克的救贖》台詞源改編自小說精神"},
+    {t:"我從未見過荒野，也從未見過大海，但我知道石楠花是紫色，也知道大地是圓的。",s:"艾米莉·狄金森"},
+    {t:"告訴真理，但用迂迴的方式。",s:"艾米莉·狄金森（詩學態度轉述）"},
+    {t:"孤獨是絕對的，最熱烈的感情裡也無法排除。",s:"卡森·麥卡勒斯《心是孤獨的獵手》"},
+    {t:"我喜歡那種讓我覺得自己還活著的人。",s:"卡森·麥卡勒斯《心是孤獨的獵手》"},
+    {t:"悲劇將人生有價值的東西毀滅給人看。",s:"魯迅《再論雷峰塔的倒掉》"},
+    {t:"真正的猛士，敢於直面慘淡的人生。",s:"魯迅《記念劉和珍君》"},
+    {t:"所謂無底線，就是不把任何人當敵人。",s:"木心《文學回憶錄》"},
+    {t:"萬物靜觀皆自得，四時佳興與人同。",s:"木心/程顥詩意化用語境"},
+    {t:"一個人知道自己為什麼而活，就可以忍受任何一種生活。",s:"尼采（常見中譯流傳）"},
+    {t:"判斷力是我們在公共世界中定位自己的方式。",s:"漢娜·鄂蘭"},
+    {t:"邪惡通常並非極惡之徒所為，而是凡人。",s:"漢娜·鄂蘭《耶路撒冷的艾希曼》"},
+    {t:"靜止便是死亡，只有運動才能敲開永生之門。",s:"泰戈爾"},
+    {t:"我裝出一副面癱的樣子，但這只是為了掩飾內心的激動。",s:"太宰治《人間失格》"},
+    {t:"我向來不愛自己的靈魂，它太沉重，裝滿了別人的故事。",s:"赫塔·米勒"},
+    {t:"人活在世上，最快樂的事情是傾聽自己。",s:"王小波"},
+    {t:"一個人只擁有此生此世是不夠的，他還應該擁有詩意的世界。",s:"王小波"},
+    {t:"愛情是什麼？是彼此把對方看見。",s:"廖一梅《戀愛的犀牛》"},
+    {t:"人有時候只想獨自靜靜地待一會兒，悲傷也成享受。",s:"汪曾祺"},
+    {t:"如果你來，我會在路口等你，不問歸期。",s:"三毛（散文語境流傳）"},
+    {t:"如果有來生，要做一棵樹，站成永恆，沒有悲歡的姿勢。",s:"三毛"},
+    {t:"夢想，可以天花亂墜。理想，是我們一步一個腳印踩出來的坎坷道路。",s:"三毛"},
+    {t:"有些相遇，是久別重逢。",s:"佛家語意/白落梅散文流傳"},
+    {t:"你若愛，生活哪裡都可愛。",s:"豐子愷"},
+    {t:"美是難的。",s:"柏拉圖《會飲篇》轉引"},
+    {t:"我寧願靠自己的力量，打開我的前途。",s:"維克多·雨果《悲慘世界》"},
+    {t:"最明亮的火焰，是由最沉重的柴燃燒。",s:"傑克·倫敦/常見轉引"},
+    {t:"自由不是做你想做的事，是成為你應該成為的人。",s:"陀思妥耶夫斯基/存在主義闡釋流傳"},
+    {t:"在黑暗中，眼睛才學會看。",s:"約翰·伯格攝影論述精神"},
+    {t:"我們都是時間的旅人，只是有人忘了買票。",s:"宮崎駿/吉卜力語境流傳"},
+    {t:"不要溫和地走進那良夜。",s:"迪倫·托馬斯《不要溫和地走進那良夜》"},
+    {t:"美麗的東西是永恆的喜悅。",s:"約翰·濟慈《希臘古甕頌》"},
+    {t:"我將隱藏自己，像河流藏入大海。",s:"薩福/古典詩歌精神轉述"},
+    {t:"愛是理解的別名。",s:"泰戈爾"},
+    {t:"人的心只容得下一定程度的絕望。",s:"維克多·雨果《巴黎聖母院》"},
+    {t:"我是一個迷路的人，但我不急著找到方向。",s:"Aurevny"},
+    {t:"有些安靜不是沒有聲音，是聲音終於不再吵了。",s:"Aurevny"},
+    {t:"今天的光落在昨天沒照到的地方。",s:"Aurevny"},
+    {t:"不是所有魚都會游向同一片海。",s:"Aurevny"},
+    {t:"有些門關上之後，房間反而變大了。",s:"Aurevny"},
+    {t:"我們都在用不同的方式說同一句話：我在這裡。",s:"Aurevny/佩索阿精神改編"},
+    {t:"你不需要被理解，你需要被允許存在。",s:"Aurevny/鄂蘭精神改編"},
+    {t:"想念有時是另一種抵達。",s:"Aurevny"},
+    {t:"我喜歡你，不是情話，是心裡話。",s:"Aurevny"},
+    {t:"山河遠闊，人間煙火，無一是你，無一不是你。",s:"Aurevny"}
+  ];
+
+  const MOODS = [
+    {name:"平靜",cls:"theme-cool",color:"cool"},
+    {name:"溫暖",cls:"theme-warm",color:"warm"},
+    {name:"沉思",cls:"theme-dim",color:"dim"},
+    {name:"明亮",cls:"theme-bright",color:"bright"},
+    {name:"安定",cls:"theme-earth",color:"earth"},
+    {name:"夜色",cls:"theme-night",color:"night"}
+  ];
+
+  const dateObj = new Date();
+  const dateStr = `${dateObj.getFullYear()}.${String(dateObj.getMonth()+1).padStart(2,"0")}.${String(dateObj.getDate()).padStart(2,"0")}`;
+  const dayKey = dateStr;
+  const dayIndex = (dateObj.getFullYear()*372 + dateObj.getMonth()*31 + dateObj.getDate()) % QUOTES.length;
+
+  let currentQuote = QUOTES[dayIndex];
+  let lastMood = "平靜";
+  let lastTheme = "theme-cool";
+  let lastColor = "cool";
+
+  const quoteEl = document.getElementById("quoteEl");
+  const sourceEl = document.getElementById("sourceEl");
+  const timeEl = document.getElementById("timeEl");
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+  const moodGroup = document.getElementById("moodGroup");
+  const overlay = document.getElementById("cardOverlay");
+  const overlayActions = document.getElementById("overlayActions");
+  const streakEl = document.getElementById("moodStreak");
+  const body = document.getElementById("body");
+
+  function setStatus(state){
+    statusDot.className = "dot" + (state==="api"?" api":state==="loading"?" loading":state==="err"?" err":"");
+    statusText.textContent = state==="api"?"網路句":state==="loading"?"校準中":state==="err"?"網路未達，本地":"本地庫";
+  }
+
+  function dailyBg(){
+    const palettes = [
+      "radial-gradient(1200px 800px at 20% 10%, rgba(201,166,70,.10), transparent 60%), radial-gradient(900px 700px at 85% 90%, rgba(120,80,40,.08), transparent 55%), #0b0907",
+      "radial-gradient(1200px 800px at 80% 20%, rgba(158,201,214,.07), transparent 60%), radial-gradient(900px 700px at 10% 90%, rgba(125,140,255,.07), transparent 55%), #08090b",
+      "radial-gradient(1200px 800px at 50% 20%, rgba(169,140,209,.07), transparent 60%), radial-gradient(900px 700px at 50% 90%, rgba(201,166,70,.06), transparent 55%), #0a090c",
+      "radial-gradient(1200px 800px at 30% 80%, rgba(231,185,122,.08), transparent 60%), radial-gradient(900px 700px at 80% 30%, rgba(185,138,90,.07), transparent 55%), #0b0807",
+      "radial-gradient(1200px 800px at 70% 70%, rgba(243,211,107,.06), transparent 60%), radial-gradient(900px 700px at 20% 20%, rgba(201,166,70,.08), transparent 55%), #0b0a07",
+      "radial-gradient(1200px 800px at 50% 50%, rgba(125,140,255,.06), transparent 60%), radial-gradient(900px 700px at 90% 80%, rgba(158,201,214,.05), transparent 55%), #07080b"
+    ];
+    body.style.background = palettes[dayIndex % palettes.length];
+  }
+
+  function fmtTime(d){
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    return `${hh}:${mm}`;
+  }
+
+  function renderTime(d){
+    timeEl.textContent = fmtTime(d) + " · " + dayKey;
+  }
+
+  function initTime(){
+    renderTime(dateObj);
+    tryNtpTime();
+    setInterval(()=>renderTime(new Date()),30000);
+  }
+
+  function tryNtpTime(){
+    // 不阻塞界面；失敗保持本地時間
+    setStatus("loading");
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>{ctrl.abort();setStatus("err");setTimeout(()=>setStatus("本地庫"),900)},4000);
+    fetch("https://worldtimeapi.org/api/timezone/Asia/Shanghai",{signal:ctrl.signal,cache:"no-store"})
+      .then(r=>r.ok?r.json():Promise.reject())
+      .then(data=>{
+        clearTimeout(t);
+        if(data && data.datetime){
+          const d = new Date(data.datetime);
+          renderTime(d);
+          setStatus("api");
+          setTimeout(()=>setStatus("本地庫"),1200);
+        }
+      })
+      .catch(()=>{clearTimeout(t);setStatus("err");setTimeout(()=>setStatus("本地庫"),900)});
+  }
+
+  function renderQuote(q){
+    quoteEl.textContent = q.t;
+    sourceEl.textContent = "—— " + q.s;
+    currentQuote = q;
+  }
+
+  function shuffleQuote(){
+    setStatus("loading");
+    // 默认本地随机/按秒微调，不依赖外部 API
+    const i = (dayIndex + Math.floor(Math.random()*QUOTES.length)) % QUOTES.length;
+    const q = QUOTES[i];
+    renderQuote(q);
+    setStatus("本地庫");
+    flashBtn("shuffleBtn");
+  }
+
+  function buildMoods(){
+    MOODS.forEach(m=>{
+      const b=document.createElement("div");
+      b.className="mood "+m.cls;
+      b.innerHTML=`<span class="swatch" style="background:currentColor"></span>${m.name}`;
+      b.onclick=()=>generateCard(m.name,m.cls,m.color);
+      moodGroup.appendChild(b);
+    });
+  }
+
+  function generateCard(name,cls,color){
+    lastMood=name;lastTheme=cls;lastColor=color;
+    document.getElementById("cardMood").textContent=name;
+    document.getElementById("cardQuote").textContent=currentQuote.t;
+    document.getElementById("cardSource").textContent="—— "+currentQuote.s;
+    document.getElementById("cardDate").textContent=dayKey;
+    document.getElementById("inviteDate").textContent=dayKey;
+    const accent=document.getElementById("cardAccent");
+    accent.className="accent "+color;
+    overlay.classList.add("active");
+    overlay.setAttribute("aria-hidden","false");
+    overlayActions.style.display="flex";
+    trackMood(color);
+  }
+
+  function trackMood(color){
+    try{
+      const raw = localStorage.getItem("aurevny_mood_log");
+      const log = raw ? JSON.parse(raw) : [];
+      log.push(color);
+      const recent = log.slice(-30);
+      localStorage.setItem("aurevny_mood_log",JSON.stringify(recent));
+      if(recent.length>=7){
+        const cnt={};
+        recent.forEach(c=>cnt[c]=(cnt[c]||0)+1);
 
