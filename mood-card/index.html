@@ -15,25 +15,38 @@ html,body{background:var(--bg);color:var(--ink);font-family:"Noto Serif TC","Son
 body{
   min-height:100dvh;padding:24px 18px 100px;max-width:680px;margin:0 auto;
   background:radial-gradient(1200px 800px at 20% 10%,rgba(201,166,70,.08),transparent 60%),var(--bg);
-  overflow-x:hidden;
+  overflow-x:hidden;transition:background-position .8s ease;
 }
 body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:radial-gradient(rgba(255,255,255,.6) 1px,transparent 1px);background-size:3px 3px}
 
 .topbar{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--gold);letter-spacing:.3em;text-transform:uppercase}
 .status-group{display:flex;align-items:center;gap:14px}
 .status{display:flex;align-items:center;gap:6px;color:var(--gold-soft);font-size:11px}
-.dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.5);transition:.3s}
-.dot.api-ready{background:#5a5a5a;box-shadow:none}
-.dot.api-ready.active{background:#60a5fa;box-shadow:0 0 8px rgba(96,165,250,.5)}
-.dot.api-ready.loading{background:#facc15;animation:pulse 1s infinite}
-.dot.api-ready.err{background:#f87171;box-shadow:0 0 8px rgba(248,113,113,.5)}
+.dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.5);transition:.3s;display:inline-block}
+.dot-api{background:#5a5a5a;box-shadow:none;transition:.3s;display:inline-block}
+.dot-api.loading{background:#d4b840;box-shadow:0 0 8px rgba(212,184,64,.6);animation:pulse 1s infinite}
+.dot-api.ok{background:#6fa8dc;box-shadow:0 0 8px rgba(111,168,220,.6)}
+.dot-api.fail{background:#c75a5a;box-shadow:0 0 8px rgba(199,90,90,.6)}
 @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
 
-.hero{margin-top:28px;text-align:center}
-.date-row{font-size:12px;color:var(--gold-soft);letter-spacing:.28em;min-height:18px}
-.quote-wrap{margin-top:20px;min-height:140px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:0 4px}
-.quote{font-size:clamp(20px,5vw,28px);line-height:1.8;color:var(--ink)}
-.source{font-size:12px;color:var(--gold-soft);letter-spacing:.2em;font-style:italic;min-height:16px}
+.hero{margin-top:28px;text-align:center;width:100%;padding:0 4px}
+.date-row{font-size:12px;color:var(--gold-soft);letter-spacing:.28em;min-height:18px;display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap}
+.read-count{font-size:10px;opacity:.6;letter-spacing:.14em}
+
+.quote-wrap{margin-top:20px;min-height:160px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:0 4px;width:100%}
+.quote{
+  font-size:clamp(20px,5vw,28px);line-height:1.8;color:var(--ink);
+  min-height:3.6em;width:100%;max-width:100%;
+  word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap;
+  text-align:center;
+}
+.quote .cursor{display:inline-block;width:2px;height:.9em;background:var(--gold);margin-left:2px;vertical-align:middle;animation:blink 1s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+.quote.typing-done .cursor{display:none}
+
+.source{font-size:12px;color:var(--gold-soft);letter-spacing:.2em;font-style:italic;min-height:16px;opacity:0;transition:opacity .5s ease}
+.source.show{opacity:1}
+
 .divider{margin:28px auto 18px;width:48px;height:1px;background:var(--line);position:relative}
 .divider::after{content:"";position:absolute;left:50%;top:-3px;width:7px;height:7px;background:var(--bg);border:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
 
@@ -45,22 +58,44 @@ button:active{transform:translateY(1px)}
 .weather-row{margin-top:14px;font-size:11px;color:var(--gold-soft);letter-spacing:.18em;min-height:14px}
 
 .hint{text-align:center;font-size:13px;color:var(--gold-soft);margin-top:28px;letter-spacing:.16em}
-.hint b{color:var(--gold);font-weight:400}
+.hint b{color:var(--gold);font-weight:normal}
 
 .moodSection{margin-top:22px;display:flex;flex-direction:column;gap:14px}
 .group-title{font-size:10px;letter-spacing:.32em;color:var(--gold-soft);margin-bottom:6px;text-transform:uppercase}
-.mood-row{display:flex;flex-wrap:wrap;gap:7px}
+.mood-row{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
 .mood-btn{background:rgba(255,255,255,.01);color:var(--ink);border:1px solid var(--line);padding:7px 11px;font-size:12px;letter-spacing:.14em;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:.2s;border-radius:1px}
 .mood-btn:hover{border-color:var(--gold-soft);transform:translateY(-1px)}
 .swatch{width:6px;height:6px;border-radius:50%;flex:none}
 
 .footer-note{margin-top:40px;text-align:center;font-size:10px;color:var(--gold-soft);line-height:1.8;letter-spacing:.2em}
 .footer-note a{color:var(--gold);text-decoration:none;border-bottom:1px dotted var(--line)}
-#moodStreak{margin-top:8px;min-height:14px;font-size:10px;color:var(--gold-soft);opacity:0;transition:.6s;letter-spacing:.18em}
+#moodStreak{margin-top:8px;min-height:14px;font-size:10px;color:var(--gold-soft);opacity:0;transition:.6s;letter-spacing:.18em;cursor:pointer}
+#moodStreak:hover{color:var(--gold)}
 
+/* 周报 */
+.weekly-overlay{position:fixed;inset:0;z-index:90;background:rgba(5,4,3,.88);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}
+.weekly-overlay.active{display:flex;animation:fade .3s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.weekly-card{width:min(340px,90vw);background:linear-gradient(160deg,#15110d,#0a0907);border:1px solid var(--line);padding:28px 22px 20px;position:relative;color:var(--ink)}
+.weekly-card .w-label{font-size:9px;letter-spacing:.32em;color:var(--gold-soft);text-transform:uppercase}
+.weekly-card .w-title{font-size:18px;color:var(--gold);letter-spacing:.2em;margin-top:6px}
+.weekly-card .w-summary{font-size:12px;color:var(--gold-soft);line-height:1.8;margin-top:14px;font-style:italic}
+.w-ring{width:120px;height:120px;border-radius:50%;margin:18px auto;display:flex;align-items:center;justify-content:center;position:relative}
+.w-ring-center{text-align:center}
+.w-ring-center .num{font-size:24px;color:var(--gold);letter-spacing:.1em}
+.w-ring-center .unit{font-size:9px;color:var(--gold-soft);letter-spacing:.2em}
+.w-bars{margin-top:16px;display:flex;flex-direction:column;gap:6px}
+.w-bar-row{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--gold-soft);letter-spacing:.12em}
+.w-bar-name{min-width:36px;text-align:right}
+.w-bar-track{flex:1;height:5px;background:rgba(201,166,70,.1);border-radius:2px;overflow:hidden}
+.w-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.w-bar-pct{min-width:28px;text-align:left}
+.w-close{position:absolute;top:10px;right:14px;font-size:20px;color:var(--gold-soft);cursor:pointer;line-height:1;transition:color .2s;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.w-close:hover{color:var(--gold)}
+
+/* 卡片弹窗 */
 .overlay{position:fixed;inset:0;z-index:50;background:rgba(5,4,3,.82);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:20px 10px 100px;overflow-y:auto}
 .overlay.active{display:flex;animation:fade .3s ease}
-@keyframes fade{from{opacity:0}to{opacity:1}}
 .cards-grid{display:grid;gap:16px;width:100%;max-width:720px;justify-items:center;margin-top:6px}
 @media(min-width:640px){.cards-grid{grid-template-columns:1fr 1fr}}
 
@@ -71,6 +106,23 @@ button:active{transform:translateY(1px)}
 .mood-card .src{margin-top:14px;font-size:10px;color:var(--gold-soft);font-style:italic;letter-spacing:.14em}
 .mood-card .stamp{position:absolute;left:18px;right:18px;bottom:14px;display:flex;justify-content:space-between;font-size:9px;color:var(--gold-soft);letter-spacing:.2em;border-top:1px solid var(--line);padding-top:8px}
 .accent{position:absolute;right:-30px;top:-30px;width:100px;height:100px;border-radius:50%;opacity:.12;filter:blur(24px)}
+
+#inviteCard{
+  --mood:#c9a646;width:min(300px,88vw);aspect-ratio:3/4;padding:24px 18px 16px;position:relative;overflow:hidden;
+  border:1px solid var(--line);background:linear-gradient(160deg,#100d0a,#050403);
+  color:var(--ink);box-shadow:0 18px 48px rgba(0,0,0,.5);transition:box-shadow .35s ease,border-color .35s ease;
+}
+#inviteCard.mood-on{border-color:rgba(201,166,70,.55);box-shadow:inset 0 0 28px rgba(201,166,70,.04),0 0 24px rgba(0,0,0,.35)}
+#inviteCard::before{content:"";position:absolute;left:24px;right:24px;top:18px;height:1px;background:var(--mood);opacity:.55;transition:background .35s ease}
+#inviteCard .invite-eyebrow{font-size:9px;letter-spacing:.32em;color:var(--gold-soft);text-transform:uppercase;margin-top:14px}
+#inviteCard .invite-title{margin-top:8px;font-size:16px;color:var(--gold);letter-spacing:.22em;transition:color .35s ease}
+#inviteCard.mood-on .invite-title{color:var(--mood)}
+#inviteCard .invite-desc{margin-top:20px;font-size:15px;line-height:1.75;letter-spacing:.04em}
+#inviteCard .brand{margin-top:14px;font-size:10px;color:var(--gold-soft);font-style:italic;letter-spacing:.14em}
+#inviteCard .invite-foot{position:absolute;left:18px;right:18px;bottom:14px;display:flex;justify-content:space-between;font-size:9px;color:var(--gold-soft);letter-spacing:.2em;border-top:1px solid rgba(201,166,70,.18);padding-top:8px;transition:border-color .35s ease}
+#inviteCard.mood-on .invite-foot{border-top-color:rgba(201,166,70,.35)}
+#inviteCard.mood-on .invite-foot span:last-child{color:var(--mood);transition:color .35s ease}
+#inviteCard::after{content:"";position:absolute;left:24px;bottom:22px;width:8px;height:8px;border-radius:50%;background:var(--mood);opacity:.75;box-shadow:0 0 10px var(--mood);transition:background .35s ease,box-shadow .35s ease}
 
 .overlay-bar{position:fixed;left:0;right:0;bottom:0;display:none;justify-content:center;gap:8px;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,.7));z-index:60}
 .overlay-bar.active{display:flex;flex-wrap:wrap}
@@ -84,27 +136,24 @@ button:active{transform:translateY(1px)}
 <div class="topbar">
   <div>Aurevny.Lab</div>
   <div class="status-group">
-    <div class="status">
-      <span class="dot" id="localDot"></span>
-      <span id="localText">本地庫</span>
-    </div>
-    <div class="status">
-      <span class="dot api-ready" id="apiDot"></span>
-      <span id="apiText">API</span>
-    </div>
+    <div class="status"><span class="dot"></span><span>本地庫</span></div>
+    <div class="status"><span class="dot dot-api" id="apiDot"></span><span id="apiText">API</span></div>
   </div>
 </div>
 
 <section class="hero">
-  <div class="date-row" id="dateEl">--/--/--</div>
+  <div class="date-row">
+    <span id="dateEl">--/--/--</span>
+    <span class="read-count" id="readCount"></span>
+  </div>
   <div class="quote-wrap">
-    <div class="quote" id="quoteEl">載入中…</div>
+    <div class="quote" id="quoteEl"></div>
     <div class="source" id="sourceEl"></div>
   </div>
   <div class="divider"></div>
   <div class="tools">
-    <button id="shuffleBtn" onclick="shuffleQuote()">換一句</button>
-    <button id="copyBtn" onclick="copyShare()">複製連結</button>
+    <button onclick="shuffleQuote()">換一句</button>
+    <button onclick="copyShare()">複製連結</button>
   </div>
   <div class="weather-row" id="weatherEl"></div>
   <div class="hint">今天讀到這句，你比較靠近 <b>哪一種顏色</b>？</div>
@@ -117,6 +166,19 @@ button:active{transform:translateY(1px)}
   <div id="moodStreak"></div>
 </div>
 
+<!-- 周报弹窗 -->
+<div class="weekly-overlay" id="weeklyOverlay">
+  <div class="weekly-card">
+    <span class="w-close" onclick="closeWeekly()">×</span>
+    <div class="w-label">AUREVNY.LAB · WEEKLY MOOD</div>
+    <div class="w-title">情緒周報</div>
+    <div class="w-summary" id="wSummary"></div>
+    <div class="w-ring" id="wRing"></div>
+    <div class="w-bars" id="wBars"></div>
+  </div>
+</div>
+
+<!-- 卡片弹窗 -->
 <div class="overlay" id="overlay">
   <div class="cards-grid">
     <div class="mood-card" id="userCard">
@@ -127,13 +189,12 @@ button:active{transform:translateY(1px)}
       <div class="src" id="cardSource"></div>
       <div class="stamp"><span id="cardDate"></span><span>情緒色卡</span></div>
     </div>
-    <div class="mood-card" id="inviteCard" style="background:linear-gradient(160deg,#100d0a,#050403)">
-      <span class="accent" style="background:#c9a646"></span>
-      <div class="label">INVITE</div>
-      <div class="mood-title">今天，給情緒一個顏色</div>
-      <div class="q" style="font-size:15px;margin-top:20px">每天一句，從文字走到自己的心情。</div>
-      <div class="src">AUREVNY.LAB</div>
-      <div class="stamp"><span id="inviteDate"></span><span>by0628.github.io</span></div>
+    <div id="inviteCard">
+      <div class="invite-eyebrow">INVITE</div>
+      <div class="invite-title">今天，給情緒一個顏色</div>
+      <div class="invite-desc">每天一句，從文字走到自己的心情。</div>
+      <div class="brand">AUREVNY.LAB</div>
+      <div class="invite-foot"><span id="inviteDate"></span><span>by0628.github.io</span></div>
     </div>
   </div>
 </div>
@@ -148,9 +209,14 @@ button:active{transform:translateY(1px)}
 
 <script>
 // ═══════════════════════════════════════════
-// 数据
+// 80 句
 // ═══════════════════════════════════════════
 const QUOTES = [
+  {t:"我是一個迷路的人，但我不急著找到方向。",s:"Aurevny"},
+  {t:"有些安靜不是沒有聲音，是聲音終於不再吵了。",s:"Aurevny"},
+  {t:"今天的光落在昨天沒照到的地方。",s:"Aurevny"},
+  {t:"不是所有魚都會游向同一片海。",s:"Aurevny"},
+  {t:"有些門關上之後，房間反而變大了。",s:"Aurevny"},
   {t:"我習慣於孤獨，就像別人習慣於擁擠。",s:"費爾南多·佩索阿《不安之書》"},
   {t:"我從未活過。我只是夢見自己在活。",s:"費爾南多·佩索阿"},
   {t:"生命是一襲華美的袍，爬滿了蝨子。",s:"張愛玲《天才夢》"},
@@ -160,7 +226,7 @@ const QUOTES = [
   {t:"天堂應該像圖書館一樣。",s:"豪爾赫·路易斯·博爾赫斯"},
   {t:"我偏愛寫詩的荒謬，勝過不寫詩的荒謬。",s:"維斯拉瓦·辛波斯卡《萬物靜默如謎》"},
   {t:"在冬天的正中央，我終於發現，我心裡有一個不可戰勝的夏天。",s:"阿爾貝·加繆《重返蒂帕薩》"},
-  {t:"真正嚴肅的哲學問題只有一個，那就是自殺。",s:"阿爾貝·加繆《西西弗斯神話》"},
+  {t:"真正嚴肅的哲學問題只有有一個，那就是自殺。",s:"阿爾貝·加繆《西西弗斯神話》"},
   {t:"有何勝利可言？挺住意味著一切。",s:"萊納·瑪利亞·里爾克"},
   {t:"你要容忍心裡難解的疑惑，試著去喜愛問題的本身。",s:"萊納·瑪利亞·里爾克《給青年詩人的信》"},
   {t:"從前的日色變得慢。車，馬，郵件都慢。一生只夠愛一個人。",s:"木心《從前慢》"},
@@ -186,11 +252,6 @@ const QUOTES = [
   {t:"如果有來生，要做一棵樹，站成永恆，沒有悲歡的姿勢。",s:"三毛"},
   {t:"夢想，可以天花亂墜。理想，是我們一步一個腳印踩出來的坎坷道路。",s:"三毛"},
   {t:"所有的相遇，都是久別重逢。",s:"白落梅（改編自佛家語）"},
-  {t:"我是一個迷路的人，但我不急著找到方向。",s:"Aurevny"},
-  {t:"有些安靜不是沒有聲音，是聲音終於不再吵了。",s:"Aurevny"},
-  {t:"今天的光落在昨天沒照到的地方。",s:"Aurevny"},
-  {t:"不是所有魚都會游向同一片海。",s:"Aurevny"},
-  {t:"有些門關上之後，房間反而變大了。",s:"Aurevny"},
   {t:"我喜歡那種讓我覺得自己還活著的人。",s:"卡森·麥卡勒斯《心是孤獨的獵手》"},
   {t:"悲劇將人生的有價值的東西毀滅給人看。",s:"魯迅"},
   {t:"判斷力是我們在公共世界中定位自己的方式。",s:"漢娜·鄂蘭"},
@@ -208,37 +269,54 @@ const QUOTES = [
   {t:"我們讀書，其實是為了遇見另一個自己。",s:"羅曼·羅蘭"},
   {t:"自由不是你想做什麼就做什麼，而是你不想做什麼就可以不做什麼。",s:"伊曼努爾·康德"},
   {t:"我孤獨地漫遊，像一朵雲。",s:"威廉·華茲華斯"},
-  {t:"詩歌是強烈情感的自然流露。",s:"威廉·華茲華斯"},
   {t:"我們都在陰溝裡，但仍有人仰望星空。",s:"奧斯卡·王爾德"},
   {t:"愛自己，是終身浪漫的開始。",s:"奧斯卡·王爾德"},
   {t:"我寫作，是為了讓時間在紙上停留下來。",s:"瑪格麗特·杜拉斯"},
-  {t:"任何一個人類的苦難，都讓我感到是我自己的苦難。",s:"馬克西姆·高爾基"},
   {t:"我從不思考未來，它來得太快了。",s:"阿爾伯特·愛因斯坦"},
   {t:"想象力比知識更重要。",s:"阿爾伯特·愛因斯坦"},
-  {t:"沒有什麼比希望更令人絕望的了。",s:"索倫·克爾凱郭爾"},
   {t:"焦慮是自由的眩暈。",s:"索倫·克爾凱郭爾"},
   {t:"生活必須向前走，但理解必須向後看。",s:"索倫·克爾凱郭爾"},
   {t:"我將在你的沉默中歌唱。",s:"泰戈爾《飛鳥集》"},
   {t:"在一切語言中，沉默是最深刻的。",s:"托馬斯·卡萊爾"},
   {t:"我們的內心有太多的房間，有些永遠上鎖。",s:"弗吉尼亞·伍爾夫"},
-  {t:"我習慣了在黑暗中尋找光，而不是等待光來找我。",s:"安托萬·德·聖-埃克蘇佩里"},
   {t:"命運不是機遇，而是選擇。",s:"威廉·詹寧斯·布萊恩"},
   {t:"你不需要遵循別人的節奏。",s:"阿爾貝·加繆"},
   {t:"鏡子與交媾都是可憎的，因為它們都使人口增殖。",s:"豪爾赫·路易斯·博爾赫斯"},
   {t:"笑，全世界便與你同笑；哭，你便獨自哭。",s:"張愛玲"},
-  {t:"我反抗，所以我存在。",s:"阿爾貝·加繆《反抗者》"}
+  {t:"我反抗，所以我存在。",s:"阿爾貝·加繆《反抗者》"},
+  {t:"錯不在我，錯的是這個世界。",s:"《叛逆的魯魯修》"},
+  {t:"我可是要成為海賊王的男人！",s:"《海賊王》"},
+  {t:"真相只有一個。",s:"《名偵探柯南》"},
+  {t:"你指尖躍動的電光，是我此生不滅的信仰。",s:"《某科學的超電磁炮》"},
+  {t:"只要活著，就一定會遇到好事。",s:"《元氣少女緣結神》"},
+  {t:"你是我最重要的朋友。",s:"《夏目友人帳》"},
+  {t:"即使沒有翅膀，也能飛翔。",s:"《新世紀福音戰士》"},
+  {t:"我可是連神都殺給你看。",s:"《Fate/stay night》"},
+  {t:"你是我最珍貴的寶物。",s:"《鋼之鍊金術師》"},
+  {t:"人嘛，總是要犯點錯的，這樣才能記得住。",s:"《CLANNAD》"}
 ];
 
-// 天气中文化映射
-const weatherMap = {
+// ═══════════════════════════════════════════
+// 天气中文化
+// ═══════════════════════════════════════════
+const WEATHER_ZH = {
   "Sunny":"晴","Clear":"晴","Partly cloudy":"多雲","Cloudy":"陰","Overcast":"陰天",
-  "Mist":"薄霧","Fog":"霧","Patchy rain possible":"局部有雨","Light rain":"小雨",
-  "Moderate rain":"中雨","Heavy rain":"大雨","Light snow":"小雪","Moderate snow":"中雪",
-  "Heavy snow":"大雪","Thunderstorm":"雷陣雨","Blizzard":"暴風雪","Drizzle":"毛毛雨",
-  "Patchy light drizzle":"小陣雨","Freezing drizzle":"凍雨","Sleet":"雨夾雪",
-  "Patchy light rain with thunder":"雷陣雨","Blowing snow":"吹雪"
+  "Mist":"薄霧","Fog":"霧","Light rain":"小雨","Rain":"雨","Heavy rain":"大雨",
+  "Light rain shower":"小陣雨","Rain shower":"陣雨","Showers":"陣雨","Heavy rain shower":"大雨陣雨",
+  "Thunderstorm":"雷陣雨","Storm":"雷陣雨","Light snow":"小雪","Snow":"雪","Heavy snow":"大雪",
+  "Blizzard":"暴風雪","Drizzle":"毛毛雨","Freezing rain":"凍雨","Sleet":"雨夾雪","Blowing snow":"吹雪"
 };
+function weatherDescZh(en){
+  if(!en) return "";
+  en = en.trim();
+  if(WEATHER_ZH[en]) return WEATHER_ZH[en];
+  for(const k in WEATHER_ZH){ if(en.toLowerCase().includes(k.toLowerCase())) return WEATHER_ZH[k]; }
+  return en;
+}
 
+// ═══════════════════════════════════════════
+// 情绪 30
+// ═══════════════════════════════════════════
 const MOODS = [
   {name:"平靜",color:"#9ec9d6"},{name:"孤獨",color:"#7ba3b8"},
   {name:"思念",color:"#8ab4c8"},{name:"憂鬱",color:"#6a8a9e"},
@@ -273,116 +351,209 @@ const $moodSection = document.getElementById("moodSection");
 const $overlay = document.getElementById("overlay");
 const $overlayBar = document.getElementById("overlayBar");
 const $streak = document.getElementById("moodStreak");
+const $readCount = document.getElementById("readCount");
+const $weeklyOverlay = document.getElementById("weeklyOverlay");
 
 let currentQuote = QUOTES[0];
+let apiQuote = null;
+let apiReady = false;
+let readTotal = 0;
 
 // ═══════════════════════════════════════════
 // 工具
 // ═══════════════════════════════════════════
-function setApiStatus(state){
-  $apiDot.className = "dot api-ready" + (state==="active"?" active":state==="loading"?" loading":state==="err"?" err":"");
-  $apiText.textContent = state==="active"?"API ✓":state==="loading"?"API…":state==="err"?"API ✗":"API";
+function setApiDot(state){
+  if(!$apiDot) return;
+  $apiDot.className = "dot dot-api " + state;
+  const map = {"idle":"API","loading":"API…","ok":"API ✓","fail":"API ✗"};
+  $apiText.textContent = map[state] || "API";
+  if(state === "ok")   setTimeout(()=>setApiDot("idle"),2000);
+  if(state === "fail") setTimeout(()=>setApiDot("idle"),1200);
 }
-
 function toast(msg){
-  const el=document.getElementById("toast");
-  el.textContent=msg;el.classList.add("show");
-  clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("show"),1800);
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>el.classList.remove("show"),1800);
 }
-
 function todayStr(){
-  const d=new Date();
+  const d = new Date();
   return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}`;
 }
 
-// ═══════════════════════════════════════════
-// 1. 句子：本地先出 → 后台 hitokoto
-// ═══════════════════════════════════════════
-function initQuote(){
-  const d=new Date();
-  const seed = d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
-  currentQuote = QUOTES[seed % QUOTES.length];
+// ── 已读计数 ──
+function loadReadCount(){
+  try{ readTotal = parseInt(localStorage.getItem("aurevny_read_count") || "0"); }
+  catch(e){ readTotal = 0; }
+  updateReadCount();
+}
+function incReadCount(){
+  readTotal++;
+  try{ localStorage.setItem("aurevny_read_count", String(readTotal)); }
+  catch(e){}
+  updateReadCount();
+}
+function updateReadCount(){
+  $readCount.textContent = readTotal > 0 ? `已讀 ${readTotal} 句` : "";
+}
+
+// ── 打字机（文本节点版，支持自动换行）──
+function typewriter(text, onDone){
+  $quote.innerHTML = "";
+  $quote.classList.remove("typing-done");
+  $source.classList.remove("show");
+  $source.textContent = "";
+
+  const textNode = document.createTextNode("");
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+  $quote.appendChild(textNode);
+  $quote.appendChild(cursor);
+
+  let i = 0;
+  const speed = 35;
+  const pauseChars = /[，。！？、；：,.!?;:]/;
+
+  function step(){
+    if(i < text.length){
+      textNode.textContent = text.slice(0, i+1);
+      i++;
+      const lastChar = text[i-1];
+      const delay = pauseChars.test(lastChar) ? 220 : speed;
+      setTimeout(step, delay);
+    } else {
+      cursor.remove();
+      $quote.classList.add("typing-done");
+      onDone && onDone();
+    }
+  }
+  step();
+}
+
+// 仅给 ?typewriter=off 用
+function renderInstant(){
+  $quote.classList.add("typing-done");
   $quote.textContent = currentQuote.t;
-  $source.textContent = "—— " + currentQuote.s;
-  fetchHitokoto();
-}
-
-function fetchHitokoto(){
-  setApiStatus("loading");
-  const ctrl=new AbortController();
-  const t=setTimeout(()=>{ctrl.abort();setApiStatus("err");setTimeout(()=>setApiStatus(""),1200)},3500);
-  fetch("https://v1.hitokoto.cn/?c=i&c=k&encode=json",{signal:ctrl.signal,cache:"no-store"})
-    .then(r=>r.ok?r.json():Promise.reject())
-    .then(data=>{
-      clearTimeout(t);
-      if(data&&data.hitokoto){
-        currentQuote={t:data.hitokoto,s:data.from||"hitokoto.cn"};
-        $quote.textContent=currentQuote.t;
-        $source.textContent="—— "+currentQuote.s;
-        setApiStatus("active");
-        setTimeout(()=>setApiStatus(""),2000);
-      }else{setApiStatus("err");setTimeout(()=>setApiStatus(""),1200)}
-    })
-    .catch(()=>{clearTimeout(t);setApiStatus("err");setTimeout(()=>setApiStatus(""),1200)});
-}
-
-function shuffleQuote(){
-  const i=Math.floor(Math.random()*QUOTES.length);
-  currentQuote=QUOTES[i];
-  $quote.textContent=currentQuote.t;
-  $source.textContent="—— "+currentQuote.s;
-  fetchHitokoto();
+  $source.textContent = currentQuote.s ? `—— ${currentQuote.s}` : "";
+  $source.classList.add("show");
 }
 
 // ═══════════════════════════════════════════
-// 2. 时间：本地立刻 + 后台校准
+// 1. 首次加载
+// ═══════════════════════════════════════════
+async function preloadApiQuote(){
+  setApiDot("loading");
+  try{
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(),8000);
+    const r = await fetch("https://v1.hitokoto.cn/?c=i&c=k&c=d&c=a",{signal:ctrl.signal,cache:"no-store"});
+    clearTimeout(t);
+    if(!r.ok) throw new Error("http");
+    const j = await r.json();
+    const txt = (j.hitokoto||"").trim();
+    const who = (j.from_who||"").trim();
+    const from = (j.from||"").trim();
+    let source = "";
+    if(who && from && who !== from) source = `${who} · ${from}`;
+    else if(who) source = who;
+    else if(from) source = from;
+    if(!txt) throw new Error("empty");
+    apiQuote = {t:txt, s:source};
+    apiReady = true;
+    setApiDot("ok");
+  }catch(e){
+    setApiDot("fail");
+  }
+}
+
+function initQuote(){
+  const d = new Date();
+  const seed = d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate();
+  currentQuote = QUOTES[seed % QUOTES.length];
+  const typewriterOff = new URLSearchParams(location.search).get("typewriter") === "off";
+  if(typewriterOff){
+    renderInstant();
+  }else{
+    typewriter(currentQuote.t, ()=>{
+      $source.textContent = currentQuote.s ? `—— ${currentQuote.s}` : "";
+      $source.classList.add("show");
+    });
+  }
+  preloadApiQuote();
+}
+
+// ═══════════════════════════════════════════
+// 2. 換一句（也走打字机）
+// ═══════════════════════════════════════════
+function shuffleQuote(){
+  // 选下一句
+  if(apiReady && apiQuote){
+    if(Math.random() < 0.5){
+      currentQuote = apiQuote;
+      apiReady = false;
+      preloadApiQuote();
+    }else{
+      currentQuote = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    }
+  }else{
+    currentQuote = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  }
+
+  // 出处先藏，重新跑打字机
+  $source.classList.remove("show");
+  $source.textContent = "";
+  typewriter(currentQuote.t, ()=>{
+    $source.textContent = currentQuote.s ? `—— ${currentQuote.s}` : "";
+    $source.classList.add("show");
+  });
+
+  incReadCount();
+}
+
+// ═══════════════════════════════════════════
+// 3. 时间
 // ═══════════════════════════════════════════
 function initTime(){
   updateTimeDisplay(new Date());
-  const ctrl=new AbortController();
-  const t=setTimeout(()=>{ctrl.abort()},4000);
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(),4000);
   fetch("https://worldtimeapi.org/api/timezone/Asia/Shanghai",{signal:ctrl.signal,cache:"no-store"})
     .then(r=>r.ok?r.json():Promise.reject())
-    .then(data=>{
-      clearTimeout(t);
-      if(data&&data.datetime) updateTimeDisplay(new Date(data.datetime));
-    })
+    .then(data=>{ clearTimeout(t); if(data&&data.datetime) updateTimeDisplay(new Date(data.datetime)); })
     .catch(()=>clearTimeout(t));
   setInterval(()=>updateTimeDisplay(new Date()),60000);
 }
-
 function updateTimeDisplay(d){
-  const hh=String(d.getHours()).padStart(2,"0");
-  const mm=String(d.getMinutes()).padStart(2,"0");
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mm = String(d.getMinutes()).padStart(2,"0");
   $date.textContent = `${todayStr()}  ·  ${hh}:${mm}`;
 }
 
 // ═══════════════════════════════════════════
-// 3. 天气：wttr.in + 中文化
+// 4. 天气
 // ═══════════════════════════════════════════
 function initWeather(){
-  const ctrl=new AbortController();
-  const t=setTimeout(()=>{ctrl.abort();$weather.textContent=""},4000);
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>{ctrl.abort();$weather.textContent="";},5000);
   fetch("https://wttr.in/?format=j1",{signal:ctrl.signal,cache:"no-store"})
     .then(r=>r.ok?r.json():Promise.reject())
     .then(data=>{
       clearTimeout(t);
       if(data&&data.current_condition&&data.current_condition[0]){
-        const c=data.current_condition[0];
-        const temp=c.temp_C;
-        const rawDesc=c.weatherDesc&&c.weatherDesc[0]&&c.weatherDesc[0].value?c.weatherDesc[0].value:"";
-        const desc=weatherMap[rawDesc]||rawDesc;
-        $weather.textContent = `${desc}  ${temp}°C`;
-      }else{$weather.textContent=""}
+        const c = data.current_condition[0];
+        const temp = c.temp_C;
+        const rawDesc = c.weatherDesc&&c.weatherDesc[0]&&c.weatherDesc[0].value ? c.weatherDesc[0].value : "";
+        const desc = weatherDescZh(rawDesc);
+        $weather.textContent = desc ? `${desc}  ${temp}°C` : `${temp}°C`;
+      }else{ $weather.textContent = ""; }
     })
-    .catch(()=>{clearTimeout(t);$weather.textContent=""});
+    .catch(()=>{ clearTimeout(t); $weather.textContent = ""; });
 }
 
 // ═══════════════════════════════════════════
-// 4. 情绪按钮（30个，6组）
+// 5. 情绪
 // ═══════════════════════════════════════════
 function buildMoods(){
-  const groups=[
+  const groups = [
     {label:"冷調",items:["平靜","孤獨","思念","憂鬱","釋然"]},
     {label:"暖調",items:["溫暖","想念","感激","懷舊","柔軟"]},
     {label:"暗調",items:["疲憊","麻木","空白","虛無","沉默"]},
@@ -390,12 +561,12 @@ function buildMoods(){
     {label:"自然",items:["呼吸","清醒","流動","安放","生長"]},
     {label:"深淵",items:["燃燒","執念","撕裂","覺醒","邊界"]}
   ];
-  $moodSection.innerHTML=groups.map(g=>`
+  $moodSection.innerHTML = groups.map(g=>`
     <div>
       <div class="group-title">${g.label}</div>
       <div class="mood-row">
         ${g.items.map(name=>{
-          const m=MOODS.find(x=>x.name===name);
+          const m = MOODS.find(x=>x.name===name);
           return `<button class="mood-btn" onclick="pickMood('${name}','${m?m.color:'#c9a646'}')"><span class="swatch" style="background:${m?m.color:'#c9a646'}"></span>${name}</button>`;
         }).join("")}
       </div>
@@ -404,66 +575,119 @@ function buildMoods(){
 }
 
 function pickMood(name,color){
-  document.getElementById("cardMood").textContent=name;
-  document.getElementById("cardQuote").textContent=currentQuote.t;
-  document.getElementById("cardSource").textContent="—— "+currentQuote.s;
-  document.getElementById("cardDate").textContent=todayStr();
-  document.getElementById("inviteDate").textContent=todayStr();
-  document.getElementById("cardAccent").style.background=color;
+  document.getElementById("cardMood").textContent = name;
+  document.getElementById("cardQuote").textContent = currentQuote.t;
+  document.getElementById("cardSource").textContent = currentQuote.s ? `—— ${currentQuote.s}` : "";
+  document.getElementById("cardDate").textContent = todayStr();
+  document.getElementById("inviteDate").textContent = todayStr();
+  document.getElementById("cardAccent").style.background = color;
+  const inviteCard = document.getElementById("inviteCard");
+  inviteCard.style.setProperty("--mood",color);
+  inviteCard.classList.add("mood-on");
   $overlay.classList.add("active");
   $overlayBar.classList.add("active");
   try{
-    const raw=localStorage.getItem("aurevny_mood_log");
-    const log=raw?JSON.parse(raw):[];
+    const raw = localStorage.getItem("aurevny_mood_log");
+    const log = raw ? JSON.parse(raw) : [];
     log.push(name);
-    localStorage.setItem("aurevny_mood_log",JSON.stringify(log.slice(-30)));
-    if(log.length>=7){
-      const cnt={};log.forEach(n=>cnt[n]=(cnt[n]||0)+1);
-      const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];
-      $streak.textContent=`你最近最常選的顏色是「${top}」`;
-      $streak.style.opacity=".6";
-    }
+    localStorage.setItem("aurevny_mood_log", JSON.stringify(log.slice(-30)));
+    updateStreak(log);
   }catch(e){}
 }
 
+function updateStreak(log){
+  if(log.length >= 7){
+    const cnt = {}; log.forEach(n=>cnt[n]=(cnt[n]||0)+1);
+    const top = Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];
+    $streak.textContent = `你最近最常選的顏色是「${top}」`;
+    $streak.style.opacity = ".6";
+  }
+}
+
+// ── 周报 ──
+$streak.addEventListener("click", openWeekly);
+
+function openWeekly(){
+  try{
+    const raw = localStorage.getItem("aurevny_mood_log");
+    const log = raw ? JSON.parse(raw) : [];
+    if(log.length === 0){ toast("還沒有情緒記錄"); return; }
+    const total = log.length;
+    const cnt = {}; log.forEach(n=>cnt[n]=(cnt[n]||0)+1);
+    const sorted = Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+    const top = sorted[0];
+    const summary = total >= 7
+      ? `過去 ${total} 天，你最常停留在「${top[0]}」。`
+      : `已記錄 ${total} 天，你最常停留在「${top[0]}」。`;
+    document.getElementById("wSummary").textContent = summary;
+    const ring = document.getElementById("wRing");
+    const gradientStops = sorted.slice(0,6).map(([name])=>{
+      const m = MOODS.find(x=>x.name===name);
+      return m ? m.color : "#555";
+    });
+    const conicStr = gradientStops.map((c,i,a)=>{
+      const start = (i/a.length*100).toFixed(1)+"%";
+      const end = ((i+1)/a.length*100).toFixed(1)+"%";
+      return `${c} ${start} ${end}`;
+    }).join(",");
+    ring.style.background = `conic-gradient(${conicStr})`;
+    ring.innerHTML = `<div class="w-ring-center"><div class="num">${total}</div><div class="unit">DAYS</div></div>`;
+    const maxCount = sorted[0][1];
+    document.getElementById("wBars").innerHTML = sorted.slice(0,6).map(([name,count])=>{
+      const m = MOODS.find(x=>x.name===name);
+      const color = m ? m.color : "#c9a646";
+      const pct = Math.round(count/maxCount*100);
+      return `<div class="w-bar-row">
+        <span class="w-bar-name">${name}</span>
+        <div class="w-bar-track"><div class="w-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="w-bar-pct">${count}</span>
+      </div>`;
+    }).join("");
+    $weeklyOverlay.classList.add("active");
+  }catch(e){ toast("周報加載失敗"); }
+}
+function closeWeekly(){ $weeklyOverlay.classList.remove("active"); }
+
 // ═══════════════════════════════════════════
-// 5. 保存 / 分享 / 关闭
+// 6. 保存 / 分享 / 关闭
 // ═══════════════════════════════════════════
 function saveCard(id,type){
   if(!window.html2canvas){
-    const s=document.createElement("script");
-    s.src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
-    s.onload=()=>_capture(id,type);
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+    s.onload = ()=>_capture(id,type);
     document.head.appendChild(s);
-  }else{_capture(id,type)}
+  }else{ _capture(id,type); }
 }
 function _capture(id,type){
   html2canvas(document.getElementById(id),{scale:2,backgroundColor:null}).then(canvas=>{
-    const a=document.createElement("a");
-    a.download=`aurevny-${type}-${Date.now()}.png`;
-    a.href=canvas.toDataURL();a.click();
+    const a = document.createElement("a");
+    a.download = `aurevny-${type}-${Date.now()}.png`;
+    a.href = canvas.toDataURL(); a.click();
     toast("已導出圖片");
   });
 }
-
 function copyShare(){
-  const url=location.origin+location.pathname;
-  const text=`Aurevny.Lab 每日一句：「${currentQuote.t}」—— ${url}`;
-  if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>toast("連結已複製"));return}
-  const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast("連結已複製");
+  const url = location.origin + location.pathname;
+  const text = `Aurevny.Lab 每日一句：「${currentQuote.t}」—— ${url}`;
+  if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>toast("連結已複製")); return; }
+  const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); toast("連結已複製");
 }
-
-function resetAll(){$overlay.classList.remove("active");$overlayBar.classList.remove("active");}
+function resetAll(){ $overlay.classList.remove("active"); $overlayBar.classList.remove("active"); }
 
 document.addEventListener("keydown",e=>{
-  if(e.code==="Space"&&!$overlay.classList.contains("active")){e.preventDefault();shuffleQuote()}
-  if(e.code==="Escape"&&$overlay.classList.contains("active")){resetAll()}
+  if(e.code === "Space" && !$overlay.classList.contains("active") && !$weeklyOverlay.classList.contains("active")){ e.preventDefault(); shuffleQuote(); }
+  if(e.code === "Escape"){
+    if($overlay.classList.contains("active")) resetAll();
+    if($weeklyOverlay.classList.contains("active")) closeWeekly();
+  }
 });
 
 // ═══════════════════════════════════════════
 // 启动
 // ═══════════════════════════════════════════
 window.addEventListener("DOMContentLoaded",()=>{
+  loadReadCount();
   initQuote();
   initTime();
   initWeather();
