@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>作品 · Aurevny.Lab</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noto-serif-tc/1.0.0/static/noto-serif-tc.css">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<div class="back-bar">
+  <a href="../index.html">← 返回 Lab</a>
+</div>
+
+<header class="header">
+  <h1>作品</h1>
+  <div class="sub">一些寫下來的東西。</div>
+</header>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-cat="all">全部</button>
+  <button class="tab" data-cat="小说">小說</button>
+  <button class="tab" data-cat="随笔">隨筆</button>
+  <button class="tab" data-cat="哲思">哲思</button>
+</div>
+
+<div class="articles" id="articles">
+
+  <!-- ARTICLES -->
+  <article-card
+    file="chen-yu-xiao"
+    title="晨与晓的间距"
+    date="2026.08.10"
+    excerpt="十七道偏转半径等于一次开口。江念晨数叶子的时候，林晓在画素描。"
+    category="小说"
+    read="12 min"
+  ></article-card>
+
+  <article-card
+    file="time-forgive"
+    title="时间从来没让我原谅过任何人"
+    date="2026.08.05"
+    excerpt="东北的早市，冻红的手，出租车里的沉默。生活不曾回头，只是不那么在乎了。"
+    category="随笔"
+    read="8 min"
+  ></article-card>
+
+  <article-card
+    file="born-lament"
+    title="降生的哀鸣"
+    date="2026.07.28"
+    excerpt="灵魂被困在肉体里。永恒的轮回。永远的孤独。时间冲刷下的时间。"
+    category="哲思"
+    read="6 min"
+  ></article-card>
+
+  <article-card
+    file="flower-war"
+    title="花开"
+    date="2026.07.20"
+    excerpt="花开了，然后呢。"
+    category="哲思"
+    read="3 min"
+  ></article-card>
+
+  <article-card
+    file="time-erosion"
+    title="时间冲刷下的"时间""
+    date="2026.07.15"
+    excerpt="我们都在被冲刷，只是有人站得远一点。"
+    category="随笔"
+    read="5 min"
+  ></article-card>
+  <!-- /ARTICLES -->
+
+</div>
+
+<div class="footer">
+  <div>© 2026 Aurevny · Local Only · No Telemetry</div>
+</div>
+
+<script>
+// ── 自定义元素 article-card ──
+class ArticleCard extends HTMLElement {
+  connectedCallback(){
+    const f = this.getAttribute('file');
+    const t = this.getAttribute('title');
+    const d = this.getAttribute('date');
+    const e = this.getAttribute('excerpt');
+    const c = this.getAttribute('category');
+    const r = this.getAttribute('read');
+    this.innerHTML = `
+      <a class="card" href="./article.html?file=${f}">
+        <div class="card-meta">
+          <span class="cat">${c}</span>
+          <span>${d}</span>
+          <span class="read">${r}</span>
+        </div>
+        <div class="card-title">${t}</div>
+        <div class="card-excerpt">${e}</div>
+      </a>
+    `;
+  }
+}
+customElements.define('article-card', ArticleCard);
+
+// ── Tab 筛选 ──
+const tabs = document.getElementById('tabs');
+const cards = document.getElementById('articles').children;
+
+tabs.addEventListener('click', e => {
+  if(!e.target.classList.contains('tab')) return;
+  tabs.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  const cat = e.target.dataset.cat;
+  Array.from(cards).forEach(card => {
+    const match = cat === 'all' || card.getAttribute('category') === cat;
+    card.style.display = match ? '' : 'none';
+  });
+});
+</script>
+
+</body>
+</html>
