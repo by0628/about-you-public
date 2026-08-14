@@ -20,11 +20,13 @@ body{
 body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:radial-gradient(rgba(255,255,255,.6) 1px,transparent 1px);background-size:3px 3px}
 
 .topbar{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--gold);letter-spacing:.3em;text-transform:uppercase}
+.status-group{display:flex;align-items:center;gap:14px}
 .status{display:flex;align-items:center;gap:6px;color:var(--gold-soft);font-size:11px}
 .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.5);transition:.3s}
-.dot.api{background:#60a5fa;box-shadow:0 0 8px rgba(96,165,250,.5)}
-.dot.loading{background:#facc15;animation:pulse 1s infinite}
-.dot.err{background:#f87171;box-shadow:0 0 8px rgba(248,113,113,.5)}
+.dot.api-ready{background:#5a5a5a;box-shadow:none}
+.dot.api-ready.active{background:#60a5fa;box-shadow:0 0 8px rgba(96,165,250,.5)}
+.dot.api-ready.loading{background:#facc15;animation:pulse 1s infinite}
+.dot.api-ready.err{background:#f87171;box-shadow:0 0 8px rgba(248,113,113,.5)}
 @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
 
 .hero{margin-top:28px;text-align:center}
@@ -56,7 +58,6 @@ button:active{transform:translateY(1px)}
 .footer-note a{color:var(--gold);text-decoration:none;border-bottom:1px dotted var(--line)}
 #moodStreak{margin-top:8px;min-height:14px;font-size:10px;color:var(--gold-soft);opacity:0;transition:.6s;letter-spacing:.18em}
 
-/* 卡片浮层 */
 .overlay{position:fixed;inset:0;z-index:50;background:rgba(5,4,3,.82);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:20px 10px 100px;overflow-y:auto}
 .overlay.active{display:flex;animation:fade .3s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -82,7 +83,16 @@ button:active{transform:translateY(1px)}
 
 <div class="topbar">
   <div>Aurevny.Lab</div>
-  <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">本地庫</span></div>
+  <div class="status-group">
+    <div class="status">
+      <span class="dot" id="localDot"></span>
+      <span id="localText">本地庫</span>
+    </div>
+    <div class="status">
+      <span class="dot api-ready" id="apiDot"></span>
+      <span id="apiText">API</span>
+    </div>
+  </div>
 </div>
 
 <section class="hero">
@@ -181,7 +191,6 @@ const QUOTES = [
   {t:"今天的光落在昨天沒照到的地方。",s:"Aurevny"},
   {t:"不是所有魚都會游向同一片海。",s:"Aurevny"},
   {t:"有些門關上之後，房間反而變大了。",s:"Aurevny"},
-  // 以下继续补到70句（真实出处）
   {t:"我喜歡那種讓我覺得自己還活著的人。",s:"卡森·麥卡勒斯《心是孤獨的獵手》"},
   {t:"悲劇將人生的有價值的東西毀滅給人看。",s:"魯迅"},
   {t:"判斷力是我們在公共世界中定位自己的方式。",s:"漢娜·鄂蘭"},
@@ -196,7 +205,6 @@ const QUOTES = [
   {t:"沉默有時是最沈重的抗議。",s:"赫塔·米勒"},
   {t:"我們都是孤獨的刺蝟，只有頻率相同的人才能靠近。",s:"叔本華"},
   {t:"我偏愛一種例外。我偏愛不規則的韻腳。",s:"維斯拉瓦·辛波斯卡"},
-  {t:"我偏愛不尋常的結局。",s:"維斯拉瓦·辛波斯卡"},
   {t:"我們讀書，其實是為了遇見另一個自己。",s:"羅曼·羅蘭"},
   {t:"自由不是你想做什麼就做什麼，而是你不想做什麼就可以不做什麼。",s:"伊曼努爾·康德"},
   {t:"我孤獨地漫遊，像一朵雲。",s:"威廉·華茲華斯"},
@@ -216,28 +224,51 @@ const QUOTES = [
   {t:"我習慣了在黑暗中尋找光，而不是等待光來找我。",s:"安托萬·德·聖-埃克蘇佩里"},
   {t:"命運不是機遇，而是選擇。",s:"威廉·詹寧斯·布萊恩"},
   {t:"你不需要遵循別人的節奏。",s:"阿爾貝·加繆"},
-  {t:"鏡子與交媾都是可憎的，因為它們都使人口增殖。",s:"豪爾赫·路易斯·博爾赫斯《特隆、烏克巴爾、奧比斯·特蒂烏斯》"},
+  {t:"鏡子與交媾都是可憎的，因為它們都使人口增殖。",s:"豪爾赫·路易斯·博爾赫斯"},
   {t:"笑，全世界便與你同笑；哭，你便獨自哭。",s:"張愛玲"},
   {t:"我反抗，所以我存在。",s:"阿爾貝·加繆《反抗者》"}
 ];
 
+// 天气中文化映射
+const weatherMap = {
+  "Sunny":"晴","Clear":"晴","Partly cloudy":"多雲","Cloudy":"陰","Overcast":"陰天",
+  "Mist":"薄霧","Fog":"霧","Patchy rain possible":"局部有雨","Light rain":"小雨",
+  "Moderate rain":"中雨","Heavy rain":"大雨","Light snow":"小雪","Moderate snow":"中雪",
+  "Heavy snow":"大雪","Thunderstorm":"雷陣雨","Blizzard":"暴風雪","Drizzle":"毛毛雨",
+  "Patchy light drizzle":"小陣雨","Freezing drizzle":"凍雨","Sleet":"雨夾雪",
+  "Patchy light rain with thunder":"雷陣雨","Blowing snow":"吹雪"
+};
+
 const MOODS = [
-  {name:"平靜",color:"#9ec9d6"},{name:"溫暖",color:"#e7b97a"},
-  {name:"沉思",color:"#a98cd1"},{name:"明亮",color:"#f3d36b"},
-  {name:"安定",color:"#b98a5a"},{name:"夜色",color:"#7d8cff"},
-  {name:"疲憊",color:"#6a6a6a"},{name:"柔軟",color:"#d6a5c4"},
-  {name:"雀躍",color:"#f0a868"},{name:"空白",color:"#4a4a4a"}
+  {name:"平靜",color:"#9ec9d6"},{name:"孤獨",color:"#7ba3b8"},
+  {name:"思念",color:"#8ab4c8"},{name:"憂鬱",color:"#6a8a9e"},
+  {name:"釋然",color:"#a8c8d8"},
+  {name:"溫暖",color:"#e7b97a"},{name:"想念",color:"#d4a05a"},
+  {name:"感激",color:"#c98a4a"},{name:"懷舊",color:"#b07a3a"},
+  {name:"柔軟",color:"#e8c8a0"},
+  {name:"疲憊",color:"#6a6a6a"},{name:"麻木",color:"#555555"},
+  {name:"空白",color:"#4a4a4a"},{name:"虛無",color:"#3a3a3a"},
+  {name:"沉默",color:"#5a5a5a"},
+  {name:"雀躍",color:"#f0a868"},{name:"期待",color:"#f3c85a"},
+  {name:"輕盈",color:"#f5d87a"},{name:"自由",color:"#e8c84a"},
+  {name:"好奇",color:"#d4b840"},
+  {name:"呼吸",color:"#9bb89a"},{name:"清醒",color:"#8aa888"},
+  {name:"流動",color:"#a8c4a8"},{name:"安放",color:"#7a9a7a"},
+  {name:"生長",color:"#88b088"},
+  {name:"燃燒",color:"#d97757"},{name:"執念",color:"#b85a4a"},
+  {name:"撕裂",color:"#a04040"},{name:"覺醒",color:"#c06050"},
+  {name:"邊界",color:"#8a5048"}
 ];
 
 // ═══════════════════════════════════════════
-// DOM 引用
+// DOM
 // ═══════════════════════════════════════════
 const $quote = document.getElementById("quoteEl");
 const $source = document.getElementById("sourceEl");
 const $date = document.getElementById("dateEl");
 const $weather = document.getElementById("weatherEl");
-const $statusDot = document.getElementById("statusDot");
-const $statusText = document.getElementById("statusText");
+const $apiDot = document.getElementById("apiDot");
+const $apiText = document.getElementById("apiText");
 const $moodSection = document.getElementById("moodSection");
 const $overlay = document.getElementById("overlay");
 const $overlayBar = document.getElementById("overlayBar");
@@ -248,9 +279,9 @@ let currentQuote = QUOTES[0];
 // ═══════════════════════════════════════════
 // 工具
 // ═══════════════════════════════════════════
-function setStatus(state){
-  $statusDot.className = "dot" + (state==="api"?" api":state==="loading"?" loading":state==="err"?" err":"");
-  $statusText.textContent = state==="api"?"網路句":state==="loading"?"校準中":state==="err"?"離線":"本地庫";
+function setApiStatus(state){
+  $apiDot.className = "dot api-ready" + (state==="active"?" active":state==="loading"?" loading":state==="err"?" err":"");
+  $apiText.textContent = state==="active"?"API ✓":state==="loading"?"API…":state==="err"?"API ✗":"API";
 }
 
 function toast(msg){
@@ -265,7 +296,7 @@ function todayStr(){
 }
 
 // ═══════════════════════════════════════════
-// 1. 立刻渲染句子（不等任何 API）
+// 1. 句子：本地先出 → 后台 hitokoto
 // ═══════════════════════════════════════════
 function initQuote(){
   const d=new Date();
@@ -273,31 +304,50 @@ function initQuote(){
   currentQuote = QUOTES[seed % QUOTES.length];
   $quote.textContent = currentQuote.t;
   $source.textContent = "—— " + currentQuote.s;
-  $date.textContent = todayStr();
+  fetchHitokoto();
+}
+
+function fetchHitokoto(){
+  setApiStatus("loading");
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>{ctrl.abort();setApiStatus("err");setTimeout(()=>setApiStatus(""),1200)},3500);
+  fetch("https://v1.hitokoto.cn/?c=i&c=k&encode=json",{signal:ctrl.signal,cache:"no-store"})
+    .then(r=>r.ok?r.json():Promise.reject())
+    .then(data=>{
+      clearTimeout(t);
+      if(data&&data.hitokoto){
+        currentQuote={t:data.hitokoto,s:data.from||"hitokoto.cn"};
+        $quote.textContent=currentQuote.t;
+        $source.textContent="—— "+currentQuote.s;
+        setApiStatus("active");
+        setTimeout(()=>setApiStatus(""),2000);
+      }else{setApiStatus("err");setTimeout(()=>setApiStatus(""),1200)}
+    })
+    .catch(()=>{clearTimeout(t);setApiStatus("err");setTimeout(()=>setApiStatus(""),1200)});
+}
+
+function shuffleQuote(){
+  const i=Math.floor(Math.random()*QUOTES.length);
+  currentQuote=QUOTES[i];
+  $quote.textContent=currentQuote.t;
+  $source.textContent="—— "+currentQuote.s;
+  fetchHitokoto();
 }
 
 // ═══════════════════════════════════════════
-// 2. 时间：立刻本地 + 后台校准
+// 2. 时间：本地立刻 + 后台校准
 // ═══════════════════════════════════════════
 function initTime(){
-  // 立刻显示本地时间
   updateTimeDisplay(new Date());
-  // 后台尝试网络校准
-  setStatus("loading");
   const ctrl=new AbortController();
-  const t=setTimeout(()=>{ctrl.abort();setStatus("err");setTimeout(()=>setStatus("本地庫"),800)},4000);
+  const t=setTimeout(()=>{ctrl.abort()},4000);
   fetch("https://worldtimeapi.org/api/timezone/Asia/Shanghai",{signal:ctrl.signal,cache:"no-store"})
     .then(r=>r.ok?r.json():Promise.reject())
     .then(data=>{
       clearTimeout(t);
-      if(data&&data.datetime){
-        updateTimeDisplay(new Date(data.datetime));
-        setStatus("api");
-        setTimeout(()=>setStatus("本地庫"),1200);
-      }else{setStatus("err");setTimeout(()=>setStatus("本地庫"),800)}
+      if(data&&data.datetime) updateTimeDisplay(new Date(data.datetime));
     })
-    .catch(()=>{clearTimeout(t);setStatus("err");setTimeout(()=>setStatus("本地庫"),800)});
-  // 每分钟刷新一次本地时间
+    .catch(()=>clearTimeout(t));
   setInterval(()=>updateTimeDisplay(new Date()),60000);
 }
 
@@ -308,11 +358,11 @@ function updateTimeDisplay(d){
 }
 
 // ═══════════════════════════════════════════
-// 3. 天气 API（wttr.in，超时 fallback）
+// 3. 天气：wttr.in + 中文化
 // ═══════════════════════════════════════════
 function initWeather(){
   const ctrl=new AbortController();
-  const t=setTimeout(()=>{ctrl.abort();$weather.textContent="";},4000);
+  const t=setTimeout(()=>{ctrl.abort();$weather.textContent=""},4000);
   fetch("https://wttr.in/?format=j1",{signal:ctrl.signal,cache:"no-store"})
     .then(r=>r.ok?r.json():Promise.reject())
     .then(data=>{
@@ -320,7 +370,8 @@ function initWeather(){
       if(data&&data.current_condition&&data.current_condition[0]){
         const c=data.current_condition[0];
         const temp=c.temp_C;
-        const desc=c.weatherDesc&&c.weatherDesc[0]&&c.weatherDesc[0].value?c.weatherDesc[0].value:"";
+        const rawDesc=c.weatherDesc&&c.weatherDesc[0]&&c.weatherDesc[0].value?c.weatherDesc[0].value:"";
+        const desc=weatherMap[rawDesc]||rawDesc;
         $weather.textContent = `${desc}  ${temp}°C`;
       }else{$weather.textContent=""}
     })
@@ -328,42 +379,16 @@ function initWeather(){
 }
 
 // ═══════════════════════════════════════════
-// 4. 换句（点按钮才尝试 API，默认本地）
-// ═══════════════════════════════════════════
-function shuffleQuote(){
-  // 本地随机（主力）
-  const i=Math.floor(Math.random()*QUOTES.length);
-  currentQuote=QUOTES[i];
-  $quote.textContent=currentQuote.t;
-  $source.textContent="—— "+currentQuote.s;
-  // 尝试 API 兜底（不阻塞，失败不影响）
-  setStatus("loading");
-  const ctrl=new AbortController();
-  const t=setTimeout(()=>{ctrl.abort();setStatus("本地庫")},3500);
-  fetch("https://api.quotable.io/quotes/random?tags=wisdom|life&limit=1",{signal:ctrl.signal})
-    .then(r=>r.ok?r.json():Promise.reject())
-    .then(data=>{
-      clearTimeout(t);
-      if(data&&data[0]){
-        currentQuote={t:data[0].content,s:data[0].author};
-        $quote.textContent=currentQuote.t;
-        $source.textContent="—— "+currentQuote.s;
-        setStatus("api");
-        setTimeout(()=>setStatus("本地庫"),1000);
-      }else{setStatus("本地庫")}
-    })
-    .catch(()=>{clearTimeout(t);setStatus("本地庫")});
-}
-
-// ═══════════════════════════════════════════
-// 5. 情绪按钮
+// 4. 情绪按钮（30个，6组）
 // ═══════════════════════════════════════════
 function buildMoods(){
   const groups=[
-    {label:"冷調",items:["平靜","沉思","夜色"]},
-    {label:"暖調",items:["溫暖","柔軟","雀躍"]},
-    {label:"深調",items:["疲憊","空白"]},
-    {label:"亮調",items:["明亮","安定"]}
+    {label:"冷調",items:["平靜","孤獨","思念","憂鬱","釋然"]},
+    {label:"暖調",items:["溫暖","想念","感激","懷舊","柔軟"]},
+    {label:"暗調",items:["疲憊","麻木","空白","虛無","沉默"]},
+    {label:"亮調",items:["雀躍","期待","輕盈","自由","好奇"]},
+    {label:"自然",items:["呼吸","清醒","流動","安放","生長"]},
+    {label:"深淵",items:["燃燒","執念","撕裂","覺醒","邊界"]}
   ];
   $moodSection.innerHTML=groups.map(g=>`
     <div>
@@ -387,15 +412,13 @@ function pickMood(name,color){
   document.getElementById("cardAccent").style.background=color;
   $overlay.classList.add("active");
   $overlayBar.classList.add("active");
-  // 记录
   try{
     const raw=localStorage.getItem("aurevny_mood_log");
     const log=raw?JSON.parse(raw):[];
     log.push(name);
-    const recent=log.slice(-30);
-    localStorage.setItem("aurevny_mood_log",JSON.stringify(recent));
-    if(recent.length>=7){
-      const cnt={};recent.forEach(n=>cnt[n]=(cnt[n]||0)+1);
+    localStorage.setItem("aurevny_mood_log",JSON.stringify(log.slice(-30)));
+    if(log.length>=7){
+      const cnt={};log.forEach(n=>cnt[n]=(cnt[n]||0)+1);
       const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];
       $streak.textContent=`你最近最常選的顏色是「${top}」`;
       $streak.style.opacity=".6";
@@ -404,7 +427,7 @@ function pickMood(name,color){
 }
 
 // ═══════════════════════════════════════════
-// 6. 保存卡片
+// 5. 保存 / 分享 / 关闭
 // ═══════════════════════════════════════════
 function saveCard(id,type){
   if(!window.html2canvas){
@@ -423,9 +446,6 @@ function _capture(id,type){
   });
 }
 
-// ═══════════════════════════════════════════
-// 7. 其他
-// ═══════════════════════════════════════════
 function copyShare(){
   const url=location.origin+location.pathname;
   const text=`Aurevny.Lab 每日一句：「${currentQuote.t}」—— ${url}`;
@@ -433,25 +453,21 @@ function copyShare(){
   const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast("連結已複製");
 }
 
-function resetAll(){
-  $overlay.classList.remove("active");
-  $overlayBar.classList.remove("active");
-}
+function resetAll(){$overlay.classList.remove("active");$overlayBar.classList.remove("active");}
 
-// 键盘
 document.addEventListener("keydown",e=>{
   if(e.code==="Space"&&!$overlay.classList.contains("active")){e.preventDefault();shuffleQuote()}
   if(e.code==="Escape"&&$overlay.classList.contains("active")){resetAll()}
 });
 
 // ═══════════════════════════════════════════
-// 启动 —— 顺序明确，不依赖任何 API
+// 启动
 // ═══════════════════════════════════════════
 window.addEventListener("DOMContentLoaded",()=>{
-  initQuote();      // ① 先出句子，用户立刻看到内容
-  initTime();       // ② 本地时间立刻显示，后台校准
-  initWeather();    // ③ 天气后台拉，失败不显示
-  buildMoods();     // ④ 情绪按钮
+  initQuote();
+  initTime();
+  initWeather();
+  buildMoods();
 });
 </script>
 </body>
