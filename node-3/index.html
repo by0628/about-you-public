@@ -1,126 +1,246 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>作品 · Aurevny.Lab</title>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noto-serif-tc/1.0.0/static/noto-serif-tc.css">
-<link rel="stylesheet" href="./style.css">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aurevny · 离线翻译</title>
+<style>
+:root{
+  --bg:#F2EFEA;
+  --surface:#EDE9E3;
+  --surface-alt:#F9F6F2;
+  --blue:#8EAAAE;
+  --blue-deep:#6F8F94;
+  --pink:#C9A4A6;
+  --green:#8A9E8B;
+  --text:#4A4441;
+  --text-soft:#7A7470;
+  --muted:#A8A29E;
+  --line:#DDD7D1;
+  --line-soft:#EAE5DF;
+  --shadow:0 2px 12px rgba(74,68,65,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  padding:24px 18px 60px;max-width:580px;margin:0 auto;line-height:1.7;
+}
+
+.header{text-align:center;margin-bottom:28px;margin-top:8px}
+.header .logo{font-size:11px;letter-spacing:.4em;color:var(--blue-deep);text-transform:uppercase;font-weight:500}
+.header .title{font-size:22px;font-weight:400;color:var(--text);margin-top:4px;letter-spacing:.08em}
+.header .desc{font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.12em}
+
+.dir-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:24px}
+.dir-btn{
+  background:var(--surface);border:1px solid var(--line);color:var(--text-soft);
+  padding:8px 20px;font-size:13px;letter-spacing:.18em;border-radius:24px;
+  cursor:pointer;transition:.3s;font-family:inherit;
+}
+.dir-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:var(--shadow)}
+.dir-btn:hover:not(.active){border-color:var(--blue);color:var(--blue-deep)}
+.dir-arrow{color:var(--muted);font-size:14px;opacity:.5}
+
+.box{
+  width:100%;background:var(--surface-alt);border:1px solid var(--line-soft);
+  border-radius:16px;padding:18px 18px 14px;margin-bottom:14px;
+  box-shadow:var(--shadow);position:relative;
+}
+.box-label{font-size:9px;letter-spacing:.32em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+textarea{
+  width:100%;min-height:110px;background:transparent;border:none;outline:none;
+  color:var(--text);font-size:16px;line-height:1.75;resize:none;font-family:inherit;
+}
+textarea::placeholder{color:#C4BEB8}
+.result{
+  width:100%;min-height:110px;font-size:16px;line-height:1.75;
+  color:var(--text);word-break:break-word;white-space:pre-wrap;
+}
+
+.copy-btn{
+  position:absolute;top:14px;right:14px;
+  background:transparent;border:1px solid var(--line-soft);color:var(--muted);
+  padding:4px 12px;font-size:10px;border-radius:14px;cursor:pointer;transition:.25s;letter-spacing:.1em;
+}
+.copy-btn:hover{color:var(--blue-deep);border-color:var(--blue-deep)}
+
+.actions{display:flex;gap:10px;justify-content:center;margin-top:4px;margin-bottom:16px}
+.btn{
+  border:1px solid var(--line);background:var(--surface);color:var(--text-soft);
+  padding:10px 26px;font-size:12px;letter-spacing:.22em;border-radius:24px;
+  cursor:pointer;transition:.3s;font-family:inherit;
+}
+.btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue-deep)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
+
+.status{text-align:center;font-size:11px;color:var(--muted);min-height:18px;letter-spacing:.14em;margin-bottom:4px;transition:.3s}
+.status.loading{color:var(--blue-deep)}
+.status.ready{color:var(--green)}
+.status.error{color:var(--pink)}
+
+.progress{width:100%;max-width:280px;height:3px;background:var(--line-soft);border-radius:2px;overflow:hidden;margin:0 auto 4px;display:none}
+.progress.show{display:block}
+.progress-bar{height:100%;width:0%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--pink));transition:width .35s ease}
+
+.divider{display:flex;align-items:center;gap:10px;margin:4px 0 4px;color:var(--line);font-size:12px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+
+.footer{margin-top:auto;padding-top:30px;text-align:center;font-size:9px;color:#C4BEB8;letter-spacing:.24em}
+</style>
 </head>
 <body>
 
-<div class="back-bar">
-  <a href="../index.html">← 返回 Lab</a>
+<div class="header">
+  <div class="logo">Aurevny · Lab</div>
+  <div class="title">离线翻译</div>
+  <div class="desc">首次联网加载 · 之后永久离线</div>
 </div>
 
-<header class="header">
-  <h1>作品</h1>
-  <div class="sub">一些寫下來的東西。</div>
-</header>
-
-<div class="tabs" id="tabs">
-  <button class="tab active" data-cat="all">全部</button>
-  <button class="tab" data-cat="小说">小說</button>
-  <button class="tab" data-cat="随笔">隨筆</button>
-  <button class="tab" data-cat="哲思">哲思</button>
+<div class="dir-bar">
+  <button class="dir-btn active" id="bZhEn" onclick="setDir('zh-en')">中文 → 英文</button>
+  <span class="dir-arrow">⇌</span>
+  <button class="dir-btn" id="bEnZh" onclick="setDir('en-zh')">英文 → 中文</button>
 </div>
 
-<div class="articles" id="articles">
-
-  <!-- ARTICLES -->
-  <article-card
-    file="chen-yu-xiao"
-    title="晨与晓的间距"
-    date="2026.08.10"
-    excerpt="十七道偏转半径等于一次开口。江念晨数叶子的时候，林晓在画素描。"
-    category="小说"
-    read="12 min"
-  ></article-card>
-
-  <article-card
-    file="time-forgive"
-    title="时间从来没让我原谅过任何人"
-    date="2026.08.05"
-    excerpt="东北的早市，冻红的手，出租车里的沉默。生活不曾回头，只是不那么在乎了。"
-    category="随笔"
-    read="8 min"
-  ></article-card>
-
-  <article-card
-    file="born-lament"
-    title="降生的哀鸣"
-    date="2026.07.28"
-    excerpt="灵魂被困在肉体里。永恒的轮回。永远的孤独。时间冲刷下的时间。"
-    category="哲思"
-    read="6 min"
-  ></article-card>
-
-  <article-card
-    file="flower-war"
-    title="花开"
-    date="2026.07.20"
-    excerpt="花开了，然后呢。"
-    category="哲思"
-    read="3 min"
-  ></article-card>
-
-  <article-card
-    file="time-erosion"
-    title="时间冲刷下的"时间""
-    date="2026.07.15"
-    excerpt="我们都在被冲刷，只是有人站得远一点。"
-    category="随笔"
-    read="5 min"
-  ></article-card>
-  <!-- /ARTICLES -->
-
+<div class="box">
+  <div class="box-label">输入</div>
+  <textarea id="input" placeholder="输入要翻译的文字…"></textarea>
 </div>
 
-<div class="footer">
-  <div>© 2026 Aurevny · Local Only · No Telemetry</div>
+<div class="actions">
+  <button class="btn btn-primary" id="goBtn" onclick="translate()" disabled>翻译</button>
+  <button class="btn" onclick="clearAll()">清空</button>
 </div>
 
-<script>
-// ── 自定义元素 article-card ──
-class ArticleCard extends HTMLElement {
-  connectedCallback(){
-    const f = this.getAttribute('file');
-    const t = this.getAttribute('title');
-    const d = this.getAttribute('date');
-    const e = this.getAttribute('excerpt');
-    const c = this.getAttribute('category');
-    const r = this.getAttribute('read');
-    this.innerHTML = `
-      <a class="card" href="./article.html?file=${f}">
-        <div class="card-meta">
-          <span class="cat">${c}</span>
-          <span>${d}</span>
-          <span class="read">${r}</span>
-        </div>
-        <div class="card-title">${t}</div>
-        <div class="card-excerpt">${e}</div>
-      </a>
-    `;
+<div class="progress" id="prog"><div class="progress-bar" id="bar"></div></div>
+<div class="status" id="status">初始化中…</div>
+
+<div class="divider">✿</div>
+
+<div class="box">
+  <div class="box-label">结果</div>
+  <div class="result" id="output">—</div>
+  <button class="copy-btn" onclick="copyResult()">复制</button>
+</div>
+
+<div class="footer">AUREVNY · TRANSFORMERS.JS</div>
+
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
+
+let translator = null;
+let currentDir = 'zh-en';
+let modelLoaded = false;
+
+const $input = document.getElementById('input');
+const $output = document.getElementById('output');
+const $status = document.getElementById('status');
+const $goBtn = document.getElementById('goBtn');
+const $prog = document.getElementById('prog');
+const $bar = document.getElementById('bar');
+
+async function init(){
+  try{
+    $status.textContent = '正在加载模型（首次需联网，约 80MB）…';
+    $status.className = 'status loading';
+    $prog.classList.add('show');
+
+    const { env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js');
+    env.useBrowserCache = true;
+    env.allowLocalModels = false;
+    env.remoteHost = 'https://hf-mirror.com';
+
+    translator = await pipeline('translation', 'Xenova/opus-mt-zh-en', {
+      progress_callback: (p) => {
+        if(p.status === 'progress'){
+          const pct = Math.round((p.loaded / p.total) * 100);
+          $bar.style.width = pct + '%';
+          $status.textContent = `下载模型中… ${pct}%`;
+        }
+      }
+    });
+
+    modelLoaded = true;
+    $status.textContent = '✓ 模型就绪 · 可离线使用';
+    $status.className = 'status ready';
+    $prog.classList.remove('show');
+    $goBtn.disabled = false;
+  }catch(e){
+    $status.textContent = '✗ 加载失败，请检查网络后刷新';
+    $status.className = 'status error';
+    $prog.classList.remove('show');
+    console.error(e);
   }
 }
-customElements.define('article-card', ArticleCard);
 
-// ── Tab 筛选 ──
-const tabs = document.getElementById('tabs');
-const cards = document.getElementById('articles').children;
+window.setDir = function(d){
+  currentDir = d;
+  document.getElementById('bZhEn').classList.toggle('active', d==='zh-en');
+  document.getElementById('bEnZh').classList.toggle('active', d==='en-zh');
+  $input.placeholder = d==='zh-en' ? '输入中文…' : 'Enter English…';
+  $output.textContent = '—';
+};
 
-tabs.addEventListener('click', e => {
-  if(!e.target.classList.contains('tab')) return;
-  tabs.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  e.target.classList.add('active');
-  const cat = e.target.dataset.cat;
-  Array.from(cards).forEach(card => {
-    const match = cat === 'all' || card.getAttribute('category') === cat;
-    card.style.display = match ? '' : 'none';
+window.translate = async function(){
+  if(!translator || !modelLoaded){ $status.textContent = '模型尚未就绪'; return; }
+  const text = $input.value.trim();
+  if(!text){ $output.textContent = '—'; return; }
+
+  $goBtn.disabled = true;
+  $status.textContent = '翻译中…';
+  $status.className = 'status';
+
+  try{
+    let modelName = currentDir === 'zh-en' ? 'Xenova/opus-mt-zh-en' : 'Xenova/opus-mt-en-zh';
+    if(translator.modelName !== modelName){
+      translator = await pipeline('translation', modelName);
+    }
+    const result = await translator(text);
+    $output.textContent = result[0].translation_text;
+    $status.textContent = '✓ 翻译完成';
+    $status.className = 'status ready';
+  }catch(e){
+    $output.textContent = '翻译失败';
+    $status.textContent = '✗ 翻译失败';
+    $status.className = 'status error';
+    console.error(e);
+  }
+  $goBtn.disabled = false;
+};
+
+window.clearAll = function(){
+  $input.value = '';
+  $output.textContent = '—';
+  $status.textContent = modelLoaded ? '✓ 模型就绪 · 可离线使用' : '初始化中…';
+  $status.className = modelLoaded ? 'status ready' : 'status';
+};
+
+window.copyResult = function(){
+  const t = $output.textContent;
+  if(!t || t==='—') return;
+  navigator.clipboard.writeText(t).then(()=>{
+    $status.textContent = '✓ 已复制';
+    $status.className = 'status ready';
+    setTimeout(()=>{
+      $status.textContent = modelLoaded ? '✓ 模型就绪 · 可离线使用' : '初始化中…';
+      $status.className = modelLoaded ? 'status ready' : 'status';
+    }, 1500);
+  }).catch(()=>{
+    $status.textContent = '✗ 复制失败';
+    $status.className = 'status error';
   });
-});
-</script>
+};
 
+$input.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); translate(); }
+});
+
+init();
+</script>
 </body>
 </html>
