@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" id="html-root">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noto-serif-tc/1.0.0/static/noto-serif-tc.css">
 <style>
+/* ─── 颜色变量 ─── */
 :root{
   --bg-cream:#FDFBF7;
   --card-white:#FFFFFF;
@@ -17,85 +18,176 @@
   --accent-green:#A8C0B8;
   --line:#E5DFD7;
   --shadow:0 12px 48px rgba(90,80,70,0.08);
+  --shadow-hover:0 16px 56px rgba(90,80,70,0.14);
+  --toggle-bg:#f0ebe5;
+  --toggle-dot:#C4A89A;
 }
+
+/* ─── 深色模式 ─── */
+html.dark-mode{
+  --bg-cream:#191613;
+  --card-white:#2A2622;
+  --text-main:#D6CFC8;
+  --text-muted:#9E958A;
+  --accent-pink:#D4B8A8;
+  --accent-blue:#B8CDE0;
+  --accent-green:#B0C8C0;
+  --line:#3D3833;
+  --shadow:0 12px 48px rgba(0,0,0,0.5);
+  --shadow-hover:0 16px 56px rgba(0,0,0,0.65);
+  --toggle-bg:#3D3833;
+  --toggle-dot:#D4B8A8;
+}
+
+/* ─── 全局重置 ─── */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{
   background:var(--bg-cream);color:var(--text-main);
   font-family:"Noto Serif TC","Songti TC",serif;
   letter-spacing:.04em;-webkit-font-smoothing:antialiased;
   min-height:100dvh;
+  transition:background .45s ease, color .35s ease;
 }
 body{
   max-width:720px;margin:0 auto;
   padding:clamp(24px,5vw,40px) clamp(16px,4vw,24px) 80px;
 }
 
-/* ── 主卡片 ── */
+/* ─── 主卡片 ─── */
 .shell{
   background:var(--card-white);
   border-radius:32px;
   box-shadow:var(--shadow);
   padding:clamp(28px,6vw,48px) clamp(20px,5vw,40px);
+  transition:background .45s ease, box-shadow .45s ease;
 }
 
-/* ── 顶部（方案B：上下分行居中） ── */
+/* ─── 顶部：左 中 右 三栏布局 ─── */
 .topbar{
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  font-size:11px;color:var(--text-muted);letter-spacing:.28em;text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;
+  font-size:11px;
+  color:var(--text-muted);
+  letter-spacing:.28em;
+  text-transform:uppercase;
 }
-.status{display:flex;align-items:center;gap:6px}
-.dot{width:6px;height:6px;border-radius:50%;background:#8BA888;box-shadow:0 0 6px rgba(139,168,136,.4)}
+.topbar-left{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:0;
+}
+.topbar-center{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  white-space:nowrap;
+  font-size:11px;
+  letter-spacing:.28em;
+}
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+  margin-left:auto;
+}
+.dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#8BA888;
+  box-shadow:0 0 6px rgba(139,168,136,.4);
+  transition:background .45s ease, box-shadow .45s ease;
+}
 
-/* ── Hero ── */
+/* ─── 主题切换按钮 ─── */
+.theme-toggle{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:var(--toggle-bg);
+  color:var(--toggle-dot);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  transition:all .35s cubic-bezier(.25,.8,.25,1);
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+  flex-shrink:0;
+  padding:0;
+  line-height:1;
+}
+.theme-toggle:hover{
+  transform:rotate(15deg) scale(1.05);
+  border-color:var(--accent-pink);
+  box-shadow:0 4px 16px rgba(196,168,154,0.15);
+}
+.theme-toggle:active{
+  transform:scale(.92);
+}
+
+/* ─── Hero ─── */
 .hero{margin-top:clamp(24px,6vw,36px);text-align:center}
-.brand{font-size:clamp(24px,6.5vw,34px);color:var(--accent-pink);letter-spacing:.22em;font-weight:400}
+.brand{font-size:clamp(24px,6.5vw,34px);color:var(--accent-pink);letter-spacing:.22em;font-weight:400;transition:color .35s ease}
 .tagline{
   margin-top:14px;font-size:clamp(12px,3.4vw,14px);color:var(--text-muted);
   line-height:1.9;letter-spacing:.08em;
+  transition:color .35s ease;
 }
-.tagline .accent{color:var(--accent-pink);font-style:italic}
+.tagline .accent{color:var(--accent-pink);font-style:italic;transition:color .35s ease}
 
-/* ── 关于我 ── */
+/* ─── 关于我 ─── */
 .about{margin-top:clamp(28px,6vw,40px);text-align:center}
-.about-name{font-size:clamp(13px,3.5vw,15px);color:var(--accent-pink);letter-spacing:.3em;text-transform:uppercase}
+.about-name{font-size:clamp(13px,3.5vw,15px);color:var(--accent-pink);letter-spacing:.3em;text-transform:uppercase;transition:color .35s ease}
 .about-meta{
   margin-top:10px;font-size:clamp(12px,3.2vw,13.5px);color:var(--text-main);
   line-height:1.9;letter-spacing:.05em;
+  transition:color .35s ease;
 }
-.about-meta .hl{color:var(--accent-pink)}
-.about-meta .dim{color:var(--text-muted);font-style:italic}
+.about-meta .hl{color:var(--accent-pink);transition:color .35s ease}
+.about-meta .dim{color:var(--text-muted);font-style:italic;transition:color .35s ease}
 .about-contact{
   margin-top:14px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 14px;
   font-size:11px;color:var(--text-muted);letter-spacing:.12em;
+  transition:color .35s ease;
 }
-.about-contact a{color:var(--text-muted);text-decoration:none;border-bottom:1px dotted var(--line);transition:.2s}
+.about-contact a{color:var(--text-muted);text-decoration:none;border-bottom:1px dotted var(--line);transition:color .3s, border-color .3s}
 .about-contact a:hover{color:var(--accent-pink);border-bottom-color:var(--accent-pink)}
 
-/* ── 天气/节气 ── */
+/* ─── 天气 ─── */
 .weather-line{margin-top:clamp(20px,5vw,28px);text-align:center}
-.weather-date{font-size:10px;color:var(--text-muted);letter-spacing:.3em}
+.weather-date{font-size:10px;color:var(--text-muted);letter-spacing:.3em;transition:color .35s ease}
 .weather-body{
   margin-top:8px;font-size:clamp(12px,3.2vw,13px);color:var(--text-muted);
   line-height:1.9;letter-spacing:.07em;font-style:italic;opacity:.8;
+  transition:color .35s ease, opacity .35s ease;
 }
 
-/* ── 分隔 ── */
-.divider{margin:clamp(24px,6vw,32px) auto;width:40px;height:1px;background:var(--line)}
+/* ─── 分隔线 ─── */
+.divider{margin:clamp(24px,6vw,32px) auto;width:40px;height:1px;background:var(--line);transition:background .45s ease}
 
-/* ── 节点 ── */
+/* ─── 节点列表 ─── */
 .nodes{display:flex;flex-direction:column;gap:12px}
 .node{
   display:flex;align-items:center;gap:14px;
   padding:16px 18px;border-radius:16px;
   background:var(--bg-cream);border:1px solid transparent;
   text-decoration:none;color:var(--text-main);
-  transition:all .3s cubic-bezier(.25,.8,.25,1);position:relative;overflow:hidden;
+  transition:all .35s cubic-bezier(.25,.8,.25,1);
+  position:relative;overflow:hidden;
 }
 .node::before{
   content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--accent-green);opacity:0;transition:.3s;
+  background:var(--accent-green);opacity:0;transition:opacity .35s ease;
 }
-.node:hover{transform:translateX(4px);box-shadow:var(--shadow);border-color:rgba(196,168,154,.3)}
+.node:hover{
+  transform:translateX(4px);
+  box-shadow:var(--shadow-hover);
+  border-color:rgba(196,168,154,.3);
+}
 .node:hover::before{opacity:1}
 .node.empty{opacity:.38;pointer-events:none}
 .node.empty:hover{transform:none;box-shadow:none;border-color:transparent}
@@ -104,25 +196,35 @@ body{
   background:var(--card-white);border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;
   font-size:13px;flex:none;color:var(--accent-pink);letter-spacing:.06em;
+  transition:background .45s ease, border-color .45s ease, color .35s ease;
 }
 .node-body{flex:1;min-width:0}
-.node-title{font-size:14px;color:var(--text-main);letter-spacing:.12em}
-.node-desc{margin-top:2px;font-size:11px;color:var(--text-muted);line-height:1.5}
+.node-title{font-size:14px;color:var(--text-main);letter-spacing:.12em;transition:color .35s ease}
+.node-desc{margin-top:2px;font-size:11px;color:var(--text-muted);line-height:1.5;transition:color .35s ease}
 .node-tag{
   flex:none;font-size:9px;letter-spacing:.22em;padding:3px 8px;
   border:1px solid var(--line);color:var(--text-muted);border-radius:4px;
+  transition:border-color .45s ease, color .35s ease;
 }
-.node-tag.live{color:var(--accent-pink);border-color:rgba(196,168,154,.5)}
-.node-tag.soon{opacity:.5}
+.node-tag.live{color:var(--accent-pink);border-color:rgba(196,168,154,.5);transition:color .35s ease, border-color .45s ease}
+.node-tag.soon{opacity:.5;transition:opacity .35s ease}
 
-/* ── 底部 ── */
+/* ─── 底部 ─── */
 .footer{
   margin-top:clamp(32px,7vw,48px);text-align:center;
   font-size:10px;color:var(--text-muted);line-height:2;letter-spacing:.2em;
+  transition:color .35s ease;
 }
-.footer a{color:var(--accent-pink);text-decoration:none;border-bottom:1px dotted var(--line)}
-.footer .quote{font-style:italic;opacity:.6;margin-top:6px;letter-spacing:.14em}
+.footer a{color:var(--accent-pink);text-decoration:none;border-bottom:1px dotted var(--line);transition:color .3s, border-color .3s}
+.footer .quote{font-style:italic;opacity:.6;margin-top:6px;letter-spacing:.14em;transition:opacity .35s ease}
 
+/* ─── 响应式 ─── */
+@media(max-width:480px){
+  .topbar-center{font-size:9px;letter-spacing:.2em}
+  .topbar-left{font-size:9px}
+  .topbar-left .dot{width:5px;height:5px}
+  .theme-toggle{width:32px;height:32px;font-size:14px}
+}
 @media(min-width:640px){
   .shell{padding:48px 44px}
 }
@@ -132,90 +234,128 @@ body{
 
 <div class="shell">
 
-<div class="topbar">
-  <div>Aurevny.Lab</div>
-  <div class="status"><span class="dot"></span><span>All Systems Normal</span></div>
-</div>
-
-<section class="hero">
-  <div class="brand">Aurevny.Lab</div>
-  <div class="tagline">
-    一個安靜的數字自留地。<br>
-    文字、情緒、問卷——<span class="accent">只屬於你自己</span>。
+  <!-- ═══ 顶部：左中右三栏 ═══ -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="dot"></span>
+      <span>All Systems Normal</span>
+    </div>
+    <div class="topbar-center">Aurevny.Lab</div>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="切換深色/淺色模式">
+        🌙
+      </button>
+    </div>
   </div>
-</section>
 
-<div class="about">
-  <div class="about-name">Aurevny</div>
-  <div class="about-meta">
-    寫 <span class="hl">HTML</span> 和 <span class="hl">Python</span>。<br>
-    偶爾打 <span class="hl">《我的世界》</span> 和 <span class="hl">《cops》</span>，<span class="dim">躺平、拖延、慢熱</span>。<br>
-    做安靜的東西，給安靜的人。
+  <!-- ═══ Hero ═══ -->
+  <section class="hero">
+    <div class="brand">Aurevny.Lab</div>
+    <div class="tagline">
+      一個安靜的數字自留地。<br>
+      文字、情緒、問卷——<span class="accent">只屬於你自己</span>。
+    </div>
+  </section>
+
+  <!-- ═══ 关于 ═══ -->
+  <div class="about">
+    <div class="about-name">Aurevny</div>
+    <div class="about-meta">
+      寫 <span class="hl">HTML</span> 和 <span class="hl">Python</span>。<br>
+      偶爾打 <span class="hl">《我的世界》</span> 和 <span class="hl">《cops》</span>，<span class="dim">躺平、拖延、慢熱</span>。<br>
+      做安靜的東西，給安靜的人。
+    </div>
+    <div class="about-contact">
+      <a href="mailto:By120628@outlook.com">By120628@outlook.com</a>
+      <span>·</span>
+      <a href="mailto:by120628@icloud.com">by120628@icloud.com</a>
+    </div>
   </div>
-  <div class="about-contact">
-    <a href="mailto:By120628@outlook.com">By120628@outlook.com</a>
-    <span>·</span>
-    <a href="mailto:by120628@icloud.com">by120628@icloud.com</a>
+
+  <!-- ═══ 天气 ═══ -->
+  <div class="weather-line">
+    <div class="weather-date" id="wDate">今日</div>
+    <div class="weather-body" id="wBody">雲層未散，二十二度。<br>秋意尚淺，月亮還圓了幾次才到中秋。</div>
   </div>
-</div>
 
-<div class="weather-line">
-  <div class="weather-date" id="wDate">今日</div>
-  <div class="weather-body" id="wBody">雲層未散，二十二度。<br>秋意尚淺，月亮還圓了幾次才到中秋。</div>
-</div>
+  <!-- ═══ 分隔 ═══ -->
+  <div class="divider"></div>
 
-<div class="divider"></div>
+  <!-- ═══ 节点列表 ═══ -->
+  <div class="nodes">
 
-<div class="nodes">
+    <a class="node" href="./about-you/">
+      <div class="node-icon">01</div>
+      <div class="node-body">
+        <div class="node-title">關於你 · A Quiet Portrait</div>
+        <div class="node-desc">一個純前端的安靜問卷。所有回答僅存於本地。</div>
+      </div>
+      <div class="node-tag live">Live</div>
+    </a>
 
-  <a class="node" href="./about-you/">
-    <div class="node-icon">01</div>
-    <div class="node-body">
-      <div class="node-title">關於你 · A Quiet Portrait</div>
-      <div class="node-desc">一個純前端的安靜問卷。所有回答僅存於本地。</div>
-    </div>
-    <div class="node-tag live">Live</div>
-  </a>
+    <a class="node" href="./mood-card/">
+      <div class="node-icon">02</div>
+      <div class="node-body">
+        <div class="node-title">每日一句 × 情緒色卡</div>
+        <div class="node-desc">80 句話，30 種顏色，打字機逐字出現。</div>
+      </div>
+      <div class="node-tag live">Live</div>
+    </a>
 
-  <a class="node" href="./mood-card/">
-    <div class="node-icon">02</div>
-    <div class="node-body">
-      <div class="node-title">每日一句 × 情緒色卡</div>
-      <div class="node-desc">80 句話，30 種顏色，打字機逐字出現。</div>
-    </div>
-    <div class="node-tag live">Live</div>
-  </a>
+    <a class="node" href="./node-3/">
+      <div class="node-icon">03</div>
+      <div class="node-body">
+        <div class="node-title">小测试·test</div>
+        <div class="node-desc">TRUE</div>
+      </div>
+      <div class="node-tag live">Live</div>
+    </a>
 
-  <a class="node" href="./node-3/">
-    <div class="node-icon">03</div>
-    <div class="node-body">
-      <div class="node-title">小测试·test</div>
-      <div class="node-desc">TRUE</div>
-    </div>
-    <div class="node-tag live">Live</div>
-  </a>
+    <a class="node empty" href="#">
+      <div class="node-icon">04</div>
+      <div class="node-body">
+        <div class="node-title">Node 04</div>
+        <div class="node-desc">即將開啟</div>
+      </div>
+      <div class="node-tag soon">Soon</div>
+    </a>
 
-  <a class="node empty" href="#">
-    <div class="node-icon">04</div>
-    <div class="node-body">
-      <div class="node-title">Node 04</div>
-      <div class="node-desc">即將開啟</div>
-    </div>
-    <div class="node-tag soon">Soon</div>
-  </a>
+  </div>
 
-</div>
-
-<div class="footer">
-  <div>© 2026 Aurevny · Local Only · No Telemetry</div>
-  <div class="quote">做安靜的東西，給安靜的人。</div>
-</div>
+  <!-- ═══ 底部 ═══ -->
+  <div class="footer">
+    <div>© 2026 Aurevny · Local Only · No Telemetry</div>
+    <div class="quote">做安靜的東西，給安靜的人。</div>
+  </div>
 
 </div><!-- /shell -->
-
 <script>
 // ═══════════════════════════════════════════
-// 天气 + 散文化节假日
+//  主题切换
+// ═══════════════════════════════════════════
+function applyTheme() {
+  const saved = localStorage.getItem('aurevny-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved === 'dark' || (saved === null && prefersDark);
+  
+  document.documentElement.classList.toggle('dark-mode', isDark);
+  
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    toggle.textContent = isDark ? '☀️' : '🌙';
+  }
+}
+
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.classList.toggle('dark-mode');
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) toggle.textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('aurevny-theme', isDark ? 'dark' : 'light');
+}
+
+// ═══════════════════════════════════════════
+//  天气 + 散文化节假日
 // ═══════════════════════════════════════════
 const WEATHER_ZH = {
   "Sunny":"晴","Clear":"晴","Partly cloudy":"多雲","Cloudy":"陰","Overcast":"陰天",
@@ -224,6 +364,7 @@ const WEATHER_ZH = {
   "Thunderstorm":"雷陣雨","Storm":"雷陣雨","Light snow":"小雪","Snow":"雪","Heavy snow":"大雪",
   "Blizzard":"暴風雪","Drizzle":"毛毛雨","Freezing rain":"凍雨","Sleet":"雨夾雪","Blowing snow":"吹雪"
 };
+
 function weatherDescZh(en){
   if(!en) return "";
   en = en.trim();
@@ -231,21 +372,39 @@ function weatherDescZh(en){
   for(const k in WEATHER_ZH){ if(en.toLowerCase().includes(k.toLowerCase())) return WEATHER_ZH[k]; }
   return en;
 }
+
+// 修复节日跨年逻辑 Bug
 function getNextFestival(){
   const now = new Date();
   const y = now.getFullYear();
-  const festivals = [
-    { name:"中秋", date: new Date(y, 8, 15) },
-    { name:"國慶", date: new Date(y, 9, 1) },
-    { name:"冬至", date: new Date(y, 11, 21) },
-    { name:"元旦", date: new Date(y+1, 0, 1) },
-    { name:"春節", date: new Date(y+1, 0, 25) },
-    { name:"清明", date: new Date(y+1, 3, 4) },
-    { name:"端午", date: new Date(y+1, 4, 31) },
+  
+  // 按照月-日定义节日列表（月从0开始）
+  const baseFestivals = [
+    { name:"元旦", m:0, d:1 },
+    { name:"春節", m:0, d:25 },
+    { name:"清明", m:3, d:4 },
+    { name:"端午", m:4, d:31 },
+    { name:"中秋", m:8, d:15 },
+    { name:"國慶", m:9, d:1 },
+    { name:"冬至", m:11, d:21 }
   ];
-  for(const f of festivals){ if(now < f.date){ const diff = Math.ceil((f.date - now)/86400000); return { name:f.name, days:diff }; } }
-  return { name:"中秋", days:0 };
+
+  for(const f of baseFestivals){
+    let fDate = new Date(y, f.m, f.d);
+    // 如果今年这个节日已经过了，算作明年的节日
+    if (now > fDate) {
+      fDate = new Date(y + 1, f.m, f.d);
+    }
+    
+    // 找到最近的下一个节日
+    const diff = Math.ceil((fDate - now) / 86400000);
+    if(diff >= 0) {
+      return { name: f.name, days: diff };
+    }
+  }
+  return { name:"元旦", days: 1 };
 }
+
 function getSeasonText(){
   const now = new Date();
   const m = now.getMonth(), d = now.getDate();
@@ -268,15 +427,17 @@ function getSeasonText(){
   if(m===6)        return { body:"小暑前後，熱還沒到頂" };
   return { body:"四時流轉，日子照舊" };
 }
+
 function renderWeather(){
   const ctrl = new AbortController();
   const t = setTimeout(()=>ctrl.abort(), 5000);
+  
   fetch("https://wttr.in/?format=j1", { signal: ctrl.signal, cache: "no-store" })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(data => {
       clearTimeout(t);
       const c = data?.current_condition?.[0];
-      if(!c) return;
+      if(!c) throw new Error("No data");
       const temp = c.temp_C;
       const rawDesc = c.weatherDesc?.[0]?.value || "";
       const desc = weatherDescZh(rawDesc) || "多雲";
@@ -286,6 +447,7 @@ function renderWeather(){
       if(festival.days <= 1) line = `${desc}，${temp} 度。<br>明日便是${festival.name}。`;
       else if(festival.days <= 7) line = `${desc}，${temp} 度。<br>${season.body}，距${festival.name}還有幾天。`;
       else line = `${desc}，${temp} 度。<br>${season.body}，距${festival.name}還有 ${festival.days} 天。`;
+      
       document.getElementById("wBody").innerHTML = line;
     })
     .catch(() => {
@@ -295,14 +457,20 @@ function renderWeather(){
       document.getElementById("wBody").innerHTML = `${season.body}，距${festival.name}還有 ${festival.days} 天。`;
     });
 }
+
 function renderDate(){
   const d = new Date();
   const months = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
   const days = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
   document.getElementById("wDate").textContent = `${d.getFullYear()} · ${months[d.getMonth()]} · ${days[d.getDay()]}`;
 }
-renderDate();
-renderWeather();
+
+// 初始化
+document.addEventListener("DOMContentLoaded", () => {
+  applyTheme();
+  renderDate();
+  renderWeather();
+});
 </script>
 
 </body>
