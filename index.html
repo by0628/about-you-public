@@ -8,229 +8,487 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noto-serif-tc/1.0.0/static/noto-serif-tc.css">
 <style>
 /* ─── 颜色变量 ─── */
-:root{
-  --bg-cream:#FDFBF7;
-  --card-white:#FFFFFF;
-  --text-main:#5D5A55;
-  --text-muted:#8A8278;
-  --accent-pink:#C4A89A;
-  --accent-blue:#B0C4D8;
-  --accent-green:#A8C0B8;
-  --line:#E5DFD7;
-  --shadow:0 12px 48px rgba(90,80,70,0.08);
-  --shadow-hover:0 16px 56px rgba(90,80,70,0.14);
-  --toggle-bg:#f0ebe5;
-  --toggle-dot:#C4A89A;
+:root {
+  --bg-cream: #FDFBF7;
+  --card-white: #FFFFFF;
+  --text-main: #5D5A55;
+  --text-muted: #8A8278;
+  --accent-pink: #C4A89A;
+  --accent-blue: #B0C4D8;
+  --accent-green: #A8C0B8;
+  --line: #E5DFD7;
+  --shadow: 0 12px 48px rgba(90, 80, 70, 0.08);
+  --shadow-hover: 0 16px 56px rgba(90, 80, 70, 0.14);
+  --toggle-bg: #f0ebe5;
+  --toggle-dot: #C4A89A;
+  --particle-color: rgba(196, 168, 154, 0.25);
+  --particle-line: rgba(196, 168, 154, 0.08);
 }
 
 /* ─── 深色模式 ─── */
-html.dark-mode{
-  --bg-cream:#191613;
-  --card-white:#2A2622;
-  --text-main:#D6CFC8;
-  --text-muted:#9E958A;
-  --accent-pink:#D4B8A8;
-  --accent-blue:#B8CDE0;
-  --accent-green:#B0C8C0;
-  --line:#3D3833;
-  --shadow:0 12px 48px rgba(0,0,0,0.5);
-  --shadow-hover:0 16px 56px rgba(0,0,0,0.65);
-  --toggle-bg:#3D3833;
-  --toggle-dot:#D4B8A8;
+html.dark-mode {
+  --bg-cream: #191613;
+  --card-white: #2A2622;
+  --text-main: #D6CFC8;
+  --text-muted: #9E958A;
+  --accent-pink: #D4B8A8;
+  --accent-blue: #B8CDE0;
+  --accent-green: #B0C8C0;
+  --line: #3D3833;
+  --shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 16px 56px rgba(0, 0, 0, 0.65);
+  --toggle-bg: #3D3833;
+  --toggle-dot: #D4B8A8;
+  --particle-color: rgba(212, 184, 168, 0.20);
+  --particle-line: rgba(212, 184, 168, 0.06);
 }
 
 /* ─── 全局重置 ─── */
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{
-  background:var(--bg-cream);color:var(--text-main);
-  font-family:"Noto Serif TC","Songti TC",serif;
-  letter-spacing:.04em;-webkit-font-smoothing:antialiased;
-  min-height:100dvh;
-  transition:background .45s ease, color .35s ease;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-body{
-  max-width:720px;margin:0 auto;
-  padding:clamp(24px,5vw,40px) clamp(16px,4vw,24px) 80px;
+html,
+body {
+  background: var(--bg-cream);
+  color: var(--text-main);
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  letter-spacing: .04em;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  transition: background .45s ease, color .35s ease;
+}
+body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 40px) clamp(16px, 4vw, 24px) 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Canvas 背景层 ─── */
+#bgCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity .6s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  #bgCanvas {
+    opacity: 0.2;
+  }
 }
 
 /* ─── 主卡片 ─── */
-.shell{
-  background:var(--card-white);
-  border-radius:32px;
-  box-shadow:var(--shadow);
-  padding:clamp(28px,6vw,48px) clamp(20px,5vw,40px);
-  transition:background .45s ease, box-shadow .45s ease;
+.shell {
+  background: var(--card-white);
+  border-radius: 32px;
+  box-shadow: var(--shadow);
+  padding: clamp(28px, 6vw, 48px) clamp(20px, 5vw, 40px);
+  transition: background .45s ease, box-shadow .45s ease;
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 /* ─── 顶部：左 中 右 三栏布局 ─── */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  position:relative;
-  font-size:11px;
-  color:var(--text-muted);
-  letter-spacing:.28em;
-  text-transform:uppercase;
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: .28em;
+  text-transform: uppercase;
 }
-.topbar-left{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  flex-shrink:0;
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
-.topbar-center{
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  white-space:nowrap;
-  font-size:11px;
-  letter-spacing:.28em;
+.topbar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: .28em;
 }
-.topbar-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-shrink:0;
-  margin-left:auto;
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
-.dot{
-  width:6px;height:6px;border-radius:50%;
-  background:#8BA888;
-  box-shadow:0 0 6px rgba(139,168,136,.4);
-  transition:background .45s ease, box-shadow .45s ease;
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8BA888;
+  box-shadow: 0 0 6px rgba(139, 168, 136, .4);
+  transition: background .45s ease, box-shadow .45s ease;
 }
 
-/* ─── 主题切换按钮 ─── */
-.theme-toggle{
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  border:1px solid var(--line);
-  background:var(--toggle-bg);
-  color:var(--toggle-dot);
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  transition:all .35s cubic-bezier(.25,.8,.25,1);
-  box-shadow:0 2px 8px rgba(0,0,0,0.04);
-  flex-shrink:0;
-  padding:0;
-  line-height:1;
+/* ─── 主题切换 & 音乐控制按钮 ─── */
+.ctrl-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--toggle-bg);
+  color: var(--toggle-dot);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all .35s cubic-bezier(.25, .8, .25, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
 }
-.theme-toggle:hover{
-  transform:rotate(15deg) scale(1.05);
-  border-color:var(--accent-pink);
-  box-shadow:0 4px 16px rgba(196,168,154,0.15);
+.ctrl-btn:hover {
+  transform: rotate(12deg) scale(1.05);
+  border-color: var(--accent-pink);
+  box-shadow: 0 4px 16px rgba(196, 168, 154, 0.15);
 }
-.theme-toggle:active{
-  transform:scale(.92);
+.ctrl-btn:active {
+  transform: scale(.92);
+}
+.ctrl-btn.playing {
+  border-color: var(--accent-green);
+  box-shadow: 0 4px 16px rgba(168, 192, 184, 0.20);
 }
 
 /* ─── Hero ─── */
-.hero{margin-top:clamp(24px,6vw,36px);text-align:center}
-.brand{font-size:clamp(24px,6.5vw,34px);color:var(--accent-pink);letter-spacing:.22em;font-weight:400;transition:color .35s ease}
-.tagline{
-  margin-top:14px;font-size:clamp(12px,3.4vw,14px);color:var(--text-muted);
-  line-height:1.9;letter-spacing:.08em;
-  transition:color .35s ease;
+.hero {
+  margin-top: clamp(24px, 6vw, 36px);
+  text-align: center;
 }
-.tagline .accent{color:var(--accent-pink);font-style:italic;transition:color .35s ease}
+.brand {
+  font-size: clamp(24px, 6.5vw, 34px);
+  color: var(--accent-pink);
+  letter-spacing: .22em;
+  font-weight: 400;
+  transition: color .35s ease;
+}
+.tagline {
+  margin-top: 14px;
+  font-size: clamp(12px, 3.4vw, 14px);
+  color: var(--text-muted);
+  line-height: 1.9;
+  letter-spacing: .08em;
+  transition: color .35s ease;
+}
+.tagline .accent {
+  color: var(--accent-pink);
+  font-style: italic;
+  transition: color .35s ease;
+}
 
 /* ─── 关于我 ─── */
-.about{margin-top:clamp(28px,6vw,40px);text-align:center}
-.about-name{font-size:clamp(13px,3.5vw,15px);color:var(--accent-pink);letter-spacing:.3em;text-transform:uppercase;transition:color .35s ease}
-.about-meta{
-  margin-top:10px;font-size:clamp(12px,3.2vw,13.5px);color:var(--text-main);
-  line-height:1.9;letter-spacing:.05em;
-  transition:color .35s ease;
+.about {
+  margin-top: clamp(28px, 6vw, 40px);
+  text-align: center;
 }
-.about-meta .hl{color:var(--accent-pink);transition:color .35s ease}
-.about-meta .dim{color:var(--text-muted);font-style:italic;transition:color .35s ease}
-.about-contact{
-  margin-top:14px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 14px;
-  font-size:11px;color:var(--text-muted);letter-spacing:.12em;
-  transition:color .35s ease;
+.about-name {
+  font-size: clamp(13px, 3.5vw, 15px);
+  color: var(--accent-pink);
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  transition: color .35s ease;
 }
-.about-contact a{color:var(--text-muted);text-decoration:none;border-bottom:1px dotted var(--line);transition:color .3s, border-color .3s}
-.about-contact a:hover{color:var(--accent-pink);border-bottom-color:var(--accent-pink)}
+.about-meta {
+  margin-top: 10px;
+  font-size: clamp(12px, 3.2vw, 13.5px);
+  color: var(--text-main);
+  line-height: 1.9;
+  letter-spacing: .05em;
+  transition: color .35s ease;
+}
+.about-meta .hl {
+  color: var(--accent-pink);
+  transition: color .35s ease;
+}
+.about-meta .dim {
+  color: var(--text-muted);
+  font-style: italic;
+  transition: color .35s ease;
+}
+.about-contact {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 14px;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: .12em;
+  transition: color .35s ease;
+}
+.about-contact a {
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--line);
+  transition: color .3s, border-color .3s;
+}
+.about-contact a:hover {
+  color: var(--accent-pink);
+  border-bottom-color: var(--accent-pink);
+}
 
 /* ─── 天气 ─── */
-.weather-line{margin-top:clamp(20px,5vw,28px);text-align:center}
-.weather-date{font-size:10px;color:var(--text-muted);letter-spacing:.3em;transition:color .35s ease}
-.weather-body{
-  margin-top:8px;font-size:clamp(12px,3.2vw,13px);color:var(--text-muted);
-  line-height:1.9;letter-spacing:.07em;font-style:italic;opacity:.8;
-  transition:color .35s ease, opacity .35s ease;
+.weather-line {
+  margin-top: clamp(20px, 5vw, 28px);
+  text-align: center;
+}
+.weather-date {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: .3em;
+  transition: color .35s ease;
+}
+.weather-body {
+  margin-top: 8px;
+  font-size: clamp(12px, 3.2vw, 13px);
+  color: var(--text-muted);
+  line-height: 1.9;
+  letter-spacing: .07em;
+  font-style: italic;
+  opacity: .8;
+  transition: color .35s ease, opacity .35s ease;
 }
 
 /* ─── 分隔线 ─── */
-.divider{margin:clamp(24px,6vw,32px) auto;width:40px;height:1px;background:var(--line);transition:background .45s ease}
+.divider {
+  margin: clamp(24px, 6vw, 32px) auto;
+  width: 40px;
+  height: 1px;
+  background: var(--line);
+  transition: background .45s ease;
+}
 
 /* ─── 节点列表 ─── */
-.nodes{display:flex;flex-direction:column;gap:12px}
-.node{
-  display:flex;align-items:center;gap:14px;
-  padding:16px 18px;border-radius:16px;
-  background:var(--bg-cream);border:1px solid transparent;
-  text-decoration:none;color:var(--text-main);
-  transition:all .35s cubic-bezier(.25,.8,.25,1);
-  position:relative;overflow:hidden;
+.nodes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.node::before{
-  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--accent-green);opacity:0;transition:opacity .35s ease;
+.node {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--bg-cream);
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: var(--text-main);
+  transition: all .35s cubic-bezier(.25, .8, .25, 1);
+  position: relative;
+  overflow: hidden;
 }
-.node:hover{
-  transform:translateX(4px);
-  box-shadow:var(--shadow-hover);
-  border-color:rgba(196,168,154,.3);
+.node::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-green);
+  opacity: 0;
+  transition: opacity .35s ease;
 }
-.node:hover::before{opacity:1}
-.node.empty{opacity:.38;pointer-events:none}
-.node.empty:hover{transform:none;box-shadow:none;border-color:transparent}
-.node-icon{
-  width:36px;height:36px;border-radius:10px;
-  background:var(--card-white);border:1px solid var(--line);
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;flex:none;color:var(--accent-pink);letter-spacing:.06em;
-  transition:background .45s ease, border-color .45s ease, color .35s ease;
+.node:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(196, 168, 154, .3);
 }
-.node-body{flex:1;min-width:0}
-.node-title{font-size:14px;color:var(--text-main);letter-spacing:.12em;transition:color .35s ease}
-.node-desc{margin-top:2px;font-size:11px;color:var(--text-muted);line-height:1.5;transition:color .35s ease}
-.node-tag{
-  flex:none;font-size:9px;letter-spacing:.22em;padding:3px 8px;
-  border:1px solid var(--line);color:var(--text-muted);border-radius:4px;
-  transition:border-color .45s ease, color .35s ease;
+.node:hover::before {
+  opacity: 1;
 }
-.node-tag.live{color:var(--accent-pink);border-color:rgba(196,168,154,.5);transition:color .35s ease, border-color .45s ease}
-.node-tag.soon{opacity:.5;transition:opacity .35s ease}
+.node.empty {
+  opacity: .38;
+  pointer-events: none;
+}
+.node.empty:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+.node-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--card-white);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex: none;
+  color: var(--accent-pink);
+  letter-spacing: .06em;
+  transition: background .45s ease, border-color .45s ease, color .35s ease;
+}
+.node-body {
+  flex: 1;
+  min-width: 0;
+}
+.node-title {
+  font-size: 14px;
+  color: var(--text-main);
+  letter-spacing: .12em;
+  transition: color .35s ease;
+}
+.node-desc {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  transition: color .35s ease;
+}
+.node-tag {
+  flex: none;
+  font-size: 9px;
+  letter-spacing: .22em;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  border-radius: 4px;
+  transition: border-color .45s ease, color .35s ease;
+}
+.node-tag.live {
+  color: var(--accent-pink);
+  border-color: rgba(196, 168, 154, .5);
+  transition: color .35s ease, border-color .45s ease;
+}
+.node-tag.soon {
+  opacity: .5;
+  transition: opacity .35s ease;
+}
 
-/* ─── 底部 ─── */
-.footer{
-  margin-top:clamp(32px,7vw,48px);text-align:center;
-  font-size:10px;color:var(--text-muted);line-height:2;letter-spacing:.2em;
-  transition:color .35s ease;
+/* ─── 底部统计 ─── */
+.footer {
+  margin-top: clamp(32px, 7vw, 48px);
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 2;
+  letter-spacing: .2em;
+  transition: color .35s ease;
 }
-.footer a{color:var(--accent-pink);text-decoration:none;border-bottom:1px dotted var(--line);transition:color .3s, border-color .3s}
-.footer .quote{font-style:italic;opacity:.6;margin-top:6px;letter-spacing:.14em;transition:opacity .35s ease}
+.footer a {
+  color: var(--accent-pink);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--line);
+  transition: color .3s, border-color .3s;
+}
+.footer .stats {
+  margin-top: 10px;
+  font-size: 9px;
+  letter-spacing: .18em;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.footer .stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.footer .stats .num {
+  font-weight: 600;
+  color: var(--accent-pink);
+}
+.footer .stats .inc-btn {
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .3s ease;
+  padding: 0;
+  line-height: 1;
+}
+.footer .stats .inc-btn:hover {
+  border-color: var(--accent-pink);
+  color: var(--accent-pink);
+  transform: scale(1.1);
+}
+.footer .quote {
+  font-style: italic;
+  opacity: .6;
+  margin-top: 6px;
+  letter-spacing: .14em;
+  transition: opacity .35s ease;
+}
 
 /* ─── 响应式 ─── */
-@media(max-width:480px){
-  .topbar-center{font-size:9px;letter-spacing:.2em}
-  .topbar-left{font-size:9px}
-  .topbar-left .dot{width:5px;height:5px}
-  .theme-toggle{width:32px;height:32px;font-size:14px}
+@media(max-width:480px) {
+  .topbar-center {
+    font-size: 9px;
+    letter-spacing: .2em;
+  }
+  .topbar-left {
+    font-size: 9px;
+  }
+  .topbar-left .dot {
+    width: 5px;
+    height: 5px;
+  }
+  .ctrl-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
 }
-@media(min-width:640px){
-  .shell{padding:48px 44px}
+@media(min-width:640px) {
+  .shell {
+    padding: 48px 44px;
+  }
+}
+
+/* ─── prefers-reduced-motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .node:hover {
+    transform: none !important;
+  }
+  .ctrl-btn:hover {
+    transform: none !important;
+  }
 }
 </style>
 </head>
 <body>
+
+<!-- ═══ Canvas 动态背景 ═══ -->
+<canvas id="bgCanvas"></canvas>
 
 <div class="shell">
 
@@ -242,7 +500,10 @@ body{
     </div>
     <div class="topbar-center">Aurevny.Lab</div>
     <div class="topbar-right">
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="切換深色/淺色模式">
+      <button class="ctrl-btn" id="musicToggle" onclick="toggleMusic()" aria-label="切換背景音樂">
+        ♪
+      </button>
+      <button class="ctrl-btn" id="themeToggle" onclick="toggleTheme()" aria-label="切換深色/淺色模式">
         🌙
       </button>
     </div>
@@ -284,7 +545,7 @@ body{
   <!-- ═══ 节点列表 ═══ -->
   <div class="nodes">
 
-    <a class="node" href="./about-you/">
+    <a class="node" href="./about-you/" aria-label="關於你 · 安靜問卷">
       <div class="node-icon">01</div>
       <div class="node-body">
         <div class="node-title">關於你 · A Quiet Portrait</div>
@@ -293,7 +554,7 @@ body{
       <div class="node-tag live">Live</div>
     </a>
 
-    <a class="node" href="./mood-card/">
+    <a class="node" href="./mood-card/" aria-label="每日一句 × 情緒色卡">
       <div class="node-icon">02</div>
       <div class="node-body">
         <div class="node-title">每日一句 × 情緒色卡</div>
@@ -302,7 +563,7 @@ body{
       <div class="node-tag live">Live</div>
     </a>
 
-    <a class="node" href="./node-3/">
+    <a class="node" href="./node-3/" aria-label="小測試">
       <div class="node-icon">03</div>
       <div class="node-body">
         <div class="node-title">小测试·test</div>
@@ -311,7 +572,7 @@ body{
       <div class="node-tag live">Live</div>
     </a>
 
-    <a class="node empty" href="#">
+    <a class="node empty" href="#" aria-label="即將開啟">
       <div class="node-icon">04</div>
       <div class="node-body">
         <div class="node-title">Node 04</div>
@@ -325,28 +586,36 @@ body{
   <!-- ═══ 底部 ═══ -->
   <div class="footer">
     <div>© 2026 Aurevny · Local Only · No Telemetry</div>
+    <div class="stats">
+      <span>瀏覽 <span class="num" id="visitCount">0</span> 次</span>
+      <span>
+        問卷完成 <span class="num" id="quizCount">0</span> 次
+        <button class="inc-btn" onclick="incQuiz()" aria-label="增加問卷完成次數">+</button>
+      </span>
+    </div>
     <div class="quote">做安靜的東西，給安靜的人。</div>
   </div>
 
 </div><!-- /shell -->
+
 <script>
 // ═══════════════════════════════════════════
-//  主题切换
+//  1. 主题切换
 // ═══════════════════════════════════════════
 function applyTheme() {
   const saved = localStorage.getItem('aurevny-theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const isDark = saved === 'dark' || (saved === null && prefersDark);
-  
+
   document.documentElement.classList.toggle('dark-mode', isDark);
-  
+
   const toggle = document.getElementById('themeToggle');
   if (toggle) {
     toggle.textContent = isDark ? '☀️' : '🌙';
   }
 }
 
-function toggleTheme(){
+function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.classList.toggle('dark-mode');
   const toggle = document.getElementById('themeToggle');
@@ -355,121 +624,407 @@ function toggleTheme(){
 }
 
 // ═══════════════════════════════════════════
-//  天气 + 散文化节假日
+//  2. 音乐控制 (Web Audio 环境音)
+// ═══════════════════════════════════════════
+let audioCtx = null;
+let osc = null;
+let lfo = null;
+let gain = null;
+let isPlaying = false;
+
+function toggleMusic() {
+  const btn = document.getElementById('musicToggle');
+
+  if (isPlaying) {
+    // 停止
+    try {
+      if (osc) { osc.stop();
+        osc.disconnect(); }
+      if (lfo) { lfo.stop();
+        lfo.disconnect(); }
+      if (gain) gain.disconnect();
+      if (audioCtx && audioCtx.state !== 'closed') audioCtx.close();
+    } catch (e) { /* ignore */ }
+    osc = null;
+    lfo = null;
+    gain = null;
+    audioCtx = null;
+    isPlaying = false;
+    btn.classList.remove('playing');
+    btn.textContent = '♪';
+    return;
+  }
+
+  // 播放
+  try {
+    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+
+    // 主振荡器 (低频, 类似风声)
+    osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 95;
+
+    // LFO 调制频率 (波动感)
+    lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.35;
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 6;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+
+    // 音量控制
+    gain = audioCtx.createGain();
+    gain.gain.value = 0.06;
+
+    // 连接
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    // 启动
+    osc.start();
+    lfo.start();
+
+    isPlaying = true;
+    btn.classList.add('playing');
+    btn.textContent = '♫';
+
+    // 页面关闭时自动停止
+    document.addEventListener('visibilitychange', function visHandler() {
+      if (document.hidden && isPlaying) {
+        toggleMusic();
+        document.removeEventListener('visibilitychange', visHandler);
+      }
+    });
+
+  } catch (e) {
+    // 静默失败
+    console.warn('Audio init failed:', e);
+    btn.textContent = '♪';
+  }
+}
+
+// ═══════════════════════════════════════════
+//  3. 本地统计
+// ═══════════════════════════════════════════
+function updateStats() {
+  let visits = parseInt(localStorage.getItem('aurevny_visits') || '0', 10);
+  visits += 1;
+  localStorage.setItem('aurevny_visits', String(visits));
+  document.getElementById('visitCount').textContent = visits;
+
+  let quiz = parseInt(localStorage.getItem('aurevny_quiz_count') || '0', 10);
+  document.getElementById('quizCount').textContent = quiz;
+}
+
+function incQuiz() {
+  let quiz = parseInt(localStorage.getItem('aurevny_quiz_count') || '0', 10);
+  quiz += 1;
+  localStorage.setItem('aurevny_quiz_count', String(quiz));
+  document.getElementById('quizCount').textContent = quiz;
+}
+
+// ═══════════════════════════════════════════
+//  4. 天气 + 节日 (修复 Bug)
 // ═══════════════════════════════════════════
 const WEATHER_ZH = {
-  "Sunny":"晴","Clear":"晴","Partly cloudy":"多雲","Cloudy":"陰","Overcast":"陰天",
-  "Mist":"薄霧","Fog":"霧","Light rain":"小雨","Rain":"雨","Heavy rain":"大雨",
-  "Light rain shower":"小陣雨","Rain shower":"陣雨","Showers":"陣雨","Heavy rain shower":"大雨陣雨",
-  "Thunderstorm":"雷陣雨","Storm":"雷陣雨","Light snow":"小雪","Snow":"雪","Heavy snow":"大雪",
-  "Blizzard":"暴風雪","Drizzle":"毛毛雨","Freezing rain":"凍雨","Sleet":"雨夾雪","Blowing snow":"吹雪"
+  "Sunny": "晴",
+  "Clear": "晴",
+  "Partly cloudy": "多雲",
+  "Cloudy": "陰",
+  "Overcast": "陰天",
+  "Mist": "薄霧",
+  "Fog": "霧",
+  "Light rain": "小雨",
+  "Rain": "雨",
+  "Heavy rain": "大雨",
+  "Light rain shower": "小陣雨",
+  "Rain shower": "陣雨",
+  "Showers": "陣雨",
+  "Heavy rain shower": "大雨陣雨",
+  "Thunderstorm": "雷陣雨",
+  "Storm": "雷陣雨",
+  "Light snow": "小雪",
+  "Snow": "雪",
+  "Heavy snow": "大雪",
+  "Blizzard": "暴風雪",
+  "Drizzle": "毛毛雨",
+  "Freezing rain": "凍雨",
+  "Sleet": "雨夾雪",
+  "Blowing snow": "吹雪"
 };
 
-function weatherDescZh(en){
-  if(!en) return "";
+function weatherDescZh(en) {
+  if (!en) return "";
   en = en.trim();
-  if(WEATHER_ZH[en]) return WEATHER_ZH[en];
-  for(const k in WEATHER_ZH){ if(en.toLowerCase().includes(k.toLowerCase())) return WEATHER_ZH[k]; }
+  if (WEATHER_ZH[en]) return WEATHER_ZH[en];
+  for (const k in WEATHER_ZH) {
+    if (en.toLowerCase().includes(k.toLowerCase())) return WEATHER_ZH[k];
+  }
   return en;
 }
 
-// 修复节日跨年逻辑 Bug
-function getNextFestival(){
+// 修复：正确找到最近的节日
+function getNextFestival() {
   const now = new Date();
   const y = now.getFullYear();
-  
-  // 按照月-日定义节日列表（月从0开始）
-  const baseFestivals = [
-    { name:"元旦", m:0, d:1 },
-    { name:"春節", m:0, d:25 },
-    { name:"清明", m:3, d:4 },
-    { name:"端午", m:4, d:31 },
-    { name:"中秋", m:8, d:15 },
-    { name:"國慶", m:9, d:1 },
-    { name:"冬至", m:11, d:21 }
+
+  const festivals = [
+    { name: "元旦", m: 0, d: 1 },
+    { name: "春節", m: 0, d: 29 },
+    { name: "清明", m: 3, d: 4 },
+    { name: "端午", m: 5, d: 10 },
+    { name: "中秋", m: 8, d: 15 },
+    { name: "國慶", m: 9, d: 1 },
+    { name: "冬至", m: 11, d: 21 }
   ];
 
-  for(const f of baseFestivals){
+  let closest = null;
+  let minDays = Infinity;
+
+  for (const f of festivals) {
+    // 今年的日期
     let fDate = new Date(y, f.m, f.d);
-    // 如果今年这个节日已经过了，算作明年的节日
-    if (now > fDate) {
+    let diff = (fDate - now) / 86400000;
+
+    // 如果今年已经过了，尝试明年的日期
+    if (diff < 0) {
       fDate = new Date(y + 1, f.m, f.d);
+      diff = (fDate - now) / 86400000;
     }
-    
-    // 找到最近的下一个节日
-    const diff = Math.ceil((fDate - now) / 86400000);
-    if(diff >= 0) {
-      return { name: f.name, days: diff };
+
+    // 如果 diff 仍然小于 0，跳过（极端情况）
+    if (diff < 0) continue;
+
+    if (diff < minDays) {
+      minDays = diff;
+      closest = { name: f.name, days: Math.ceil(diff) };
     }
   }
-  return { name:"元旦", days: 1 };
+
+  return closest || { name: "元旦", days: 1 };
 }
 
-function getSeasonText(){
+function getSeasonText() {
   const now = new Date();
-  const m = now.getMonth(), d = now.getDate();
-  if(m===7 && d<7)  return { body:"風還溫著" };
-  if(m===7 && d>=7) return { body:"白露未至，夜還短" };
-  if(m===8 && d<22) return { body:"白露已過，夜開始涼了" };
-  if(m===8 && d>=22) return { body:"秋分將至，晝夜漸平" };
-  if(m===9 && d<8)  return { body:"寒露前，露已寒" };
-  if(m===9 && d>=8) return { body:"霜降前，葉將落" };
-  if(m===10)        return { body:"立冬後，第一場雪還遠" };
-  if(m===11 && d<21) return { body:"冬至未至，夜還在變長" };
-  if(m===11 && d>=21) return { body:"冬至已至，夜最長" };
-  if(m===0)        return { body:"新年伊始，舊事翻篇" };
-  if(m===1)        return { body:"立春前後，等一場風暖" };
-  if(m===2)        return { body:"驚蟄前後，雷還沒來" };
-  if(m===3 && d<4)  return { body:"清明未至，雨還沒下透" };
-  if(m===3 && d>=4) return { body:"穀雨前，茶正嫩" };
-  if(m===4)        return { body:"立夏後，日漸長" };
-  if(m===5)        return { body:"芒種前後，麥黃了" };
-  if(m===6)        return { body:"小暑前後，熱還沒到頂" };
-  return { body:"四時流轉，日子照舊" };
+  const m = now.getMonth(),
+    d = now.getDate();
+  if (m === 7 && d < 7) return { body: "風還溫著" };
+  if (m === 7 && d >= 7) return { body: "白露未至，夜還短" };
+  if (m === 8 && d < 22) return { body: "白露已過，夜開始涼了" };
+  if (m === 8 && d >= 22) return { body: "秋分將至，晝夜漸平" };
+  if (m === 9 && d < 8) return { body: "寒露前，露已寒" };
+  if (m === 9 && d >= 8) return { body: "霜降前，葉將落" };
+  if (m === 10) return { body: "立冬後，第一場雪還遠" };
+  if (m === 11 && d < 21) return { body: "冬至未至，夜還在變長" };
+  if (m === 11 && d >= 21) return { body: "冬至已至，夜最長" };
+  if (m === 0) return { body: "新年伊始，舊事翻篇" };
+  if (m === 1) return { body: "立春前後，等一場風暖" };
+  if (m === 2) return { body: "驚蟄前後，雷還沒來" };
+  if (m === 3 && d < 4) return { body: "清明未至，雨還沒下透" };
+  if (m === 3 && d >= 4) return { body: "穀雨前，茶正嫩" };
+  if (m === 4) return { body: "立夏後，日漸長" };
+  if (m === 5) return { body: "芒種前後，麥黃了" };
+  if (m === 6) return { body: "小暑前後，熱還沒到頂" };
+  return { body: "四時流轉，日子照舊" };
 }
 
-function renderWeather(){
+function renderWeather() {
   const ctrl = new AbortController();
-  const t = setTimeout(()=>ctrl.abort(), 5000);
-  
+  const t = setTimeout(() => ctrl.abort(), 5000);
+
   fetch("https://wttr.in/?format=j1", { signal: ctrl.signal, cache: "no-store" })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(data => {
       clearTimeout(t);
       const c = data?.current_condition?.[0];
-      if(!c) throw new Error("No data");
+      if (!c) throw new Error("No data");
       const temp = c.temp_C;
       const rawDesc = c.weatherDesc?.[0]?.value || "";
       const desc = weatherDescZh(rawDesc) || "多雲";
       const season = getSeasonText();
       const festival = getNextFestival();
       let line;
-      if(festival.days <= 1) line = `${desc}，${temp} 度。<br>明日便是${festival.name}。`;
-      else if(festival.days <= 7) line = `${desc}，${temp} 度。<br>${season.body}，距${festival.name}還有幾天。`;
+      if (festival.days <= 1) line = `${desc}，${temp} 度。<br>明日便是${festival.name}。`;
+      else if (festival.days <= 7) line = `${desc}，${temp} 度。<br>${season.body}，距${festival.name}還有幾天。`;
       else line = `${desc}，${temp} 度。<br>${season.body}，距${festival.name}還有 ${festival.days} 天。`;
-      
+
       document.getElementById("wBody").innerHTML = line;
     })
     .catch(() => {
       clearTimeout(t);
       const season = getSeasonText();
       const festival = getNextFestival();
-      document.getElementById("wBody").innerHTML = `${season.body}，距${festival.name}還有 ${festival.days} 天。`;
+      document.getElementById("wBody").innerHTML =
+        `${season.body}，距${festival.name}還有 ${festival.days} 天。`;
     });
 }
 
-function renderDate(){
+function renderDate() {
   const d = new Date();
-  const months = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
-  const days = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
-  document.getElementById("wDate").textContent = `${d.getFullYear()} · ${months[d.getMonth()]} · ${days[d.getDay()]}`;
+  const months = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+  const days = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+  document.getElementById("wDate").textContent =
+    `${d.getFullYear()} · ${months[d.getMonth()]} · ${days[d.getDay()]}`;
 }
 
-// 初始化
+// ═══════════════════════════════════════════
+//  5. Canvas 动态背景 (粒子 + 光晕)
+// ═══════════════════════════════════════════
+(function initParticles() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let particles = [];
+  const PARTICLE_COUNT = 35;
+  const MAX_DIST = 120;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function getColors() {
+    const isDark = document.documentElement.classList.contains('dark-mode');
+    return {
+      main: isDark ? 'rgba(212,184,168,' : 'rgba(196,168,154,',
+      line: isDark ? 'rgba(212,184,168,' : 'rgba(196,168,154,'
+    };
+  }
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * width;
+      this.y = Math.random() * height;
+      this.vx = (Math.random() - 0.5) * 0.25;
+      this.vy = (Math.random() - 0.5) * 0.25;
+      this.r = 1.5 + Math.random() * 2.5;
+      this.alpha = 0.15 + Math.random() * 0.35;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x < 0 || this.x > width) this.vx *= -1;
+      if (this.y < 0 || this.y > height) this.vy *= -1;
+    }
+    draw() {
+      const colors = getColors();
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = colors.main + this.alpha + ')';
+      ctx.fill();
+    }
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push(new Particle());
+    }
+  }
+  initParticles();
+
+  function drawLines() {
+    const colors = getColors();
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MAX_DIST) {
+          const alpha = (1 - dist / MAX_DIST) * 0.20;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = colors.line + alpha + ')';
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+
+    // 额外光晕 (大圆渐变)
+    const colors = getColors();
+    const grad = ctx.createRadialGradient(
+      width * 0.3 + Math.sin(Date.now() * 0.0001) * 80,
+      height * 0.4 + Math.cos(Date.now() * 0.00015) * 60,
+      10,
+      width * 0.3 + Math.sin(Date.now() * 0.0001) * 80,
+      height * 0.4 + Math.cos(Date.now() * 0.00015) * 60,
+      300
+    );
+    grad.addColorStop(0, colors.main + '0.06)');
+    grad.addColorStop(1, colors.main + '0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+
+    const grad2 = ctx.createRadialGradient(
+      width * 0.7 + Math.cos(Date.now() * 0.00008) * 60,
+      height * 0.7 + Math.sin(Date.now() * 0.00012) * 50,
+      10,
+      width * 0.7 + Math.cos(Date.now() * 0.00008) * 60,
+      height * 0.7 + Math.sin(Date.now() * 0.00012) * 50,
+      250
+    );
+    grad2.addColorStop(0, colors.main + '0.04)');
+    grad2.addColorStop(1, colors.main + '0)');
+    ctx.fillStyle = grad2;
+    ctx.fillRect(0, 0, width, height);
+
+    // 粒子
+    for (const p of particles) {
+      p.update();
+      p.draw();
+    }
+    drawLines();
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  // 窗口大小变化重置粒子位置
+  window.addEventListener('resize', () => {
+    resize();
+    for (const p of particles) {
+      p.x = Math.random() * width;
+      p.y = Math.random() * height;
+    }
+  });
+
+  // 主题变化时更新粒子颜色（通过重新绘制自动适应）
+  const observer = new MutationObserver(() => {
+    // 颜色会在下一次绘制时自动使用新主题
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+  // 减少运动
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    canvas.style.opacity = '0.2';
+  }
+})();
+
+// ═══════════════════════════════════════════
+//  6. 初始化
+// ═══════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
   applyTheme();
   renderDate();
   renderWeather();
+  updateStats();
+
+  // 音乐控制按钮初始状态
+  const btn = document.getElementById('musicToggle');
+  btn.textContent = '♪';
 });
 </script>
 
