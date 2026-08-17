@@ -1,606 +1,1157 @@
 <!DOCTYPE html>
 <html lang="zh-CN" id="html-root">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>认知棱镜 · 内在光谱</title>
-<style>
-:root {
-  --bg: #f5f3ee;
-  --bg-card: #ffffff;
-  --bg-glass: rgba(255,255,255,0.6);
-  --text-main: #2d2a24;
-  --text-sub: #7b7466;
-  --border: #e8e3dc;
-  --primary: #7b8d9e;
-  --primary-light: #a0b0c0;
-  --accent: #c9b18a;
-  --shadow: 0 10px 40px rgba(123,141,158,0.08);
-  --radius-lg: 32px;
-  --radius-md: 24px;
-  --radius-sm: 16px;
-  --transition: 0.4s cubic-bezier(.4,0,.2,1);
-}
-html.dark-mode {
-  --bg: #1a1a2e;
-  --bg-card: #24243e;
-  --bg-glass: rgba(36,36,62,0.6);
-  --text-main: #eae6e0;
-  --text-sub: #9b9588;
-  --border: #33334d;
-  --primary: #9bb0c0;
-  --primary-light: #7b8d9e;
-  --accent: #c9b18a;
-  --shadow: 0 10px 40px rgba(0,0,0,0.3);
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  font-family: 'Inter','PingFang SC','Noto Sans SC',system-ui,sans-serif;
-  background: var(--bg); color: var(--text-main);
-  min-height:100vh; padding:24px;
-  transition: background var(--transition), color var(--transition);
-}
-.app-container {
-  max-width:860px; margin:0 auto;
-  background: var(--bg-glass); backdrop-filter: blur(20px);
-  border-radius: var(--radius-lg); box-shadow: var(--shadow);
-  padding:36px 40px 60px; position:relative;
-  border:1px solid var(--border); transition: all var(--transition);
-}
-.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:36px; }
-.logo { font-size:24px; font-weight:800; display:flex; align-items:center; gap:10px; }
-.logo svg { width:32px; height:32px; stroke: var(--primary); stroke-width:2; fill:none; }
-.header-actions { display:flex; gap:10px; }
-.theme-toggle {
-  background: var(--bg-card); border:1px solid var(--border);
-  color:var(--text-sub); width:44px; height:44px; border-radius:50%;
-  cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center;
-  transition: var(--transition); box-shadow: var(--shadow);
-}
-.theme-toggle:hover { transform:translateY(-2px); color:var(--primary); }
-.theme-toggle svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2; }
-.btn {
-  padding:12px 26px; border-radius:999px; font-weight:600; font-size:15px;
-  border:none; cursor:pointer; transition: var(--transition);
-  display:inline-flex; align-items:center; gap:8px;
-}
-.btn-primary {
-  background: linear-gradient(135deg,var(--primary),var(--primary-light));
-  color:#fff; box-shadow: 0 8px 20px rgba(123,141,158,0.3);
-}
-.btn-primary:hover { transform:translateY(-2px); }
-.btn-outline { background:transparent; border:2px solid var(--border); color:var(--text-sub); }
-.btn-outline:hover { background:var(--bg); border-color:var(--primary-light); }
-.btn-full { width:100%; justify-content:center; }
-.page { display:none; animation: fadeIn .5s ease forwards; }
-.page.active { display:block; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>认知棱镜 · 内在光谱</title>
+    <style>
+        :root {
+            --bg: #f5f3ee;
+            --bg-card: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.6);
+            --text-main: #2d2a24;
+            --text-sub: #7b7466;
+            --border: #e8e3dc;
+            --primary: #7b8d9e;
+            --primary-light: #a0b0c0;
+            --accent: #c9b18a;
+            --shadow: 0 10px 40px rgba(123, 141, 158, 0.08);
+            --radius-lg: 32px;
+            --radius-md: 24px;
+            --radius-sm: 16px;
+            --transition: 0.4s cubic-bezier(.4, 0, .2, 1);
+        }
+        html.dark-mode {
+            --bg: #1a1a2e;
+            --bg-card: #24243e;
+            --bg-glass: rgba(36, 36, 62, 0.6);
+            --text-main: #eae6e0;
+            --text-sub: #9b9588;
+            --border: #33334d;
+            --primary: #9bb0c0;
+            --primary-light: #7b8d9e;
+            --accent: #c9b18a;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 24px;
+            transition: background var(--transition), color var(--transition);
+        }
+        .app-container {
+            max-width: 860px;
+            margin: 0 auto;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 36px 40px 60px;
+            position: relative;
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 36px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--primary);
+            stroke-width: 2;
+            fill: none;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .theme-toggle {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            color: var(--primary);
+        }
+        .theme-toggle svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+        .btn {
+            padding: 12px 26px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(123, 141, 158, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-sub);
+        }
+        .btn-outline:hover {
+            background: var(--bg);
+            border-color: var(--primary-light);
+        }
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            animation: fadeIn .5s ease forwards;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
 
-.home-title { font-size:36px; font-weight:800; line-height:1.2; margin-bottom:8px; }
-.home-sub { font-size:16px; color:var(--text-sub); margin:16px 0 32px; border-left:4px solid var(--accent); padding-left:20px; }
-.test-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 18px;
-}
-.test-card {
-  background:var(--bg-card); border-radius:var(--radius-md); padding:24px 20px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.03); transition:var(--transition);
-  cursor:pointer; border:1px solid var(--border); position:relative; overflow:hidden;
-}
-.test-card:hover { transform:translateY(-6px); box-shadow:0 20px 40px rgba(123,141,158,0.1); border-color:var(--primary-light); }
-.test-card .icon { width:40px; height:40px; margin-bottom:8px; stroke:var(--primary); stroke-width:1.8; fill:none; }
-.test-card h3 { font-size:16px; font-weight:700; margin-bottom:4px; }
-.test-card p { color:var(--text-sub); font-size:12px; line-height:1.4; }
-.test-card .badge { font-size:11px; background:var(--bg); border-radius:12px; padding:2px 10px; display:inline-block; margin-top:6px; color:var(--text-sub); }
+        .home-title {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+        .home-sub {
+            font-size: 16px;
+            color: var(--text-sub);
+            margin: 16px 0 32px;
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 18px;
+        }
+        .test-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 24px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .test-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(123, 141, 158, 0.1);
+            border-color: var(--primary-light);
+        }
+        .test-card .icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 8px;
+            stroke: var(--primary);
+            stroke-width: 1.8;
+            fill: none;
+        }
+        .test-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .test-card p {
+            color: var(--text-sub);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .test-card .badge {
+            font-size: 11px;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 2px 10px;
+            display: inline-block;
+            margin-top: 6px;
+            color: var(--text-sub);
+        }
 
-.progress-bar-container { width:100%; height:6px; background:var(--bg); border-radius:999px; margin-bottom:24px; overflow:hidden; border:1px solid var(--border); }
-.progress-bar { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:999px; transition:width .4s ease; width:0%; }
-.question-box { background:var(--bg-card); border-radius:var(--radius-md); padding:36px; box-shadow:0 4px 20px rgba(0,0,0,0.03); border:1px solid var(--border); }
-.q-counter { font-size:13px; color:var(--text-sub); margin-bottom:12px; display:block; }
-.q-text { font-size:20px; font-weight:600; line-height:1.6; }
-.options-container { margin-top:24px; display:flex; flex-direction:column; gap:10px; }
-.option-item {
-  padding:14px 18px; border-radius:var(--radius-sm); border:2px solid var(--border);
-  cursor:pointer; transition:var(--transition); background:var(--bg);
-  display:flex; align-items:center; gap:12px; color:var(--text-main);
-}
-.option-item:hover { border-color:var(--primary-light); background:var(--bg-card); transform:translateX(4px); }
-.option-item.selected { border-color:var(--primary); background:linear-gradient(135deg,rgba(123,141,158,0.1),rgba(201,177,138,0.05)); }
-.option-item .key-hint { font-size:11px; color:var(--text-sub); background:var(--bg-card); border:1px solid var(--border); border-radius:4px; padding:2px 6px; margin-left:auto; }
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 999px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 999px;
+            transition: width .4s ease;
+            width: 0%;
+        }
+        .question-box {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 36px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+        }
+        .q-counter {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 12px;
+            display: block;
+        }
+        .q-text {
+            font-size: 19px;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+        .q-scenario {
+            font-size: 14px;
+            color: var(--text-sub);
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            margin: 14px 0 18px;
+            border-left: 4px solid var(--accent);
+            line-height: 1.6;
+            font-weight: 400;
+            display: none;
+        }
+        .options-container {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-item {
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-main);
+            font-size: 15px;
+        }
+        .option-item:hover {
+            border-color: var(--primary-light);
+            background: var(--bg-card);
+            transform: translateX(4px);
+        }
+        .option-item.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(123, 141, 158, 0.1), rgba(201, 177, 138, 0.05));
+        }
+        .option-item .key-hint {
+            font-size: 11px;
+            color: var(--text-sub);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin-left: auto;
+        }
 
-.result-card { background:var(--bg-card); border-radius:var(--radius-lg); padding:48px 40px; box-shadow:0 20px 60px rgba(123,141,158,0.12); text-align:center; border:1px solid var(--border); }
-.result-icon { width:72px; height:72px; margin:0 auto 12px; stroke:var(--primary); stroke-width:1.5; fill:none; }
-.result-type { font-size:32px; font-weight:800; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.result-desc { font-size:15px; color:var(--text-sub); line-height:1.8; max-width:600px; margin:16px auto 0; }
-.dimension-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:24px; }
-.dim-tag { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:12px; color:var(--text-main); text-align:left; }
-.dim-tag .dim-name { font-weight:700; color:var(--primary); display:block; margin-bottom:2px; }
+        .result-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(123, 141, 158, 0.12);
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .result-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 12px;
+            stroke: var(--primary);
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .result-type {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .result-desc {
+            font-size: 15px;
+            color: var(--text-sub);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 16px auto 0;
+        }
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 24px;
+        }
+        .dim-tag {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 12px;
+            color: var(--text-main);
+            text-align: left;
+        }
+        .dim-tag .dim-name {
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 2px;
+        }
 
-.modal-mask { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); z-index:100; align-items:center; justify-content:center; }
-.modal-mask.show { display:flex; animation:fadeIn .3s ease; }
-.modal { background:var(--bg-card); border-radius:var(--radius-md); padding:28px; max-width:500px; width:90%; max-height:70vh; overflow-y:auto; border:1px solid var(--border); box-shadow:var(--shadow); }
-.modal h3 { margin-bottom:16px; font-size:18px; }
-.history-item { padding:12px; border-bottom:1px solid var(--border); font-size:14px; }
-.history-item:last-child { border-bottom:none; }
-.history-item .hist-type { font-weight:700; color:var(--primary); }
-.history-item .hist-time { font-size:11px; color:var(--text-sub); float:right; }
+        .modal-mask {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-mask.show {
+            display: flex;
+            animation: fadeIn .3s ease;
+        }
+        .modal {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .modal h3 {
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-item .hist-type {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .history-item .hist-time {
+            font-size: 11px;
+            color: var(--text-sub);
+            float: right;
+        }
 
-@media(max-width:640px) { .app-container{padding:20px; border-radius:24px;} .home-title{font-size:28px;} .question-box{padding:24px;} }
-</style>
+        @media(max-width:640px) {
+            .app-container {
+                padding: 20px;
+                border-radius: 24px;
+            }
+            .home-title {
+                font-size: 28px;
+            }
+            .question-box {
+                padding: 24px;
+            }
+            .q-text {
+                font-size: 17px;
+            }
+            .q-scenario {
+                font-size: 13px;
+                padding: 12px 14px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<div class="app-container">
-  <header class="header">
-    <div class="logo">
-      <svg viewBox="0 0 32 32"><path d="M16 4 L16 28 M4 16 L28 16 M8 8 L24 24 M24 8 L8 24" stroke-linecap="round"/></svg>
-      <span>认知棱镜</span>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">
+                <svg viewBox="0 0 32 32"><path d="M16 4 L16 28 M4 16 L28 16 M8 8 L24 24 M24 8 L8 24" stroke-linecap="round"/></svg>
+                <span>认知棱镜</span>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="showHistory()" title="历史记录">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2 L8 6 M16 2 L16 6 M3 10 L21 10"/></svg>
+                </button>
+                <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="切换主题">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2 L12 4 M12 20 L12 22 M4 12 L2 12 M22 12 L20 12 M5.6 5.6 L4.2 4.2 M18.4 18.4 L19.8 19.8 M18.4 5.6 L19.8 4.2 M5.6 18.4 L4.2 19.8"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="page active" id="page-home">
+            <h1 class="home-title">认知 · 情感 · 行为</h1>
+            <div class="home-sub">基于心理学原理的自我探索工具，所有数据仅保存在本地，不传输、不追踪。</div>
+            <div class="test-grid" id="testGrid"></div>
+        </div>
+
+        <div class="page" id="page-quiz">
+            <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="question-box">
+                <span class="q-counter" id="qCounter"></span>
+                <div class="q-text" id="qText"></div>
+                <div class="q-scenario" id="qScenario"></div>
+                <div class="options-container" id="optionsContainer"></div>
+            </div>
+            <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-outline" onclick="prevQuestion()" id="prevBtn" style="display:none;">← 上一题</button>
+                <button class="btn btn-outline" onclick="goHome()" id="homeBtn">← 返回</button>
+                <button class="btn btn-primary btn-full" id="nextBtn" onclick="nextQuestion()" disabled>确认选择</button>
+            </div>
+        </div>
+
+        <div class="page" id="page-result">
+            <div class="result-card" id="resultCard">
+                <div class="result-icon" id="resultIcon"></div>
+                <div class="result-type" id="resultType"></div>
+                <div class="result-desc" id="resultDesc"></div>
+                <div class="dimension-grid" id="dimGrid"></div>
+            </div>
+            <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-primary btn-full" onclick="shareResult()">📸 生成分享图</button>
+                <button class="btn btn-outline" onclick="goHome()">返回首页</button>
+                <button class="btn btn-outline" onclick="restartCurrentTest()">重新测试</button>
+            </div>
+        </div>
     </div>
-    <div class="header-actions">
-      <button class="theme-toggle" onclick="showHistory()" title="历史记录">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2 L8 6 M16 2 L16 6 M3 10 L21 10"/></svg>
-      </button>
-      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="切换主题">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2 L12 4 M12 20 L12 22 M4 12 L2 12 M22 12 L20 12 M5.6 5.6 L4.2 4.2 M18.4 18.4 L19.8 19.8 M18.4 5.6 L19.8 4.2 M5.6 18.4 L4.2 19.8"/></svg>
-      </button>
+
+    <div class="modal-mask" id="historyModal" onclick="if(event.target===this)this.classList.remove('show')">
+        <div class="modal">
+            <h3>📋 历史记录</h3>
+            <div id="historyList"><p style="color:var(--text-sub);font-size:14px;">暂无记录</p></div>
+        </div>
     </div>
-  </header>
 
-  <div class="page active" id="page-home">
-    <h1 class="home-title">认知 · 情感 · 行为</h1>
-    <div class="home-sub">基于心理学原理的自我探索工具，所有数据仅保存在本地，不传输、不追踪。</div>
-    <div class="test-grid" id="testGrid"></div>
-  </div>
+    <canvas id="shareCanvas" width="800" height="1000" style="display:none;"></canvas>
 
-  <div class="page" id="page-quiz">
-    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
-    <div class="question-box">
-      <span class="q-counter" id="qCounter"></span>
-      <div class="q-text" id="qText"></div>
-      <div class="options-container" id="optionsContainer"></div>
-    </div>
-    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
-      <button class="btn btn-outline" onclick="prevQuestion()" id="prevBtn" style="display:none;">← 上一题</button>
-      <button class="btn btn-outline" onclick="goHome()" id="homeBtn">← 返回</button>
-      <button class="btn btn-primary btn-full" id="nextBtn" onclick="nextQuestion()" disabled>确认选择</button>
-    </div>
-  </div>
+    <script>
+        // 主题
+        (function() {
+            const t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.getElementById('html-root').classList.add('dark-mode');
+            }
+        })();
 
-  <div class="page" id="page-result">
-    <div class="result-card" id="resultCard">
-      <div class="result-icon" id="resultIcon"></div>
-      <div class="result-type" id="resultType"></div>
-      <div class="result-desc" id="resultDesc"></div>
-      <div class="dimension-grid" id="dimGrid"></div>
-    </div>
-    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
-      <button class="btn btn-primary btn-full" onclick="shareResult()">📸 生成分享图</button>
-      <button class="btn btn-outline" onclick="goHome()">返回首页</button>
-      <button class="btn btn-outline" onclick="restartCurrentTest()">重新测试</button>
-    </div>
-  </div>
-</div>
+        function toggleTheme() {
+            const html = document.getElementById('html-root');
+            html.classList.toggle('dark-mode');
+            localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
 
-<div class="modal-mask" id="historyModal" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="modal">
-    <h3>📋 历史记录</h3>
-    <div id="historyList"><p style="color:var(--text-sub);font-size:14px;">暂无记录</p></div>
-  </div>
-</div>
+        // ─── 测试数据（全部重新编写为具体情景题，题量大幅增加） ──────────────────
+        const TESTS = [{
+            id: 'sbti',
+            name: 'SBTI 性格侧写',
+            icon: `<svg viewBox="0 0 40 40"><rect x="6" y="6" width="28" height="28" rx="3" stroke="currentColor"/><path d="M12 15 L28 15 M12 20 L24 20 M12 25 L20 25" stroke="currentColor"/></svg>`,
+            desc: '60+现实情景题，覆盖15个心理维度，精准定位你的内在原型。',
+            questions: [
+                // S1 自我评价 (S1a-d)
+                { id: 'S1a', text: '项目庆功宴上，CEO公开夸你是“天才”，但你清楚数据有个小错误。你如何回应？',
+                options: ['大方接受，认为实力配得上', '谦虚归功于团队，淡化自己', '当场解释数据背景，强调运气'] },
+                { id: 'S1b', text: '你和伴侣大吵一架，对方摔门而出，深夜未归。你的第一反应是？', options: ['主动打电话求和，担心安全',
+                        '自己先睡，等对方冷静回来再说', '觉得对方无理取闹，继续做自己的事'
+                    ] },
+                { id: 'S1c', text: '深夜复盘白天的失误，你的心理状态通常是？', options: ['很快放下，谁都会犯错', '反复回想，内耗到失眠',
+                        '客观记录原因，明天改进'
+                    ] },
+                { id: 'S1d', text: '被心仪的公司/学校拒绝后，你的内心独白是？', options: ['“他们不识货，我再找更好的”',
+                        '“我是不是真的不够好”', '“可能只是不匹配，继续投”'
+                    ] },
+                // S2 价值观 (S2a-d)
+                { id: 'S2a', text: '突然获得一笔100万的意外之财，你最想用来做什么？', options: ['辞职创业或环球旅行（追求自由）',
+                        '买课学习或深度投资自己（追求真实成长）', '买房买车或存定期（追求稳定）'
+                    ] },
+                { id: 'S2b', text: '朋友当众开了一个让你难堪的玩笑，全场哄笑。你会？', options: ['当场笑着怼回去，化解尴尬', '表面笑笑，但心里记很久',
+                        '觉得无所谓，就是玩笑'
+                    ] },
+                { id: 'S2c', text: '你理想中的“成功”更接近哪一种画面？', options: ['在自己热爱的领域做到极致', '拥有随时说“不”的选择权',
+                        '被家人和圈子高度认可'
+                    ] },
+                { id: 'S2d', text: '长辈劝你考公务员求稳定，而你有自己的创业想法。你更倾向于？', options: ['坚持自己的想法，哪怕冒险',
+                        '听取意见，先求稳定再发展', '折中，找一份体制内清闲工作同时搞副业'
+                    ] },
+                // S3 自我认知深度 (S3a-d)
+                { id: 'S3a', text: '你对自己未来五年的规划清晰程度是？', options: ['非常清晰，有详细步骤', '大致有方向，但细节模糊', '完全随缘，走一步看一步'] },
+                { id: 'S3b', text: '你更相信“性格决定命运”还是“选择改变人生”？', options: ['选择改变人生（相信能动性）', '两者各占一半',
+                        '命运主导一切（相信宿命）'
+                    ] },
+                { id: 'S3c', text: '你觉得自己身上最宝贵的特质是？', options: ['果敢无畏的行动力', '深邃敏锐的洞察力', '温暖包容的共情力'] },
+                { id: 'S3d', text: '参加一个深度心理工作坊，导师让你用三个词定义自己。你更倾向于用？', options: ['进取、果断、独立', '细腻、矛盾、清醒',
+                        '随和、适应、乐观'
+                    ] },
+                // E1 情感表达 (E1a-d)
+                { id: 'E1a', text: '在一段关系中，你通常如何确认“对方还在乎我”？', options: ['几乎不确认，安全感自给自足', '偶尔通过小事默默观察',
+                        '经常需要对方明确表达或反复确认'
+                    ] },
+                { id: 'E1b', text: '你表达负面情绪（如愤怒、悲伤）的方式更接近？', options: ['直接当面说出来', '写日记或通过艺术表达',
+                        '不表达，等对方自己察觉'
+                    ] },
+                { id: 'E1c', text: '凌晨朋友发来长消息崩溃倾诉，你更倾向于？', options: ['安静陪伴，不急于给建议', '立刻分析问题，给出一套解决方案',
+                        '感到压力，不知如何回应'
+                    ] },
+                { id: 'E1d', text: '收到一份意料之外的用心礼物，你的第一反应是？', options: ['热情拥抱并直接表达喜悦', '内心感动但表面平静，事后道谢',
+                        '有些不知所措，想着该怎么还礼'
+                    ] },
+                // E2 情感深度 (E2a-d)
+                { id: 'E2a', text: '你更容易因为哪种情境而忍不住落泪？', options: ['被他人深刻理解和看见', '被误解或感到委屈', '看到感人的新闻或影视作品'] },
+                { id: 'E2b', text: '你会在社交媒体上发布自己的负面情绪吗？', options: ['从不，只发积极内容', '偶尔设置分组可见', '经常，想获得关注和安慰'] },
+                { id: 'E2c', text: '你理想中的亲密关系状态更接近？', options: ['彼此独立但保持深度连接', '形影不离，高度融合', '互不打扰，各忙各的'] },
+                { id: 'E2d', text: '当伴侣忘记某个对你很重要的纪念日，你的内心感受是？', options: ['失望，但会直接沟通需求', '失落但不提，默默扣分',
+                        '觉得无所谓，形式不重要'
+                    ] },
+                // E3 情感反应 (E3a-d)
+                { id: 'E3a', text: '当别人在公开场合对你发火指责时，你的本能反应是？', options: ['保持冷静，就事论事反驳', '感到受伤，沉默不语或离场',
+                        '被激怒，以牙还牙怼回去'
+                    ] },
+                { id: 'E3b', text: '你更擅长表达哪一种情绪？', options: ['快乐和热情', '悲伤和脆弱', '愤怒和界限'] },
+                { id: 'E3c', text: '你对他人的细微情绪变化（如皱眉、叹气）敏感吗？', options: ['非常敏感，能精准捕捉', '一般，大致能感觉到',
+                        '不太敏感，常后知后觉'
+                    ] },
+                { id: 'E3d', text: '参加聚会时，如果有人一直在讲冷笑话冷场，你会？', options: ['主动接话活跃气氛', '礼貌性微笑保持沉默',
+                        '专注玩手机，置身事外'
+                    ] },
+                // A1 世界观 (A1a-d)
+                { id: 'A1a', text: '刷到“AI即将大规模取代人类工作”的报道，你内心真实想法是？', options: ['这是必然趋势，人类总能找到新出路（乐观）',
+                        '确实焦虑，未来充满不确定性（悲观）', '走一步看一步，跟我当前关系不大（漠然）'
+                    ] },
+                { id: 'A1b', text: '你相信“只要足够努力，就一定能获得回报”吗？', options: ['深信不疑', '半信半疑，看运气', '完全不信，环境因素更重要'] },
+                { id: 'A1c', text: '学习一项新技能时，你更习惯哪种方式？', options: ['自己瞎琢磨试错', '找资深前辈带教', '看系统教程按部就班'] },
+                { id: 'A1d', text: '你如何看待“人性本善”与“人性本恶”？', options: ['倾向本善，信任他人', '认为善恶参半，看情况', '倾向本恶，保持戒备'] },
+                // A2 规则态度 (A2a-d)
+                { id: 'A2a', text: '公司有一条你觉得很不合理的制度，你会如何？', options: ['想办法绕过去，按自己的方式做', '保留意见，但表面遵守',
+                        '严格遵守，哪怕觉得不合理'
+                    ] },
+                { id: 'A2b', text: '你人生的意义感更主要来源于？', options: ['创造独一无二的作品或价值', '被身边人需要和依赖', '体验各种新鲜事物的过程'] },
+                { id: 'A2c', text: '你的人生座右铭更接近哪一句？', options: ['尽人事，听天命', '车到山前必有路', '凡事预则立，不预则废'] },
+                { id: 'A2d', text: '朋友拉你参与一个“灰色地带”但利润丰厚的项目，你大概率会？', options: ['拒绝，触及底线', '犹豫并评估风险',
+                        '只要不被抓就做'
+                    ] },
+                // A3 行动哲学 (A3a-d)
+                { id: 'A3a', text: '开始一个重要项目前，你通常的做法是？', options: ['花大量时间规划完全，再行动', '边做边想，动态调整', '先迈出第一步再说'] },
+                { id: 'A3b', text: '做人生重大决策时，你更依赖？', options: ['冷静的理性逻辑分析', '强烈的直觉和第六感', '参考身边人的经验和意见'] },
+                { id: 'A3c', text: '你的执行力在什么时候达到顶峰？', options: ['紧急任务有硬性Deadline时', '心情愉悦、状态极佳时', '没人打扰、完全独处时'] },
+                { id: 'A3d', text: '面对一件非常困难但重要的事，你的第一念头是？', options: ['挑战它，必须攻克', '有点畏惧，需要鼓励', '拖延到不得不做'] },
+                // Ac1 行动风格 (Ac1a-d)
+                { id: 'Ac1a', text: '你拖延做一件事，最底层的原因通常是？', options: ['追求完美，怕做不好', '纯粹没动力，觉得没意思', '不知从哪里下手，迷茫'] },
+                { id: 'Ac1b', text: '你更享受哪种工作模式？', options: ['独立负责，一个人搞定', '团队协作，共同推动', '视任务类型灵活切换'] },
+                { id: 'Ac1c', text: '完成任务后，你的第一反应通常是？', options: ['长舒一口气，彻底放松', '立刻复盘哪里可以更好', '马上投入下一个任务'] },
+                { id: 'Ac1d', text: '你更倾向于“多线程并行”还是“单线程专注”？', options: ['多线程，效率高', '单线程，深度强',
+                        '看任务复杂度切换'
+                    ] },
+                // Ac2 决策模式 (Ac2a-d)
+                { id: 'Ac2a', text: '你通常需要多久才能做出一个中等重要性的决定？', options: ['几分钟内快速决定', '需要几天权衡利弊', '反复纠结，迟迟不定'] },
+                { id: 'Ac2b', text: '你更信赖“直觉”还是“数据分析”？', options: ['直觉，因为常常很准', '数据分析，因为客观可靠', '两者结合，先直觉后验证'] },
+                { id: 'Ac2c', text: '在高压紧急状况下，你的决策能力如何？', options: ['异常清晰，能快速指挥', '一般，会有些慌乱', '容易宕机，需要别人指挥'] },
+                { id: 'Ac2d', text: '你更愿意为高回报承担高风险，还是低回报保安全？', options: ['高风险高回报', '中等风险中等回报', '低风险保底'] },
+                // Ac3 执行习惯 (Ac3a-d)
+                { id: 'Ac3a', text: '你如何对待自己制定的日常任务清单？', options: ['严格执行，划掉每项才有安全感', '灵活调整，根据精力排序', '不太用清单，随性处理'] },
+                { id: 'Ac3b', text: '你更偏好设定“短期目标”还是“长期愿景”？', options: ['短期里程碑，容易获得反馈', '长期愿景，指引大方向', '两者都需要'] },
+                { id: 'Ac3c', text: '你对自己日常执行力的满意度是？', options: ['非常满意，说到做到', '一般，有时会掉链子', '很不满意，常常虎头蛇尾'] },
+                { id: 'Ac3d', text: '遇到干扰打断时，你能否快速回到工作状态？', options: ['能，切换自如', '需要几分钟缓冲', '很难，节奏被打乱就废了'] },
+                // So1 社交倾向 (So1a-d)
+                { id: 'So1a', text: '参加一个50人的行业酒会，你的自然状态是？', options: ['主动出击，四处交换名片', '只与认识的人小范围交谈', '躲在角落吃东西，等结束'] },
+                { id: 'So1b', text: '老朋友说“你变了好多”，你的反应是？', options: ['“是你没跟上我节奏吧”', '“可能吧，我自己没觉得”', '“我哪里变了？快告诉我”'] },
+                { id: 'So1c', text: '你在社交场合中最大的精力消耗来自？', options: ['维持表面的客气和笑容', '害怕冷场，绞尽脑汁找话题', '不知道如何结束对话'] },
+                { id: 'So1d', text: '你更倾向于参加“熟人局”还是“陌生人局”？', options: ['陌生人局，新鲜有趣', '熟人局，放松舒适', '都可以，视心情而定'] },
+                // So2 社交形象 (So2a-d)
+                { id: 'So2a', text: '进入一个全是陌生人的房间，你做的第一件事是？', options: ['扫视全场，观察每个人', '主动走向人群搭话', '拿出手机假装有事'] },
+                { id: 'So2b', text: '别人对你最常见的社交印象是？', options: ['高冷有距离感', '随和好相处', '有趣幽默开心果'] },
+                { id: 'So2c', text: '你主动联系不常见面朋友的频率是？', options: ['经常，喜欢维系关系', '偶尔，想到才联系', '几乎不，等对方找我'] },
+                { id: 'So2d', text: '你在朋友圈/社交媒体上通常呈现的形象是？', options: ['积极进取的个人品牌', '真实随性的生活片段', '几乎隐形，极少发'] },
+                // So3 社交深度 (So3a-d)
+                { id: 'So3a', text: '你更喜欢“深度促膝长谈”还是“轻松打闹闲聊”？', options: ['深度交谈，触及灵魂', '轻松闲聊，没负担', '视对象和场合而定'] },
+                { id: 'So3b', text: '社交中你更关注对方谈话的“内容”还是“情绪”？', options: ['内容逻辑', '情绪氛围', '两者兼顾'] },
+                { id: 'So3c', text: '在团队讨论中，你通常扮演什么角色？', options: ['主导节奏的引领者', '附和跟随的支持者', '默默记录的观察者'] },
+                { id: 'So3d', text: '你更容易被哪种人吸引成为朋友？', options: ['脑洞大开、思想深刻的', '温柔体贴、让人舒服的', '行动力强、带我玩的'] },
+                // 隐藏题
+                { id: 'DRUNK', text: '压力很大时，你更倾向于如何解压？', options: ['喝酒或放纵一下', '运动或冥想', '刷剧或打游戏'], hidden: true },
+            ],
+            getResult: function(ansList) {
+                const dimKeys = ['S1', 'S2', 'S3', 'E1', 'E2', 'E3', 'A1', 'A2', 'A3', 'Ac1', 'Ac2', 'Ac3', 'So1',
+                    'So2', 'So3'
+                ];
+                const dims = {};
+                dimKeys.forEach(k => {
+                    const items = ansList.filter(a => a.qid && a.qid.startsWith(k));
+                    if (items.length === 0) { dims[k] = '?'; return; }
+                    const avg = items.reduce((s, a) => s + a.value, 0) / items.length;
+                    dims[k] = avg < 1 ? 'L' : avg < 1.8 ? 'M' : 'H';
+                });
+                const vector = dimKeys.map(k => dims[k]).join('');
+                const drunk = ansList.some(a => a.qid === 'DRUNK' && a.value === 0);
+                const ARCHETYPES = {
+                    'LLLLLLLLLLLLLLL': { name: '静水', desc: '你像深水，表面平静，底下有自己的节奏。不争不抢，但谁也搅不动你。' },
+                    'MMMMMMMMMMMMMMM': { name: '回声', desc: '你善于接收和反射，是很好的倾听者。但偶尔会困惑：哪个声音才是自己的？' },
+                    'HHHHHHHHHHHHHHH': { name: '焰心', desc: '你燃烧得很快很亮。热情是你的燃料，但记得留一点给自己。' },
+                    'default': { name: '探索者原型', desc: '你的内在组合独特且充满变化，难以简单归类。你始终在按照自己的秩序延伸成长。' }
+                };
+                let arch;
+                if (drunk) arch = { name: '微醺者', desc: '你选择用某种方式释放压力。你允许自己偶尔失控，这本身就是一种勇气。' };
+                else if (vector === 'HHHHHHHHHHHHHHH') arch = { name: '全开', desc: '所有维度均达顶峰。你是那种"要么不做，要么做到极致"的行动派。' };
+                else arch = ARCHETYPES[vector] || ARCHETYPES['default'];
+                return { type: arch.name, description: arch.desc, dims };
+            }
+        }, {
+            id: 'mbti',
+            name: 'MBTI 性格测试',
+            icon: `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" stroke="currentColor"/><path d="M6 20 L34 20 M20 6 L20 34" stroke="currentColor"/><circle cx="20" cy="20" r="4" stroke="currentColor"/></svg>`,
+            desc: '40道现实生活情景题，从四个维度深度剖析你的16型人格。',
+            questions: [
+                // EI (10题)
+                { dim: 'EI', text: '周末公司团建，一边是热闹的KTV包厢，另一边是安静的密室逃脱，你更想去？',
+                options: ['KTV，越嗨越释放压力', '密室逃脱，专注解谜才舒服'] },
+                { dim: 'EI', text: '在社交派对中，你更倾向于？', options: ['主动穿梭人群，认识新朋友', '安静待在熟悉的朋友身边，偶尔搭话'] },
+                { dim: 'EI', text: '连续高强度社交三天后，你最想做的事是？', options: ['再约一波朋友聊个通宵', '一个人关房间，谁也别理我'] },
+                { dim: 'EI', text: '在会议讨论中，你通常如何贡献想法？', options: ['边想边说，越说思路越清晰', '深思熟虑后，一开口就是成熟观点'] },
+                { dim: 'EI', text: '感到疲惫时，你更倾向于去哪里充电？', options: ['酒吧、市集等热闹场所', '图书馆、公园等安静角落'] },
+                { dim: 'EI', text: '别人对你的第一印象往往是？', options: ['外向开朗，善于交际', '内敛沉稳，有点神秘感'] },
+                { dim: 'EI', text: '你更享受哪种交流方式？', options: ['多人热聊，头脑风暴', '一对一深谈，灵魂碰撞'] },
+                { dim: 'EI', text: '你更喜欢哪种工作氛围？', options: ['开放工位，随时可以交谈', '独立隔间，专注不被打扰'] },
+                { dim: 'EI', text: '在团队中，你更常扮演什么角色？', options: ['活跃气氛、带动节奏的发动机', '默默支撑、提供深度思考的定海针'] },
+                { dim: 'EI', text: '你更愿意把业余时间花在？', options: ['参加社团、线下活动', '独自阅读、研究爱好'] },
+                // SN (10题)
+                { dim: 'SN', text: '老板给了你一个模糊概念“做一款极简产品”，你先做什么？', options: ['调研竞品数据与用户画像', '画思维导图，构思核心理念与故事'] },
+                { dim: 'SN', text: '你更信任哪种信息来源？', options: ['亲身实践获得的现实数据', '直觉捕捉到的潜在规律与可能性'] },
+                { dim: 'SN', text: '向别人描述一件事时，你习惯？', options: ['按时间线讲清楚细节过程', '直接提炼核心观点和象征意义'] },
+                { dim: 'SN', text: '你对未来的态度更倾向？', options: ['立足当下，做好眼前事', '充满想象，常构思长远愿景'] },
+                { dim: 'SN', text: '你更擅长观察什么？', options: ['细微的表情变化与具体数据', '整体的氛围模式与抽象关联'] },
+                { dim: 'SN', text: '你更偏爱阅读哪类内容？', options: ['纪实报道、实操指南', '科幻小说、哲学思辨'] },
+                { dim: 'SN', text: '你更相信“眼见为实”还是“心之所向”？', options: ['眼见为实，相信事实', '心之所向，相信可能'] },
+                { dim: 'SN', text: '你更擅长记忆什么？', options: ['具体的事例和细节', '整体的氛围和感受'] },
+                { dim: 'SN', text: '你更倾向于关注“是什么”还是“可能是什么”？', options: ['是什么（现实）', '可能是什么（潜力）'] },
+                { dim: 'SN', text: '你更喜欢哪种解谜游戏？', options: ['需要寻找线索的密室逃脱', '需要策略布局的桌游'] },
+                // TF (10题)
+                { dim: 'TF', text: '团队里有人犯了低级错误导致扣奖金，你作为组长会？', options: ['按制度扣罚，并制定SOP防止再犯', '私下请吃饭安慰，说大家都有责任'] },
+                { dim: 'TF', text: '朋友向你倾诉职场不公，你第一反应是？', options: ['帮他分析问题，找应对策略', '共情他的委屈，安抚情绪'] },
+                { dim: 'TF', text: '你更容易被哪种人打动？', options: ['逻辑严密、条理清晰的', '温柔体贴、充满同理心的'] },
+                { dim: 'TF', text: '面对冲突辩论时，你倾向于？', options: ['坚持真理，哪怕关系紧张', '退一步缓和，优先维护关系'] },
+                { dim: 'TF', text: '你更看重什么？', options: ['逻辑自洽与公平', '人际和谐与善意'] },
+                { dim: 'TF', text: '评价他人时，你更常基于？', options: ['客观能力与表现', '动机意图与情感状态'] },
+                { dim: 'TF', text: '你更擅长理性分析还是情感体察？', options: ['理性分析，抽丝剥茧', '情感体察，感同身受'] },
+                { dim: 'TF', text: '你希望别人如何对待你？', options: ['客观公正地指出问题', '温柔体贴地照顾感受'] },
+                { dim: 'TF', text: '你更认同“对事不对人”还是“对人不对事”？', options: ['对事不对人', '先看人，再论事'] },
+                { dim: 'TF', text: '你更愿意相信“规则”还是“人情”？', options: ['规则，因为公平', '人情，因为灵活'] },
+                // JP (10题)
+                { dim: 'JP', text: '明天要交年终总结，但你只有一份草稿，今晚你会？', options: ['熬夜改到完美再睡', '先睡，早起凭直觉快速填满'] },
+                { dim: 'JP', text: '你更偏好哪种生活状态？', options: ['秩序井然，日程清晰', '充满弹性，随时可以改变计划'] },
+                { dim: 'JP', text: '旅行前你通常做多少准备？', options: ['详细攻略，按表打卡', '只订机酒，到了再说'] },
+                { dim: 'JP', text: '你的工作桌面更接近？', options: ['整洁有序，物归原位', '看似杂乱，但自己找得到'] },
+                { dim: 'JP', text: '当计划被打乱时，你第一感受是？', options: ['焦虑，想恢复原状', '兴奋，视作意外惊喜'] },
+                { dim: 'JP', text: '你更擅长哪件事？', options: ['制定计划并严格执行', '灵活应变，随机调整策略'] },
+                { dim: 'JP', text: '你更倾向于哪种截止日期管理？', options: ['提前完成，不留尾巴', '压哨冲刺，高效爆发'] },
+                { dim: 'JP', text: '你更喜欢哪种创作状态？', options: ['按步骤推进，逐步优化', '灵感驱动，随性发挥'] },
+                { dim: 'JP', text: '你更常被评价为“靠谱”还是“随性”？', options: ['靠谱', '随性'] },
+                { dim: 'JP', text: '你更倾向于“做计划”还是“留白”？', options: ['做计划，掌控感强', '留白，保持开放性'] },
+            ],
+            getResult: function(ansList) {
+                const dims = { EI: 0, SN: 0, TF: 0, JP: 0 };
+                const counts = { EI: 0, SN: 0, TF: 0, JP: 0 };
+                ansList.forEach((a, i) => {
+                    const q = this.questions[i];
+                    if (q && q.dim) {
+                        dims[q.dim] += a.value;
+                        counts[q.dim]++;
+                    }
+                });
+                const type = (dims.EI / counts.EI < 0.5 ? 'E' : 'I') +
+                    (dims.SN / counts.SN < 0.5 ? 'S' : 'N') +
+                    (dims.TF / counts.TF < 0.5 ? 'T' : 'F') +
+                    (dims.JP / counts.JP < 0.5 ? 'J' : 'P');
+                const descMap = {
+                    'INTJ': '建筑师型 — 独立果断，善于全局战略规划，对知识有强烈渴望。',
+                    'INTP': '逻辑学家型 — 求知若渴，具备强大的抽象思维能力，喜欢解构复杂问题。',
+                    'ENTJ': '指挥官型 — 天生的领导者，远见卓识，决策果断，善于组织。',
+                    'ENTP': '辩论家型 — 机智敏捷，热爱智力挑战与创新，善于从不同角度思考。',
+                    'INFJ': '提倡者型 — 深具理想主义与洞察力，坚守内在价值观，有使命感。',
+                    'INFP': '调解者型 — 温暖敏感，富有共情力与诗意情怀，追求真实与意义。',
+                    'ENFJ': '主人公型 — 充满激情与感染力，善于鼓舞他人，是天然的导师。',
+                    'ENFP': '竞选者型 — 自由开朗，充满创意与探索精神，热爱可能性。',
+                    'ISTJ': '物流师型 — 严谨务实，责任感极强，值得信赖，注重秩序。',
+                    'ISFJ': '守卫者型 — 体贴入微，忠诚守护，默默奉献，细心可靠。',
+                    'ESTJ': '总经理型 — 果断实干，组织能力卓越，注重规则与效率。',
+                    'ESFJ': '执政官型 — 热情热心，善于协调团队氛围，乐于助人。',
+                    'ISTP': '鉴赏家型 — 冷静观察，动手能力强，灵活应变，享受当下。',
+                    'ISFP': '探险家型 — 艺术气质，温和随性，追求当下体验与美感。',
+                    'ESTP': '企业家型 — 活力充沛，敢于冒险，善于应对突发事件，行动力强。',
+                    'ESFP': '表演者型 — 热情洋溢，活在当下，天生的氛围制造者。'
+                };
+                return { type, description: descMap[type] || `${type} 人格 — 独特且充满潜力。` };
+            }
+        }, {
+            id: 'color',
+            name: '性格色彩',
+            icon: `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" stroke="currentColor"/><path d="M20 4 L20 36 M4 20 L36 20 M8 8 L32 32 M32 8 L8 32" stroke="currentColor"/></svg>`,
+            desc: '24道生活决策情景，揭示你主导的性格底色（红/蓝/黄/绿）。',
+            questions: [
+                { text: '项目上线前夜服务器崩溃，你冲进办公室第一件事是？', options: ['立刻召集所有人分配任务（红）', '冷静调取日志分析崩溃原因（蓝）', '安抚大家说“没事，大不了延期”（黄）',
+                        '默默给大家买咖啡，陪着技术一起干（绿）'
+                    ] },
+                { text: '你更享受哪种工作状态？', options: ['不断突破目标，赢得胜利（红）', '秩序井然，追求完美品质（蓝）', '充满新鲜创意，自由发挥（黄）',
+                        '团队和谐，无压力无冲突（绿）'
+                    ] },
+                { text: '朋友对你最常做的评价是？', options: ['有魄力、雷厉风行（红）', '严谨细致、可靠理智（蓝）', '幽默风趣、感染力强（黄）', '温和体贴、善解人意（绿）'] },
+                { text: '面对争执，你通常的表现是？', options: ['直言不讳，辨明对错（红）', '拿出证据，用逻辑说服（蓝）', '开玩笑化解尴尬氛围（黄）', '妥协退让，避免冲突（绿）'] },
+                { text: '你更愿意在团队中承担什么角色？', options: ['决策者与指挥者（红）', '质量把控与规划者（蓝）', '创意发想与气氛担当（黄）', '后勤保障与执行落地（绿）'] },
+                { text: '你最不能忍受什么？', options: ['效率低下与拖沓（红）', '粗心大意与混乱（蓝）', '枯燥乏味与束缚（黄）', '人际紧张与强势压迫（绿）'] },
+                { text: '做决定时，你的主导因素是？', options: ['目标与结果（红）', '数据与分析（蓝）', '直觉与乐趣（黄）', '感受与关系（绿）'] },
+                { text: '你如何选择餐厅？', options: ['评分最高且排队最快的（红）', '看菜单搭配，营养均衡的（蓝）', '新开的网红店，适合拍照的（黄）', '随大家定，我不挑（绿）'] },
+                { text: '你对规则的态度是？', options: ['有利就遵守，不利就重塑（红）', '必须严格遵守（蓝）', '随心所欲，规则是死的（黄）', '默默遵守，不惹麻烦（绿）'] },
+                { text: '你对未来的核心渴望是？', options: ['成就与掌控力（红）', '完美与真理（蓝）', '快乐与自由（黄）', '平安与和谐（绿）'] },
+                { text: '你更倾向哪种沟通风格？', options: ['直接简洁，直奔主题（红）', '逻辑严谨，层层递进（蓝）', '生动有趣，充满故事（黄）', '委婉柔和，照顾情绪（绿）'] },
+                { text: '你更看重他人的哪种特质？', options: ['果断与魄力（红）', '诚实与严谨（蓝）', '幽默与活力（黄）', '善良与包容（绿）'] },
+                { text: '面对批评，你的第一反应是？', options: ['理性判断是否接受（红）', '感到不适但会认真反思（蓝）', '一笑了之，不往心里去（黄）', '很在意，怕被否定（绿）'] },
+                { text: '你内心的动力来源于？', options: ['竞争与获胜（红）', '完善与超越（蓝）', '自由与新鲜（黄）', '爱与归属（绿）'] },
+                { text: '你更倾向于哪种生活方式？', options: ['快节奏高密度（红）', '慢工出细活（蓝）', '随性自由（黄）', '安稳平静（绿）'] },
+                { text: '你更擅长激励他人还是自己？', options: ['激励他人（红/黄）', '自我激励（蓝/绿）', '两者都擅长', '两者都不擅长'] },
+                { text: '你更在意过程还是结果？', options: ['结果导向（红）', '过程体验（黄/绿）', '两者平衡（蓝）'] },
+                { text: '你更愿意接受哪种挑战？', options: ['需要勇气的（红）', '需要智慧的（蓝）', '需要创意的（黄）', '需要耐心的（绿）'] },
+                { text: '你更享受独处还是群居？', options: ['独处充电（蓝/绿）', '群居欢聚（红/黄）', '两者都需要'] },
+                { text: '你的人生信条更接近？', options: ['敢想敢做（红）', '尽善尽美（蓝）', '活在当下（黄）', '与人为善（绿）'] },
+                { text: '收到一份繁琐的报销表格，你的处理方式是？', options: ['快速填完提交，不纠结（红/黄）', '仔细核对每项，确保无误（蓝）', '太麻烦了，找人帮忙（绿）'] },
+                { text: '你更希望别人如何评价你？', options: ['有能力的（红）', '靠谱的（蓝）', '有趣的（黄）', '好相处的（绿）'] },
+                { text: '你更倾向于哪种学习方式？', options: ['挑战难题（红）', '系统深挖（蓝）', '轻松互动（黄）', '按部就班（绿）'] },
+                { text: '你更看重生活的哪个方面？', options: ['事业成就（红）', '精神世界（蓝）', '兴趣爱好（黄）', '家庭关系（绿）'] },
+            ],
+            getResult: function(ansList) {
+                const counts = [0, 0, 0, 0];
+                ansList.forEach(a => { if (a.value < 4) counts[a.value]++; });
+                const maxIdx = counts.indexOf(Math.max(...counts));
+                const colors = [
+                    { name: '力量红', desc: '你充满行动力与掌控欲，目标明确，遇到困难勇往直前，是天生的领导者。' },
+                    { name: '完美蓝', desc: '你深思熟虑、追求品质与秩序，注重细节与事实，是极其可靠的思考者。' },
+                    { name: '活力黄', desc: '你乐观热情、富有感染力，喜欢探索未知与表达体验，是快乐的传播者。' },
+                    { name: '和平绿', desc: '你温和宽容、随和包容，善于倾听与共情，是人际交往中最舒适的守护者。' }
+                ];
+                return { type: colors[maxIdx].name, description: colors[maxIdx].desc };
+            }
+        }, {
+            id: 'age',
+            name: '心理年龄',
+            icon: `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" stroke="currentColor"/><path d="M20 4 L20 36 M4 20 L36 20 M8 8 L32 32 M32 8 L8 32" stroke="currentColor"/></svg>`,
+            desc: '25道现实选择，测出你内在灵魂的真实年龄。',
+            questions: [
+                { text: '手机支付失败时，你的第一反应是？', options: ['研究设置直到成功', '重启或换APP试试', '直接掏现金'] },
+                { text: '听到最新的网络流行语（如“绝绝子”），你：', options: ['乐在其中，迅速使用', '能理解但不用', '觉得无聊，听不懂'] },
+                { text: '面对生活中的意外插曲，你心态更接近？', options: ['太刺激了，看会发生什么', '有些烦恼，但能冷静应对', '疲惫叹息，希望平静'] },
+                { text: '对于熬夜，你现在的感受是？', options: ['夜生活刚开始', '偶尔熬，但恢复慢', '早睡早起养生'] },
+                { text: '看到街边童趣玩具，你：', options: ['上前把玩，保持童心', '微笑看看', '内心毫无波澜'] },
+                { text: '你对社交圈子的看法是？', options: ['朋友越多越好', '几个挚友就够', '人际交往太累'] },
+                { text: '面对理想与现实的差距，你：', options: ['相信能改变一切', '接受现实，有限努力', '看淡不强求'] },
+                { text: '对新技术（如AI工具）的态度？', options: ['第一时间尝鲜', '有需要再学', '觉得繁琐，抗拒'] },
+                { text: '回顾过去的选择，你常觉得？', options: ['充满精彩冒险', '有遗憾但都是成长', '过去太天真'] },
+                { text: '你更喜欢哪种周末？', options: ['游乐园或潮牌打卡', '郊游或看展', '在家煮茶养花'] },
+                { text: '对年龄增长的真实感觉？', options: ['数字而已，永远年轻', '随遇而安', '感受到沧桑'] },
+                { text: '你更倾向哪种时间观念？', options: ['活在当下', '规划未来', '怀念过去'] },
+                { text: '你更愿意尝试？', options: ['全新的冒险', '熟悉的舒适区', '偶尔小挑战'] },
+                { text: '你对自己的未来？', options: ['充满期待', '脚踏实地', '有些迷茫'] },
+                { text: '你更欣赏哪种人生状态？', options: ['永远热血', '沉稳从容', '随性逍遥'] },
+                { text: '你对新鲜事物的好奇心？', options: ['强烈，都想试试', '一般，只关注兴趣', '很低'] },
+                { text: '你更看重经验还是创新？', options: ['创新突破', '经验积累', '平衡'] },
+                { text: '你更愿意和谁相处？', options: ['年轻人有活力', '同龄人有共鸣', '年长者有智慧'] },
+                { text: '你对未来的态度是？', options: ['充满希望', '谨慎乐观', '有些担忧'] },
+                { text: '你更享受哪种学习？', options: ['快速吸收新知', '深入研究领域', '随缘学习'] },
+                { text: '你的人生哲学更接近？', options: ['及时行乐', '未雨绸缪', '顺其自然'] },
+                { text: '被小朋友叫“叔叔/阿姨”，你：', options: ['纠正他们叫哥哥/姐姐', '无奈一笑', '坦然接受'] },
+                { text: '你更偏好哪种娱乐内容？', options: ['快节奏短视频', '深度纪录片', '经典老剧'] },
+                { text: '你更相信“努力”还是“天赋”？', options: ['努力决定一切', '天赋也很重要', '命运说了算'] },
+                { text: '你更愿意把钱花在？', options: ['体验和旅行', '学习和提升', '储蓄和保障'] },
+            ],
+            getResult: function(ansList) {
+                const totalScore = ansList.reduce((s, a) => s + a.value, 0);
+                const age = Math.round(18 + (totalScore / 50) * 37);
+                let label, desc;
+                if (age < 25) { label = '少年灵魂';
+                    desc = '你拥有极高的敏锐度与好奇心，眼神依然清亮，内心住着一个永远年轻的少年。'; } else if (age < 35) { label =
+                        '青年锐气';
+                    desc = '你朝气蓬勃又开始兼具理性，既有追逐理想的勇气，也懂得了脚踏实地。'; } else if (age < 48) { label = '成熟稳健';
+                    desc = '你处事从容，见过了风浪与世面，内心具备强大的定力与责任感。'; } else { label = '通透智者';
+                    desc = '你洞悉世事，看淡纷扰，拥有超越年龄的豁达与宁静。'; }
+                return { type: `${age} 岁 · ${label}`, description: desc };
+            }
+        }, {
+            id: 'love',
+            name: '爱情风格',
+            icon: `<svg viewBox="0 0 40 40"><path d="M20 34 C6 22 2 14 8 8 C14 2 20 8 20 14 C20 8 26 2 32 8 C38 14 34 22 20 34Z" stroke="currentColor" fill="none"/></svg>`,
+            desc: '24道亲密关系情景，揭示你的爱情底牌（浪漫/灵魂/守护/理性）。',
+            questions: [
+                { text: '情人节你更希望收到什么礼物？', options: ['玫瑰花束和烛光晚餐（浪漫）', '一封手写长信（灵魂）', '按摩仪或实用家电（守护）', '转账红包（理性）'] },
+                { text: '和伴侣发生分歧时，你通常？', options: ['当下立刻沟通解决', '各自冷静后理性探讨', '主动退让妥协', '评估利弊找折中方案'] },
+                { text: '你最喜欢的约会场景是？', options: ['惊喜旅行或探险', '深夜长谈吐露心声', '窝家做饭看电影', '共同规划未来'] },
+                { text: '你表达爱意最习惯的方式是？', options: ['热情夸奖和身体接触', '送精心准备的礼物', '默默做好生活琐事', '给予空间支持成长'] },
+                { text: '你相信“一见钟情”吗？', options: ['坚信不疑', '相信磁场但需后续了解', '不太信，需要日久生情', '完全不信，条件匹配重要'] },
+                { text: '在关系中你最害怕什么？', options: ['激情退却后的平淡', '渐行渐远无法交流', '背叛和缺乏安全感', '失去自我和空间'] },
+                { text: '你希望伴侣在人生中扮演什么角色？', options: ['探索世界的合伙人', '懂你的灵魂伴侣', '温暖的避风港', '并肩成长的战友'] },
+                { text: '伴侣遭遇挫折时，你第一反应是？', options: ['带他吃喝玩乐转移注意', '耐心倾听心理支撑', '分析原因给出建议', '后勤保障让他无后顾之忧'] },
+                { text: '你对关系中的隐私怎么看？', options: ['爱要毫无保留', '保持适度神秘感', '信任即可无需查', '独立互不干涉'] },
+                { text: '你理想的长久爱情是？', options: ['历经岁月依然心动', '相看两不厌的默契', '平平淡淡陪伴', '互相成就更好'] },
+                { text: '你更看重伴侣哪种特质？', options: ['浪漫激情', '深刻理解', '忠诚靠谱', '上进成熟'] },
+                { text: '你更倾向于哪种依赖模式？', options: ['适度依赖独立', '高度依恋形影不离', '保持距离各自精彩'] },
+                { text: '你更愿意为爱付出什么？', options: ['时间和精力', '耐心和包容', '妥协和牺牲', '共同成长'] },
+                { text: '你更相信爱情是什么？', options: ['一种强烈的感觉', '一种深刻的理解', '一种坚定的选择', '一种自然的相处'] },
+                { text: '你更在意激情还是稳定？', options: ['激情', '稳定', '平衡', '看阶段'] },
+                { text: '你希望如何度过纪念日？', options: ['精心策划惊喜', '简单温馨仪式', '随意度过', '不过纪念日'] },
+                { text: '你更希望伴侣如何表达爱？', options: ['言语表达', '行动付出', '礼物馈赠', '陪伴时间'] },
+                { text: '你更看重爱情中的什么？', options: ['真诚', '理解', '承诺', '自由'] },
+                { text: '你倾向于如何处理争吵？', options: ['立即解决', '冷静后再谈', '回避冲突', '幽默化解'] },
+                { text: '你相信爱情需要经营还是顺其自然？', options: ['用心经营', '顺其自然', '结合', '看缘分'] },
+                { text: '你更愿意和伴侣分享什么？', options: ['内心最深处的秘密', '日常琐事和心情', '未来的计划', '当下的快乐'] },
+                { text: '你更在意伴侣的过去还是未来？', options: ['过去', '未来', '都不在意', '只在意现在'] },
+                { text: '你更享受哪种亲密状态？', options: ['炙热燃烧', '温柔细腻', '平静笃定', '自由呼吸'] },
+                { text: '你更愿意为爱情放弃什么？', options: ['自由', '事业机会', '个人爱好', '社交圈子'] },
+            ],
+            getResult: function(ansList) {
+                const counts = [0, 0, 0, 0];
+                ansList.forEach(a => { if (a.value < 4) counts[a.value]++; });
+                const maxIdx = counts.indexOf(Math.max(...counts));
+                const styles = [
+                    { name: '热烈浪漫型', desc: '你追寻纯粹的情感火花与仪式感，相信爱情是生命中最动人的诗篇。' },
+                    { name: '灵魂共鸣型', desc: '你渴望极致的精神契合，比起外在条件，你更在意彼此内心世界的交融。' },
+                    { name: '温情守护型', desc: '你珍视陪伴与安全感，将爱融入日常细水长流的关怀与守护之中。' },
+                    { name: '理性成长型', desc: '你注重相互独立与共同进步，倾向于构建健康、成熟且可持续的关系。' }
+                ];
+                return { type: styles[maxIdx].name, description: styles[maxIdx].desc };
+            }
+        }];
 
-<canvas id="shareCanvas" width="800" height="1000" style="display:none;"></canvas>
+        // ─── 全局状态 ──────────────────────────────────────────────
+        let activeTest = null,
+            currentQ = 0,
+            answers = [],
+            resultData = null,
+            selectedValue = null,
+            autoAdvanceTimer = null;
 
-<script>
-// 主题
-(function(){
-  const t = localStorage.getItem('theme');
-  if(t==='dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)){
-    document.getElementById('html-root').classList.add('dark-mode');
-  }
-})();
-function toggleTheme(){
-  const html = document.getElementById('html-root');
-  html.classList.toggle('dark-mode');
-  localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
-}
+        // ─── 渲染首页 ──────────────────────────────────────────────
+        function renderHome() {
+            document.getElementById('testGrid').innerHTML = TESTS.map(t => `
+            <div class="test-card" onclick="startTest('${t.id}')">
+              <div class="icon">${t.icon}</div>
+              <h3>${t.name}</h3>
+              <p>${t.desc}</p>
+              <span class="badge">${t.questions.length} 题</span>
+            </div>`).join('');
+            showPage('page-home');
+        }
 
-// 测试数据（完整保留你上一版的5个测试）
-const TESTS = [
-  {
-    id: 'sbti', name: 'SBTI 性格侧写',
-    icon: `<svg viewBox="0 0 40 40"><rect x="6" y="6" width="28" height="28" rx="3" stroke="currentColor"/><path d="M12 15 L28 15 M12 20 L24 20 M12 25 L20 25" stroke="currentColor"/></svg>`,
-    desc: '基于5模型15维度的深度自我观察，27种原型。',
-    questions: [
-      { id:'S1', text:'当别人夸你"你真厉害"时，你第一反应是？', options:['觉得对方在客气','内心暗喜但表面淡定','直接回"谢谢，我也觉得"'] },
-      { id:'S2', text:'深夜独处时，你对自己的评价通常是？', options:['比较满意，知道自己在做什么','有点模糊，不太确定自己到底要什么','经常反思，但结论总在变'] },
-      { id:'S3', text:'你内心最看重的东西是？', options:['自由——不被定义','真实——不装','稳定——可预期'] },
-      { id:'E1', text:'在一段关系里，你多久会确认一次"对方是不是还在乎我"？', options:['几乎不，安全感自己给','偶尔，通过小事观察','经常，需要反复确认'] },
-      { id:'E2', text:'你表达情绪的方式更接近？', options:['直接说出来','写下来或画出来','不表达，等对方自己发现'] },
-      { id:'E3', text:'当朋友深夜崩溃找你倾诉，你会？', options:['陪着，但不一定给建议','立刻给方案、想办法解决','有点慌，不知道该不该接'] },
-      { id:'A1', text:'你对"世界会好吗"这个问题的真实想法是？', options:['不好说，但我选择乐观','大概率不会，但跟我没关系','会，但需要每个人努力'] },
-      { id:'A2', text:'面对规则，你的态度是？', options:['看情况，能绕就绕','大部分遵守，但保留质疑','规则就是规则，尽量不破'] },
-      { id:'A3', text:'你的人生意义感主要来自？', options:['创造东西','被需要','体验本身'] },
-      { id:'Ac1', text:'开始做一件事之前，你会？', options:['想清楚再动','边做边想','先做一小步再说'] },
-      { id:'Ac2', text:'做决定时你更依赖？', options:['逻辑分析','直觉','别人的经验'] },
-      { id:'Ac3', text:'你的执行力在什么时候最强？', options:['有deadline压着','心情好的时候','没人管我的时候'] },
-      { id:'So1', text:'聚会中你的状态是？', options:['主动热场，认识所有人','只跟认识的人聊','躲在角落等结束'] },
-      { id:'So2', text:'别人说"你变了"，你的反应是？', options:['"是你没跟上我"','"可能吧"','"我哪里变了？"'] },
-      { id:'So3', text:'你在社交中最大的消耗来自？', options:['维持表面客气','怕冷场','不知道该说什么'] },
-      { id:'DRUNK', text:'如果此刻有一杯酒递到你面前，你会？', options:['接过来喝掉','说"我不喝"','问"什么酒？"再决定'], hidden:true },
-      { id:'S1b', text:'你觉得自己"值得被爱"吗？', options:['值得，无条件','值得，但要看表现','不确定'] },
-      { id:'S2b', text:'当你做了一件蠢事，你多久能翻篇？', options:['当场翻篇','几天','很久，反复想'] },
-      { id:'S3b', text:'你理想中的"成功"是？', options:['做自己热爱的事','有选择权','被认可'] },
-      { id:'E1b', text:'你更容易因为什么而哭？', options:['被理解','被误解','感动'] },
-      { id:'E2b', text:'你会在朋友圈发负面情绪吗？', options:['从不','偶尔加密','经常'] },
-      { id:'E3b', text:'你理想的关系状态是？', options:['彼此独立但有连接','形影不离','互不打扰'] },
-      { id:'A1b', text:'你对"努力就一定有回报"的看法是？', options:['信','不信','看运气'] },
-      { id:'A2b', text:'你更倾向哪种学习方式？', options:['自己摸索','有人带','看教程'] },
-      { id:'A3b', text:'你的人生座右铭更接近？', options:['尽人事听天命','车到山前必有路','不打无准备之仗'] },
-      { id:'Ac1b', text:'你拖延的最大原因是？', options:['完美主义','没动力','不知道从哪开始'] },
-      { id:'Ac2b', text:'你更喜欢哪种工作模式？', options:['一个人干','跟人合作','看情况'] },
-      { id:'Ac3b', text:'你完成任务后的第一反应是？', options:['松一口气','立刻想下一个','复盘哪里可以更好'] },
-      { id:'So1b', text:'你在陌生人群中最想做的是？', options:['观察','找人搭话','假装看手机'] },
-      { id:'So2b', text:'别人眼中你的社交形象是？', options:['高冷','随和','有趣'] },
-      { id:'So3b', text:'你主动联系别人的频率是？', options:['经常','偶尔','几乎不'] },
-    ],
-    getResult: function(ansList) {
-      const dimKeys = ['S1','S2','S3','E1','E2','E3','A1','A2','A3','Ac1','Ac2','Ac3','So1','So2','So3'];
-      const dims = {};
-      dimKeys.forEach(k=>{ const a=ansList.find(x=>x.qid===k); dims[k]=a?(a.value===0?'L':a.value===1?'M':'H'):'?'; });
-      const vector = dimKeys.map(k=>dims[k]).join('');
-      const drunk = ansList.some(a=>a.qid==='DRUNK'&&a.value===0);
-      const ARCHETYPES = {
-        'LLLLLLLLLLLLLLL':{name:'静水',desc:'你像深水，表面平静，底下有自己的节奏。不争不抢，但谁也搅不动你。'},
-        'MMMMMMMMMMMMMMM':{name:'回声',desc:'你善于接收和反射，是很好的倾听者。但偶尔会困惑：哪个声音才是自己的？'},
-        'HHHHHHHHHHHHHHH':{name:'焰心',desc:'你燃烧得很快很亮。热情是你的燃料，但记得留一点给自己。'},
-        'default':{name:'探索者原型',desc:'你的内在组合独特且充满变化，难以简单归类。你始终在按照自己的秩序延伸成长。'}
-      };
-      let arch;
-      if(drunk) arch={name:'微醺者',desc:'你选择了那杯酒。你允许自己偶尔失控，这本身就是一种勇气。'};
-      else if(vector==='HHHHHHHHHHHHHHH') arch={name:'全开',desc:'所有维度均达顶峰。你是那种"要么不做，要么做到极致"的行动派。'};
-      else arch=ARCHETYPES[vector]||ARCHETYPES['default'];
-      return { type:arch.name, description:arch.desc, dims };
-    }
-  },
-  {
-    id:'mbti', name:'MBTI 性格测试',
-    icon:`<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" stroke="currentColor"/><path d="M6 20 L34 20 M20 6 L20 34" stroke="currentColor"/><circle cx="20" cy="20" r="4" stroke="currentColor"/></svg>`,
-    desc:'从精力、认知、判断、生活四个维度深度剖析16型人格。',
-    questions:[
-      {dim:'EI',text:'周末休息时，你通常如何恢复精力？',options:['与朋友聚会或参加户外活动','独自留在房间看书、刷剧或休息']},
-      {dim:'EI',text:'在社交派对或新环境中，你往往：',options:['主动认识新朋友，成为人群焦点','保持低调，等别人主动找你交谈']},
-      {dim:'EI',text:'高强度工作了一整天后，你更想：',options:['找朋友喝一杯或畅聊一番','安静地待着，不被打扰']},
-      {dim:'EI',text:'在会议或讨论中，你通常：',options:['边想边说，通过表达整理思路','深思熟虑后再开口发表观点']},
-      {dim:'EI',text:'当你感到疲惫时，你更倾向于：',options:['去热闹的地方充电','找个安静角落独处']},
-      {dim:'EI',text:'别人对你的印象往往是：',options:['外向开朗、好相处','内敛沉稳、有距离感']},
-      {dim:'SN',text:'学习或接触新事物时，你更倾向于：',options:['关注具体事实、数据和现实细节','关注整体概念、未来趋势与可能性']},
-      {dim:'SN',text:'你更信任哪种信息？',options:['亲自体验过的经验与现实依据','直觉灵感以及事物背后的潜在联系']},
-      {dim:'SN',text:'描述一件事情时，你习惯：',options:['按时间顺序讲清楚过程与细节','直接总结核心要点和象征意义']},
-      {dim:'SN',text:'你对未来的态度更偏向：',options:['立足当下，脚踏实地做好眼前事','充满想象，经常构思长远的愿景']},
-      {dim:'SN',text:'你更擅长观察：',options:['细微变化与具体细节','整体模式和抽象联系']},
-      {dim:'SN',text:'阅读时你更偏爱：',options:['纪实报道、实用指南','科幻小说、哲学思辨']},
-      {dim:'TF',text:'做重大决策时，你首要考虑的是：',options:['逻辑客观性与规则公平','相关人员的感受与人情和谐']},
-      {dim:'TF',text:'当朋友向你倾诉苦恼时，你第一反应是：',options:['分析问题帮他找解决方案','给予情感共鸣并安慰他的情绪']},
-      {dim:'TF',text:'你更容易被什么样的人打动？',options:['思路清晰、条理分明的人','充满体贴、富有同理心的人']},
-      {dim:'TF',text:'在面对冲突或辩论时，你倾向于：',options:['坚持真理，哪怕伤害一时气氛','退一步海阔天空，优先维护关系']},
-      {dim:'TF',text:'你更看重的是：',options:['逻辑一致性','人际和谐']},
-      {dim:'TF',text:'你通常如何评价他人？',options:['客观分析其能力与表现','关注其动机与情感状态']},
-      {dim:'JP',text:'出行旅游之前，你通常会：',options:['制定详细行程单并按计划执行','只定好机票酒店，具体行程随性而定']},
-      {dim:'JP',text:'面对日常工作与任务，你的节奏是：',options:['列好待办清单，有条不紊提前完成','不到最后一刻缺乏动力，喜欢临场发挥']},
-      {dim:'JP',text:'你更喜欢哪一种生活状态？',options:['充满秩序感和可预测性的环境','充满变化与自由选择的环境']},
-      {dim:'JP',text:'当原定计划突然被打乱时，你会：',options:['感到有些焦虑，想办法恢复原状','轻松接受，视其为有趣的意外插曲']},
-      {dim:'JP',text:'你更擅长：',options:['制定计划并严格遵循','灵活应变，随机调整']},
-      {dim:'JP',text:'你更偏好：',options:['早早完成事情，不留尾巴','在压力下高效爆发']},
-    ],
-    getResult:function(ansList){
-      const dims={EI:0,SN:0,TF:0,JP:0};
-      ansList.forEach((a,i)=>{ const q=this.questions[i]; if(q) dims[q.dim]+=a.value; });
-      const c=6;
-      const type=(dims.EI/c<0.5?'E':'I')+(dims.SN/c<0.5?'S':'N')+(dims.TF/c<0.5?'T':'F')+(dims.JP/c<0.5?'J':'P');
-      const descMap={
-        'INTJ':'建筑师型 — 独立果断，善于全局战略规划。','INTP':'逻辑学家型 — 求知若渴，具备强大的抽象思维能力。',
-        'ENTJ':'指挥官型 — 天生的领导者，远见卓识，决策果断。','ENTP':'辩论家型 — 机智敏捷，热爱智力挑战与创新。',
-        'INFJ':'提倡者型 — 深具理想主义与洞察力，坚守内在价值观。','INFP':'调解者型 — 温暖敏感，富有共情力与诗意情怀。',
-        'ENFJ':'主人公型 — 充满激情与感染力，善于鼓舞他人。','ENFP':'竞选者型 — 自由开朗，充满创意与探索精神。',
-        'ISTJ':'物流师型 — 严谨务实，责任感极强，值得信赖。','ISFJ':'守卫者型 — 体贴入微，忠诚守护，默默奉献。',
-        'ESTJ':'总经理型 — 果断实干，组织能力卓越，注重规则。','ESFJ':'执政官型 — 热情热心，善于协调团队氛围。',
-        'ISTP':'鉴赏家型 — 冷静观察，动手能力强，灵活应变。','ISFP':'探险家型 — 艺术气质，温和随性，追求当下体验。',
-        'ESTP':'企业家型 — 活力充沛，敢于冒险，善于应对突发事件。','ESFP':'表演者型 — 热情洋溢，活在当下，天生的氛围制造者。'
-      };
-      return { type, description:descMap[type]||`${type} 人格` };
-    }
-  },
-  {
-    id:'color', name:'性格色彩',
-    icon:`<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" stroke="currentColor"/><path d="M20 4 L20 36 M4 20 L36 20 M8 8 L32 32 M32 8 L8 32" stroke="currentColor"/></svg>`,
-    desc:'探索你主导的性格本色与潜在气质。',
-    questions:[
-      {text:'当遇到突发危机时，你的第一反应是：',options:['迅速掌控局面，下达指令','保持冷静，分析逻辑与原因','积极乐观，鼓励大家不要慌','顺应安排，默默做好配合工作']},
-      {text:'你最享受的工作/学习状态是：',options:['不断突破目标，取得胜利','秩序井然，完美无瑕','充满新鲜感，有创意交流','和谐稳定，无压力无冲突']},
-      {text:'朋友们对你最常见的评价是：',options:['有魄力、雷厉风行','细致严谨、可靠理智','幽默有趣、感染力强','温和体贴、善解人意']},
-      {text:'面对争执时，你的表现通常是：',options:['直言不讳，一定要辨明对错','拿出证据，用逻辑说服对方','开个玩笑，化解尴尬氛围','选择妥协，尽量避免正面冲突']},
-      {text:'在团队项目中，你最愿意承担的角色是：',options:['决策者与指挥者','质量把控与规划者','创意发想与气氛组','执行落地与后勤保障']},
-      {text:'你最不能忍受的情况是：',options:['效率低下与办事拖沓','毫无秩序与粗心大意','枯燥乏味与被约束','强势逼迫与人际紧张']},
-      {text:'做决定时，你的主导因素是：',options:['目标与结果','数据与分析','直觉与乐趣','感受与关系']},
-      {text:'你的休闲放松方式偏向：',options:['挑战高难度运动或竞技游戏','独处阅读、整理空间或深度研究','参加朋友聚会、探店游玩','在家休息、陪伴家人宠物']},
-      {text:'对于规则和制度，你的态度是：',options:['如果有助于提高效率就遵守，否则尝试重塑','必须严格遵守，无规则不成方圆','随心所欲，规则是死的，人是活的','默默遵守，尽量不引起麻烦']},
-      {text:'你对未来的核心渴望是：',options:['成就与掌控力','完美与真理','快乐与自由','平安与和谐']},
-      {text:'你更倾向哪种沟通风格？',options:['直接简洁，直奔主题','逻辑严谨，层层递进','生动有趣，充满故事性','委婉柔和，照顾情绪']},
-      {text:'你更看重他人的哪种特质？',options:['果断与魄力','诚实与严谨','幽默与活力','善良与包容']},
-      {text:'面对批评时，你的第一反应是：',options:['理性判断是否接受','感到不适，但会认真反思','一笑了之，不往心里去','很在意，怕被否定']},
-      {text:'你内心的动力主要来源于：',options:['竞争与获胜','完善与超越','自由与新鲜','爱与归属']},
-    ],
-    getResult:function(ansList){
-      const counts=[0,0,0,0]; ansList.forEach(a=>{if(a.value<4)counts[a.value]++;});
-      const maxIdx=counts.indexOf(Math.max(...counts));
-      const colors=[{name:'力量红',desc:'你充满行动力与掌控欲，目标明确，遇到困难勇往直前，是天生的领导者。'},{name:'完美蓝',desc:'你深思熟虑、追求品质与秩序，注重细节与事实，是极其可靠的思考者。'},{name:'活力黄',desc:'你乐观热情、富有感染力，喜欢探索未知与表达体验，是快乐的传播者。'},{name:'和平绿',desc:'你温和宽容、随和包容，善于倾听与共情，是人际交往中最舒适的守护者。'}];
-      return { type:colors[maxIdx].name, description:colors[maxIdx].desc };
-    }
-  },
-  {
-    id:'age', name:'心理年龄',
-    icon:`<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" stroke="currentColor"/><path d="M20 4 L20 36 M4 20 L36 20 M8 8 L32 32 M32 8 L8 32" stroke="currentColor"/></svg>`,
-    desc:'穿越岁月表象，测测你内心的真实灵魂状态。',
-    questions:[
-      {text:'听到最新的流行网络梗或潮流词汇时，你：',options:['乐在其中，迅速掌握并使用','能理解但不太会在日常用','完全不感兴趣，觉得有些幼稚']},
-      {text:'面对生活中的意外插曲，你的心态更接近：',options:['太刺激了，看看会发生什么','有些烦恼，但能迅速冷静应对','疲惫叹息，希望生活多些平静']},
-      {text:'对于"熬夜"这件事，你现在的感受是：',options:['夜生活才刚开始，根本不困','偶尔为之，但需要很久恢复','早睡早起最舒适，养生要紧']},
-      {text:'看到街边的小狗或童趣玩具时，你：',options:['忍不住上前逗弄，保持童心','微笑看看，觉得挺有意思','内心毫无波澜，匆匆路过']},
-      {text:'你对"社交圈子"的看法是：',options:['朋友越多越好，喜欢认识新人','维持几个知心挚友就足够','享受独处，人际交往太累']},
-      {text:'面对理想与现实的差距，你通常：',options:['满怀信心，相信自己能改变一切','接受现实，在有限空间里努力','看淡一切，顺其自然不强求']},
-      {text:'你对新科技或新产品的态度是：',options:['第一时间尝鲜，积极探索新功能','有需要时再去学习使用','觉得繁琐，更习惯传统方式']},
-      {text:'回顾过去几年自己的选择，你常觉得：',options:['充满了精彩与无悔的冒险','虽然有遗憾，但都是宝贵的成长','过去太天真，现在理智多了']},
-      {text:'你更喜欢的周末度假方式是：',options:['去游乐园、打卡潮牌或者狂欢','去郊游、看展览或者咖啡馆小憩','在家打扫卫生、煮茶放松、养花']},
-      {text:'对于"年龄增长"这件事，你的真实感觉是：',options:['不过是个数字，我永远年轻','随遇而安，每个阶段有不同的美','感受到了岁月的沧桑与沉重']},
-      {text:'你更倾向于哪种时间观念？',options:['活在当下，享受此刻','规划未来，未雨绸缪','怀念过去，珍视回忆']},
-      {text:'你更愿意尝试：',options:['全新的冒险','熟悉的舒适区','偶尔小挑战']},
-      {text:'你对自己的未来：',options:['充满期待和无限可能','脚踏实地，按步就班','有些迷茫，边走边看']},
-      {text:'你更欣赏哪种人生状态？',options:['永远热血沸腾','沉稳从容不迫','随性自在逍遥']},
-    ],
-    getResult:function(ansList){
-      const totalScore=ansList.reduce((s,a)=>s+a.value,0);
-      const age=Math.round(18+(totalScore/28)*37);
-      let label,desc;
-      if(age<25){label='少年灵魂';desc='你拥有极高的敏锐度与好奇心，眼神依然清亮，内心住着一个永远年轻的少年。';}
-      else if(age<35){label='青年锐气';desc='你朝气蓬勃又开始兼具理性，既有追逐理想的勇气，也懂得了脚踏实地。';}
-      else if(age<48){label='成熟稳健';desc='你处事从容，见过了风浪与世面，内心具备强大的定力与责任感。';}
-      else{label='通透智者';desc='你洞悉世事，看淡纷扰，拥有超越年龄的豁达与宁静。';}
-      return { type:`${age} 岁 · ${label}`, description:desc };
-    }
-  },
-  {
-    id:'love', name:'爱情风格',
-    icon:`<svg viewBox="0 0 40 40"><path d="M20 34 C6 22 2 14 8 8 C14 2 20 8 20 14 C20 8 26 2 32 8 C38 14 34 22 20 34Z" stroke="currentColor" fill="none"/></svg>`,
-    desc:'揭示你在亲密关系中的潜在模式与期待。',
-    questions:[
-      {text:'你认为理想爱情中最不可或缺要素是：',options:['心动与强烈的情感火花','深度的灵魂共鸣与理解','绝对的信任与安全感','共同的生活目标与现实支撑']},
-      {text:'当与伴侣发生分歧时，你通常：',options:['希望当下立刻沟通解决，不留隔夜仇','各自冷静一会儿，撰写长文或理性探讨','优先照顾对方情绪，主动退让和解','冷静评估现实利弊，寻找折中方案']},
-      {text:'你最喜欢的约会体验是：',options:['充满惊喜的旅行或未知的探险','安静环境下的深夜长谈与心声吐露','窝在家里一起做饭、看电影','共同制定未来的理财或规划清单']},
-      {text:'你在表达爱意时，最习惯的方式是：',options:['频繁的身体接触与热情夸奖','送上精心准备、充满含义的礼物','默默为对方做好生活小事','给予对方空间并支持其个人成长']},
-      {text:'对于"一见钟情"，你的态度是：',options:['坚信不疑，直觉往往最准确','相信有磁场吸引，但仍需后续了解','不太相信，感情需要日久生情','完全不信，现实条件匹配更重要']},
-      {text:'在关系中，你最害怕出现的情况是：',options:['激情退却后的麻木与平淡','彼此渐行渐远、无法深度交流','缺乏安全感与背叛','因恋爱失去自我与个人空间']},
-      {text:'你希望伴侣在生活中扮演的角色更接近：',options:['带你探索世界的合伙人','懂你所有情绪的灵魂伴侣','温馨港湾中的避风港','共同奋斗与成长的战友']},
-      {text:'当伴侣遇到挫折时，你第一反应是：',options:['带他去吃喝玩乐，转移注意力','耐心倾听，给予充足的心理支撑','帮他分析原因，提供现实解决建议','承担起后勤保障，让他无后顾之忧']},
-      {text:'对于亲密关系中的隐私空间，你认为：',options:['爱就要毫无保留，分享彼此一切','保持适度神秘感，爱需要呼吸感','相互信任即可，无需刻意查阅','各自保持独立，互不干涉个人界限']},
-      {text:'你理想中的长久爱情状态是：',options:['历经岁月依然保有初见的心动','相看两不厌，默契尽在不言中','平平淡淡才是真，陪伴是最长情的告白','并肩作战，互相成就更好的自己']},
-      {text:'你更看重伴侣的哪种特质？',options:['浪漫与激情','深刻的理解与共鸣','忠诚与靠谱','上进与成熟']},
-      {text:'你更倾向于哪种依赖模式？',options:['适度依赖，彼此独立','高度依恋，形影不离','保持距离，各自精彩']},
-      {text:'你更愿意为爱情付出什么？',options:['时间和精力','耐心和包容','妥协和牺牲','共同成长的努力']},
-      {text:'你更相信爱情是：',options:['一种强烈的感觉','一种深刻的理解','一种坚定的选择','一种自然的相处']},
-    ],
-    getResult:function(ansList){
-      const counts=[0,0,0,0]; ansList.forEach(a=>{if(a.value<4)counts[a.value]++;});
-      const maxIdx=counts.indexOf(Math.max(...counts));
-      const styles=[{name:'热烈浪漫型',desc:'你追寻纯粹的情感火花与仪式感，相信爱情是生命中最动人的诗篇。'},{name:'灵魂共鸣型',desc:'你渴望极致的精神契合，比起外在条件，你更在意彼此内心世界的交融。'},{name:'温情守护型',desc:'你珍视陪伴与安全感，将爱融入日常细水长流的关怀与守护之中。'},{name:'理性成长型',desc:'你注重相互独立与共同进步，倾向于构建健康、成熟且可持续的关系。'}];
-      return { type:styles[maxIdx].name, description:styles[maxIdx].desc };
-    }
-  }
-];
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
 
-// 全局状态
-let activeTest=null, currentQ=0, answers=[], resultData=null, selectedValue=null, autoAdvanceTimer=null;
+        function goHome() {
+            activeTest = null;
+            currentQ = 0;
+            answers = [];
+            resultData = null;
+            selectedValue = null;
+            if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = null; }
+            renderHome();
+        }
 
-function renderHome(){
-  document.getElementById('testGrid').innerHTML=TESTS.map(t=>`
-    <div class="test-card" onclick="startTest('${t.id}')">
-      <div class="icon">${t.icon}</div>
-      <h3>${t.name}</h3>
-      <p>${t.desc}</p>
-      <span class="badge">${t.questions.length} 题</span>
-    </div>`).join('');
-  showPage('page-home');
-}
+        function startTest(testId) {
+            activeTest = TESTS.find(t => t.id === testId);
+            if (!activeTest) return;
+            currentQ = 0;
+            answers = [];
+            resultData = null;
+            selectedValue = null;
+            showPage('page-quiz');
+            updateNavButtons();
+            renderQuestion();
+        }
 
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+        function restartCurrentTest() {
+            if (activeTest) startTest(activeTest.id);
+            else goHome();
+        }
 
-function goHome(){
-  activeTest=null; currentQ=0; answers=[]; resultData=null; selectedValue=null;
-  if(autoAdvanceTimer){clearTimeout(autoAdvanceTimer);autoAdvanceTimer=null;}
-  renderHome();
-}
+        function updateNavButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const homeBtn = document.getElementById('homeBtn');
+            if (currentQ > 0) { prevBtn.style.display = '';
+                homeBtn.style.display = 'none'; } else { prevBtn.style.display = 'none';
+                homeBtn.style.display = ''; }
+        }
 
-function startTest(testId){
-  activeTest=TESTS.find(t=>t.id===testId);
-  if(!activeTest) return;
-  currentQ=0; answers=[]; resultData=null; selectedValue=null;
-  showPage('page-quiz');
-  updateNavButtons();
-  renderQuestion();
-}
+        // ─── 渲染题目 ──────────────────────────────────────────────
+        function renderQuestion() {
+            const q = activeTest.questions[currentQ];
+            const total = activeTest.questions.length;
+            document.getElementById('qCounter').textContent = `第 ${currentQ+1} / ${total} 题`;
+            document.getElementById('progressBar').style.width = `${currentQ/total*100}%`;
+            document.getElementById('qText').textContent = q.text;
 
-function restartCurrentTest(){
-  if(activeTest) startTest(activeTest.id);
-  else goHome();
-}
+            // 情景标签增强（标注现实场景）
+            const scenarioEl = document.getElementById('qScenario');
+            const hasScenario = q.text.includes('聚会') || q.text.includes('公司') || q.text.includes('伴侣') ||
+                q.text.includes('朋友') || q.text.includes('老板') || q.text.includes('深夜') ||
+                q.text.includes('周末') || q.text.includes('压力') || q.text.includes('项目');
+            if (hasScenario) {
+                scenarioEl.style.display = 'block';
+                let label = '📌 现实情境';
+                if (q.text.includes('公司') || q.text.includes('项目') || q.text.includes('老板')) label = '💼 职场情境';
+                else if (q.text.includes('伴侣') || q.text.includes('关系') || q.text.includes('约会')) label = '❤️ 关系情境';
+                else if (q.text.includes('朋友') || q.text.includes('聚会') || q.text.includes('社交')) label = '👥 社交情境';
+                else if (q.text.includes('深夜') || q.text.includes('压力') || q.text.includes('独处')) label = '🌙 内心情境';
+                scenarioEl.textContent = `${label}  ·  请凭第一直觉选择`;
+            } else {
+                scenarioEl.style.display = 'none';
+            }
 
-function updateNavButtons(){
-  const prevBtn=document.getElementById('prevBtn');
-  const homeBtn=document.getElementById('homeBtn');
-  if(currentQ>0){ prevBtn.style.display=''; homeBtn.style.display='none'; }
-  else{ prevBtn.style.display='none'; homeBtn.style.display=''; }
-}
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                const isSelected = answers[currentQ] && answers[currentQ].value === i;
+                if (isSelected) div.classList.add('selected');
+                div.innerHTML =
+                    `<span>${String.fromCharCode(65+i)}. ${opt}</span><span class="key-hint">${i+1}</span>`;
+                div.onclick = () => selectOption(div, i);
+                container.appendChild(div);
+            });
+            selectedValue = answers[currentQ] ? answers[currentQ].value : null;
+            document.getElementById('nextBtn').disabled = selectedValue === null;
+            updateNavButtons();
+        }
 
-function renderQuestion(){
-  const q=activeTest.questions[currentQ];
-  document.getElementById('qCounter').textContent=`第 ${currentQ+1} / ${activeTest.questions.length} 题`;
-  document.getElementById('progressBar').style.width=`${currentQ/activeTest.questions.length*100}%`;
-  document.getElementById('qText').textContent=q.text;
-  const container=document.getElementById('optionsContainer');
-  container.innerHTML='';
-  q.options.forEach((opt,i)=>{
-    const div=document.createElement('div');
-    div.className='option-item';
-    // 回填已选答案
-    const isSelected = answers[currentQ] && answers[currentQ].value===i;
-    if(isSelected) div.classList.add('selected');
-    div.innerHTML=`<span>${String.fromCharCode(65+i)}. ${opt}</span><span class="key-hint">${i+1}</span>`;
-    div.onclick=()=>selectOption(div,i);
-    container.appendChild(div);
-  });
-  selectedValue = answers[currentQ] ? answers[currentQ].value : null;
-  document.getElementById('nextBtn').disabled = selectedValue===null;
-  updateNavButtons();
-}
+        function selectOption(el, val) {
+            if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = null; }
+            document.querySelectorAll('.option-item').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedValue = val;
+            document.getElementById('nextBtn').disabled = false;
 
-function selectOption(el,val){
-  if(autoAdvanceTimer){clearTimeout(autoAdvanceTimer);autoAdvanceTimer=null;}
-  document.querySelectorAll('.option-item').forEach(o=>o.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedValue=val;
-  document.getElementById('nextBtn').disabled=false;
+            if (currentQ < activeTest.questions.length - 1) {
+                autoAdvanceTimer = setTimeout(() => { nextQuestion(); }, 600);
+            }
+        }
 
-  // ★ 自动跳转：最后一题不自动跳，其他等 600ms
-  if(currentQ < activeTest.questions.length-1){
-    autoAdvanceTimer = setTimeout(()=>{
-      nextQuestion();
-    }, 600);
-  }
-}
+        function prevQuestion() {
+            if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = null; }
+            if (currentQ <= 0) return;
+            currentQ--;
+            selectedValue = null;
+            renderQuestion();
+        }
 
-function prevQuestion(){
-  if(autoAdvanceTimer){clearTimeout(autoAdvanceTimer);autoAdvanceTimer=null;}
-  if(currentQ<=0) return;
-  currentQ--;
-  selectedValue=null;
-  renderQuestion();
-}
+        function nextQuestion() {
+            if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = null; }
+            if (selectedValue === null) return;
+            const q = activeTest.questions[currentQ];
+            const qid = q.id || `q${currentQ}`;
+            answers[currentQ] = { qid, value: selectedValue };
+            currentQ++;
+            selectedValue = null;
+            if (currentQ >= activeTest.questions.length) { finishTest(); return; }
+            renderQuestion();
+        }
 
-function nextQuestion(){
-  if(autoAdvanceTimer){clearTimeout(autoAdvanceTimer);autoAdvanceTimer=null;}
-  if(selectedValue===null) return;
-  const q=activeTest.questions[currentQ];
-  const qid=q.id||`q${currentQ}`;
-  answers[currentQ]={qid,value:selectedValue};
-  currentQ++;
-  selectedValue=null;
-  if(currentQ>=activeTest.questions.length){ finishTest(); return; }
-  renderQuestion();
-}
+        // ─── 完成测试 ──────────────────────────────────────────────
+        function finishTest() {
+            const result = activeTest.getResult(answers);
+            result.testName = activeTest.name;
+            result.testIcon = activeTest.icon;
+            resultData = result;
+            showPage('page-result');
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('resultIcon').innerHTML =
+                `<svg viewBox="0 0 80 80" stroke="var(--primary)" stroke-width="2" fill="none"><circle cx="40" cy="40" r="30"/><path d="M20 40 L60 40 M40 20 L40 60"/></svg>`;
+            document.getElementById('resultType').textContent = result.type;
+            document.getElementById('resultDesc').textContent = result.description || '';
+            const grid = document.getElementById('dimGrid');
+            grid.innerHTML = '';
+            if (result.dims && Object.keys(result.dims).length > 0) {
+                grid.style.display = 'grid';
+                Object.entries(result.dims).forEach(([k, v]) => {
+                    const div = document.createElement('div');
+                    div.className = 'dim-tag';
+                    div.innerHTML = `<span class="dim-name">${k}</span>${v}`;
+                    grid.appendChild(div);
+                });
+            } else grid.style.display = 'none';
+            saveHistory(result);
+        }
 
-function finishTest(){
-  const result=activeTest.getResult(answers);
-  result.testName=activeTest.name;
-  result.testIcon=activeTest.icon;
-  resultData=result;
-  showPage('page-result');
-  document.getElementById('progressBar').style.width='100%';
-  document.getElementById('resultIcon').innerHTML=`<svg viewBox="0 0 80 80" stroke="var(--primary)" stroke-width="2" fill="none"><circle cx="40" cy="40" r="30"/><path d="M20 40 L60 40 M40 20 L40 60"/></svg>`;
-  document.getElementById('resultType').textContent=result.type;
-  document.getElementById('resultDesc').textContent=result.description||'';
-  const grid=document.getElementById('dimGrid');
-  grid.innerHTML='';
-  if(result.dims&&Object.keys(result.dims).length>0){
-    grid.style.display='grid';
-    Object.entries(result.dims).forEach(([k,v])=>{
-      const div=document.createElement('div');
-      div.className='dim-tag';
-      div.innerHTML=`<span class="dim-name">${k}</span>${v}`;
-      grid.appendChild(div);
-    });
-  } else grid.style.display='none';
-  saveHistory(result);
-}
+        // ─── 历史记录 ──────────────────────────────────────────────
+        function saveHistory(data) {
+            const key = 'aurevny_multi_test_history';
+            const hist = JSON.parse(localStorage.getItem(key) || '[]');
+            hist.unshift({ testName: data.testName, testIcon: data.testIcon, type: data.type, dims: data.dims || null,
+                date: new Date().toLocaleString('zh-CN') });
+            localStorage.setItem(key, JSON.stringify(hist.slice(0, 30)));
+        }
 
-function saveHistory(data){
-  const key='aurevny_multi_test_history';
-  const hist=JSON.parse(localStorage.getItem(key)||'[]');
-  hist.unshift({testName:data.testName,testIcon:data.testIcon,type:data.type,dims:data.dims||null,date:new Date().toLocaleString('zh-CN')});
-  localStorage.setItem(key,JSON.stringify(hist.slice(0,30)));
-}
+        function showHistory() {
+            const key = 'aurevny_multi_test_history';
+            const hist = JSON.parse(localStorage.getItem(key) || '[]');
+            const list = document.getElementById('historyList');
+            if (hist.length === 0) { list.innerHTML = '<p style="color:var(--text-sub);font-size:14px;">暂无记录</p>'; } else {
+                list.innerHTML = hist.map(h => `<div class="history-item"><span class="hist-type">${h.testName} · ${h.type}</span><span class="hist-time">${h.date}</span>${h.dims?`<br><small style="color:var(--text-sub);">${Object.entries(h.dims).map(([k,v])=>`${k}:${v}`).join(' · ')}</small>`:''}</div>`)
+                    .join('');
+            }
+            document.getElementById('historyModal').classList.add('show');
+        }
 
-function showHistory(){
-  const key='aurevny_multi_test_history';
-  const hist=JSON.parse(localStorage.getItem(key)||'[]');
-  const list=document.getElementById('historyList');
-  if(hist.length===0){ list.innerHTML='<p style="color:var(--text-sub);font-size:14px;">暂无记录</p>'; }
-  else{
-    list.innerHTML=hist.map(h=>`<div class="history-item"><span class="hist-type">${h.testName} · ${h.type}</span><span class="hist-time">${h.date}</span>${h.dims?`<br><small style="color:var(--text-sub);">${Object.entries(h.dims).map(([k,v])=>`${k}:${v}`).join(' · ')}</small>`:''}</div>`).join('');
-  }
-  document.getElementById('historyModal').classList.add('show');
-}
+        // ─── 分享图 ──────────────────────────────────────────────
+        function drawRoundRect(ctx, x, y, w, h, r) {
+            if (r > w / 2) r = w / 2;
+            if (r > h / 2) r = h / 2;
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+        }
 
-function drawRoundRect(ctx,x,y,w,h,r){
-  if(r>w/2)r=w/2; if(r>h/2)r=h/2;
-  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
-}
-function shareResult(){
-  if(!resultData) return;
-  const canvas=document.getElementById('shareCanvas');
-  const ctx=canvas.getContext('2d');
-  const isDark=document.getElementById('html-root').classList.contains('dark-mode');
-  ctx.clearRect(0,0,800,1000);
-  ctx.fillStyle=isDark?'#1a1a2e':'#f5f3ee'; ctx.fillRect(0,0,800,1000);
-  ctx.fillStyle=isDark?'#24243e':'#ffffff'; ctx.beginPath(); drawRoundRect(ctx,40,40,720,920,32); ctx.fill();
-  ctx.fillStyle=isDark?'#c9b18a':'#7b8d9e'; ctx.font='bold 36px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('认知棱镜 · '+resultData.testName,400,120);
-  ctx.strokeStyle=isDark?'#c9b18a':'#7b8d9e'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(400,260,60,0,Math.PI*2); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(360,260); ctx.lineTo(440,260); ctx.moveTo(400,220); ctx.lineTo(400,300); ctx.stroke();
-  ctx.fillStyle=isDark?'#eae6e0':'#2d2a24'; ctx.font='bold 44px sans-serif'; ctx.fillText(resultData.type,400,420);
-  ctx.font='22px sans-serif'; ctx.fillStyle=isDark?'#9b9588':'#7b7466';
-  const text=resultData.description||''; let line='',startY=490;
-  for(let n=0;n<text.length;n++){
-    let testLine=line+text[n];
-    if(ctx.measureText(testLine).width>600&&n>0){ ctx.fillText(line,400,startY); line=text[n]; startY+=36; }
-    else line=testLine;
-  }
-  ctx.fillText(line,400,startY);
-  if(resultData.dims&&Object.keys(resultData.dims).length>0){
-    ctx.font='16px monospace'; ctx.fillStyle=isDark?'#c9b18a':'#7b8d9e';
-    ctx.fillText(Object.entries(resultData.dims).map(([k,v])=>`${k}:${v}`).join('  '),400,680);
-  }
-  ctx.font='14px sans-serif'; ctx.fillStyle=isDark?'#555':'#bbb';
-  ctx.fillText('Local Only · No Telemetry',400,900); ctx.fillText(new Date().toLocaleString('zh-CN'),400,930);
-  const link=document.createElement('a');
-  link.download=`test_${resultData.testName||'result'}_${Date.now()}.png`;
-  link.href=canvas.toDataURL('image/png'); link.click();
-}
+        function shareResult() {
+            if (!resultData) return;
+            const canvas = document.getElementById('shareCanvas');
+            const ctx = canvas.getContext('2d');
+            const isDark = document.getElementById('html-root').classList.contains('dark-mode');
+            ctx.clearRect(0, 0, 800, 1000);
+            ctx.fillStyle = isDark ? '#1a1a2e' : '#f5f3ee';
+            ctx.fillRect(0, 0, 800, 1000);
+            ctx.fillStyle = isDark ? '#24243e' : '#ffffff';
+            ctx.beginPath();
+            drawRoundRect(ctx, 40, 40, 720, 920, 32);
+            ctx.fill();
+            ctx.fillStyle = isDark ? '#c9b18a' : '#7b8d9e';
+            ctx.font = 'bold 36px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('认知棱镜 · ' + resultData.testName, 400, 120);
+            ctx.strokeStyle = isDark ? '#c9b18a' : '#7b8d9e';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(400, 260, 60, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(360, 260);
+            ctx.lineTo(440, 260);
+            ctx.moveTo(400, 220);
+            ctx.lineTo(400, 300);
+            ctx.stroke();
+            ctx.fillStyle = isDark ? '#eae6e0' : '#2d2a24';
+            ctx.font = 'bold 44px sans-serif';
+            ctx.fillText(resultData.type, 400, 420);
+            ctx.font = '22px sans-serif';
+            ctx.fillStyle = isDark ? '#9b9588' : '#7b7466';
+            const text = resultData.description || '';
+            let line = '',
+                startY = 490;
+            for (let n = 0; n < text.length; n++) {
+                let testLine = line + text[n];
+                if (ctx.measureText(testLine).width > 600 && n > 0) { ctx.fillText(line, 400, startY);
+                    line = text[n];
+                    startY += 36; } else line = testLine;
+            }
+            ctx.fillText(line, 400, startY);
+            if (resultData.dims && Object.keys(resultData.dims).length > 0) {
+                ctx.font = '16px monospace';
+                ctx.fillStyle = isDark ? '#c9b18a' : '#7b8d9e';
+                ctx.fillText(Object.entries(resultData.dims).map(([k, v]) => `${k}:${v}`).join('  '), 400, 680);
+            }
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = isDark ? '#555' : '#bbb';
+            ctx.fillText('Local Only · No Telemetry', 400, 900);
+            ctx.fillText(new Date().toLocaleString('zh-CN'), 400, 930);
+            const link = document.createElement('a');
+            link.download = `test_${resultData.testName||'result'}_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
 
-// 键盘
-document.addEventListener('keydown',e=>{
-  const quizPage=document.getElementById('page-quiz');
-  if(!quizPage.classList.contains('active')) return;
-  if(e.key>='1'&&e.key<='9'){
-    const idx=parseInt(e.key)-1;
-    const items=document.querySelectorAll('.option-item');
-    if(items[idx]) items[idx].click();
-  }
-  if(e.key==='Enter'&&!document.getElementById('nextBtn').disabled){
-    if(autoAdvanceTimer){clearTimeout(autoAdvanceTimer);autoAdvanceTimer=null;}
-    nextQuestion();
-  }
-  if(e.key==='Backspace'&&currentQ>0){
-    prevQuestion();
-  }
-});
+        // ─── 键盘快捷键 ──────────────────────────────────────────────
+        document.addEventListener('keydown', e => {
+            const quizPage = document.getElementById('page-quiz');
+            if (!quizPage.classList.contains('active')) return;
+            if (e.key >= '1' && e.key <= '9') {
+                const idx = parseInt(e.key) - 1;
+                const items = document.querySelectorAll('.option-item');
+                if (items[idx]) items[idx].click();
+            }
+            if (e.key === 'Enter' && !document.getElementById('nextBtn').disabled) {
+                if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer);
+                    autoAdvanceTimer = null; }
+                nextQuestion();
+            }
+            if (e.key === 'Backspace' && currentQ > 0) { prevQuestion(); }
+        });
 
-renderHome();
-</script>
+        renderHome();
+    </script>
 </body>
 </html>
