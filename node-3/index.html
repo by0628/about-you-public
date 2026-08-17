@@ -141,6 +141,10 @@
             width: 100%;
             justify-content: center;
         }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+        }
         .page {
             display: none;
             animation: fadeIn .5s ease forwards;
@@ -375,9 +379,9 @@
             background: var(--bg-card);
             border-radius: var(--radius-md);
             padding: 28px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 70vh;
+            max-width: 600px;
+            width: 92%;
+            max-height: 80vh;
             overflow-y: auto;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
@@ -390,6 +394,11 @@
             padding: 12px;
             border-bottom: 1px solid var(--border);
             font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .history-item:last-child {
             border-bottom: none;
@@ -401,7 +410,17 @@
         .history-item .hist-time {
             font-size: 11px;
             color: var(--text-sub);
-            float: right;
+        }
+        .history-item .hist-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .history-item .hist-dims {
+            font-size: 11px;
+            color: var(--text-sub);
+            width: 100%;
+            margin-top: 4px;
         }
 
         @media(max-width:640px) {
@@ -421,6 +440,9 @@
             .q-scenario {
                 font-size: 13px;
                 padding: 12px 14px;
+            }
+            .modal {
+                padding: 16px;
             }
         }
     </style>
@@ -486,7 +508,8 @@
         </div>
     </div>
 
-    <canvas id="shareCanvas" width="800" height="1000" style="display:none;"></canvas>
+    <!-- 3倍高清画布 -->
+    <canvas id="shareCanvas" width="2400" height="3000" style="display:none;"></canvas>
 
     <script>
         // 主题
@@ -503,16 +526,16 @@
             localStorage.setItem('theme', html.classList.contains('dark-mode') ? 'dark' : 'light');
         }
 
-        // ─── 测试数据（全部重新编写为具体情景题，题量大幅增加） ──────────────────
+        // ─── 测试数据（完整保留所有情景题） ──────────────────────────
         const TESTS = [{
             id: 'sbti',
             name: 'SBTI 性格侧写',
             icon: `<svg viewBox="0 0 40 40"><rect x="6" y="6" width="28" height="28" rx="3" stroke="currentColor"/><path d="M12 15 L28 15 M12 20 L24 20 M12 25 L20 25" stroke="currentColor"/></svg>`,
             desc: '60+现实情景题，覆盖15个心理维度，精准定位你的内在原型。',
             questions: [
-                // S1 自我评价 (S1a-d)
+                // S1 自我评价
                 { id: 'S1a', text: '项目庆功宴上，CEO公开夸你是“天才”，但你清楚数据有个小错误。你如何回应？',
-                options: ['大方接受，认为实力配得上', '谦虚归功于团队，淡化自己', '当场解释数据背景，强调运气'] },
+                    options: ['大方接受，认为实力配得上', '谦虚归功于团队，淡化自己', '当场解释数据背景，强调运气'] },
                 { id: 'S1b', text: '你和伴侣大吵一架，对方摔门而出，深夜未归。你的第一反应是？', options: ['主动打电话求和，担心安全',
                         '自己先睡，等对方冷静回来再说', '觉得对方无理取闹，继续做自己的事'
                     ] },
@@ -522,7 +545,7 @@
                 { id: 'S1d', text: '被心仪的公司/学校拒绝后，你的内心独白是？', options: ['“他们不识货，我再找更好的”',
                         '“我是不是真的不够好”', '“可能只是不匹配，继续投”'
                     ] },
-                // S2 价值观 (S2a-d)
+                // S2
                 { id: 'S2a', text: '突然获得一笔100万的意外之财，你最想用来做什么？', options: ['辞职创业或环球旅行（追求自由）',
                         '买课学习或深度投资自己（追求真实成长）', '买房买车或存定期（追求稳定）'
                     ] },
@@ -535,7 +558,7 @@
                 { id: 'S2d', text: '长辈劝你考公务员求稳定，而你有自己的创业想法。你更倾向于？', options: ['坚持自己的想法，哪怕冒险',
                         '听取意见，先求稳定再发展', '折中，找一份体制内清闲工作同时搞副业'
                     ] },
-                // S3 自我认知深度 (S3a-d)
+                // S3
                 { id: 'S3a', text: '你对自己未来五年的规划清晰程度是？', options: ['非常清晰，有详细步骤', '大致有方向，但细节模糊', '完全随缘，走一步看一步'] },
                 { id: 'S3b', text: '你更相信“性格决定命运”还是“选择改变人生”？', options: ['选择改变人生（相信能动性）', '两者各占一半',
                         '命运主导一切（相信宿命）'
@@ -544,7 +567,7 @@
                 { id: 'S3d', text: '参加一个深度心理工作坊，导师让你用三个词定义自己。你更倾向于用？', options: ['进取、果断、独立', '细腻、矛盾、清醒',
                         '随和、适应、乐观'
                     ] },
-                // E1 情感表达 (E1a-d)
+                // E1
                 { id: 'E1a', text: '在一段关系中，你通常如何确认“对方还在乎我”？', options: ['几乎不确认，安全感自给自足', '偶尔通过小事默默观察',
                         '经常需要对方明确表达或反复确认'
                     ] },
@@ -557,14 +580,14 @@
                 { id: 'E1d', text: '收到一份意料之外的用心礼物，你的第一反应是？', options: ['热情拥抱并直接表达喜悦', '内心感动但表面平静，事后道谢',
                         '有些不知所措，想着该怎么还礼'
                     ] },
-                // E2 情感深度 (E2a-d)
+                // E2
                 { id: 'E2a', text: '你更容易因为哪种情境而忍不住落泪？', options: ['被他人深刻理解和看见', '被误解或感到委屈', '看到感人的新闻或影视作品'] },
                 { id: 'E2b', text: '你会在社交媒体上发布自己的负面情绪吗？', options: ['从不，只发积极内容', '偶尔设置分组可见', '经常，想获得关注和安慰'] },
                 { id: 'E2c', text: '你理想中的亲密关系状态更接近？', options: ['彼此独立但保持深度连接', '形影不离，高度融合', '互不打扰，各忙各的'] },
                 { id: 'E2d', text: '当伴侣忘记某个对你很重要的纪念日，你的内心感受是？', options: ['失望，但会直接沟通需求', '失落但不提，默默扣分',
                         '觉得无所谓，形式不重要'
                     ] },
-                // E3 情感反应 (E3a-d)
+                // E3
                 { id: 'E3a', text: '当别人在公开场合对你发火指责时，你的本能反应是？', options: ['保持冷静，就事论事反驳', '感到受伤，沉默不语或离场',
                         '被激怒，以牙还牙怼回去'
                     ] },
@@ -575,14 +598,14 @@
                 { id: 'E3d', text: '参加聚会时，如果有人一直在讲冷笑话冷场，你会？', options: ['主动接话活跃气氛', '礼貌性微笑保持沉默',
                         '专注玩手机，置身事外'
                     ] },
-                // A1 世界观 (A1a-d)
+                // A1
                 { id: 'A1a', text: '刷到“AI即将大规模取代人类工作”的报道，你内心真实想法是？', options: ['这是必然趋势，人类总能找到新出路（乐观）',
                         '确实焦虑，未来充满不确定性（悲观）', '走一步看一步，跟我当前关系不大（漠然）'
                     ] },
                 { id: 'A1b', text: '你相信“只要足够努力，就一定能获得回报”吗？', options: ['深信不疑', '半信半疑，看运气', '完全不信，环境因素更重要'] },
                 { id: 'A1c', text: '学习一项新技能时，你更习惯哪种方式？', options: ['自己瞎琢磨试错', '找资深前辈带教', '看系统教程按部就班'] },
                 { id: 'A1d', text: '你如何看待“人性本善”与“人性本恶”？', options: ['倾向本善，信任他人', '认为善恶参半，看情况', '倾向本恶，保持戒备'] },
-                // A2 规则态度 (A2a-d)
+                // A2
                 { id: 'A2a', text: '公司有一条你觉得很不合理的制度，你会如何？', options: ['想办法绕过去，按自己的方式做', '保留意见，但表面遵守',
                         '严格遵守，哪怕觉得不合理'
                     ] },
@@ -591,39 +614,39 @@
                 { id: 'A2d', text: '朋友拉你参与一个“灰色地带”但利润丰厚的项目，你大概率会？', options: ['拒绝，触及底线', '犹豫并评估风险',
                         '只要不被抓就做'
                     ] },
-                // A3 行动哲学 (A3a-d)
+                // A3
                 { id: 'A3a', text: '开始一个重要项目前，你通常的做法是？', options: ['花大量时间规划完全，再行动', '边做边想，动态调整', '先迈出第一步再说'] },
                 { id: 'A3b', text: '做人生重大决策时，你更依赖？', options: ['冷静的理性逻辑分析', '强烈的直觉和第六感', '参考身边人的经验和意见'] },
                 { id: 'A3c', text: '你的执行力在什么时候达到顶峰？', options: ['紧急任务有硬性Deadline时', '心情愉悦、状态极佳时', '没人打扰、完全独处时'] },
                 { id: 'A3d', text: '面对一件非常困难但重要的事，你的第一念头是？', options: ['挑战它，必须攻克', '有点畏惧，需要鼓励', '拖延到不得不做'] },
-                // Ac1 行动风格 (Ac1a-d)
+                // Ac1
                 { id: 'Ac1a', text: '你拖延做一件事，最底层的原因通常是？', options: ['追求完美，怕做不好', '纯粹没动力，觉得没意思', '不知从哪里下手，迷茫'] },
                 { id: 'Ac1b', text: '你更享受哪种工作模式？', options: ['独立负责，一个人搞定', '团队协作，共同推动', '视任务类型灵活切换'] },
                 { id: 'Ac1c', text: '完成任务后，你的第一反应通常是？', options: ['长舒一口气，彻底放松', '立刻复盘哪里可以更好', '马上投入下一个任务'] },
                 { id: 'Ac1d', text: '你更倾向于“多线程并行”还是“单线程专注”？', options: ['多线程，效率高', '单线程，深度强',
                         '看任务复杂度切换'
                     ] },
-                // Ac2 决策模式 (Ac2a-d)
+                // Ac2
                 { id: 'Ac2a', text: '你通常需要多久才能做出一个中等重要性的决定？', options: ['几分钟内快速决定', '需要几天权衡利弊', '反复纠结，迟迟不定'] },
                 { id: 'Ac2b', text: '你更信赖“直觉”还是“数据分析”？', options: ['直觉，因为常常很准', '数据分析，因为客观可靠', '两者结合，先直觉后验证'] },
                 { id: 'Ac2c', text: '在高压紧急状况下，你的决策能力如何？', options: ['异常清晰，能快速指挥', '一般，会有些慌乱', '容易宕机，需要别人指挥'] },
                 { id: 'Ac2d', text: '你更愿意为高回报承担高风险，还是低回报保安全？', options: ['高风险高回报', '中等风险中等回报', '低风险保底'] },
-                // Ac3 执行习惯 (Ac3a-d)
+                // Ac3
                 { id: 'Ac3a', text: '你如何对待自己制定的日常任务清单？', options: ['严格执行，划掉每项才有安全感', '灵活调整，根据精力排序', '不太用清单，随性处理'] },
                 { id: 'Ac3b', text: '你更偏好设定“短期目标”还是“长期愿景”？', options: ['短期里程碑，容易获得反馈', '长期愿景，指引大方向', '两者都需要'] },
                 { id: 'Ac3c', text: '你对自己日常执行力的满意度是？', options: ['非常满意，说到做到', '一般，有时会掉链子', '很不满意，常常虎头蛇尾'] },
                 { id: 'Ac3d', text: '遇到干扰打断时，你能否快速回到工作状态？', options: ['能，切换自如', '需要几分钟缓冲', '很难，节奏被打乱就废了'] },
-                // So1 社交倾向 (So1a-d)
+                // So1
                 { id: 'So1a', text: '参加一个50人的行业酒会，你的自然状态是？', options: ['主动出击，四处交换名片', '只与认识的人小范围交谈', '躲在角落吃东西，等结束'] },
                 { id: 'So1b', text: '老朋友说“你变了好多”，你的反应是？', options: ['“是你没跟上我节奏吧”', '“可能吧，我自己没觉得”', '“我哪里变了？快告诉我”'] },
                 { id: 'So1c', text: '你在社交场合中最大的精力消耗来自？', options: ['维持表面的客气和笑容', '害怕冷场，绞尽脑汁找话题', '不知道如何结束对话'] },
                 { id: 'So1d', text: '你更倾向于参加“熟人局”还是“陌生人局”？', options: ['陌生人局，新鲜有趣', '熟人局，放松舒适', '都可以，视心情而定'] },
-                // So2 社交形象 (So2a-d)
+                // So2
                 { id: 'So2a', text: '进入一个全是陌生人的房间，你做的第一件事是？', options: ['扫视全场，观察每个人', '主动走向人群搭话', '拿出手机假装有事'] },
                 { id: 'So2b', text: '别人对你最常见的社交印象是？', options: ['高冷有距离感', '随和好相处', '有趣幽默开心果'] },
                 { id: 'So2c', text: '你主动联系不常见面朋友的频率是？', options: ['经常，喜欢维系关系', '偶尔，想到才联系', '几乎不，等对方找我'] },
                 { id: 'So2d', text: '你在朋友圈/社交媒体上通常呈现的形象是？', options: ['积极进取的个人品牌', '真实随性的生活片段', '几乎隐形，极少发'] },
-                // So3 社交深度 (So3a-d)
+                // So3
                 { id: 'So3a', text: '你更喜欢“深度促膝长谈”还是“轻松打闹闲聊”？', options: ['深度交谈，触及灵魂', '轻松闲聊，没负担', '视对象和场合而定'] },
                 { id: 'So3b', text: '社交中你更关注对方谈话的“内容”还是“情绪”？', options: ['内容逻辑', '情绪氛围', '两者兼顾'] },
                 { id: 'So3c', text: '在团队讨论中，你通常扮演什么角色？', options: ['主导节奏的引领者', '附和跟随的支持者', '默默记录的观察者'] },
@@ -662,9 +685,9 @@
             icon: `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" stroke="currentColor"/><path d="M6 20 L34 20 M20 6 L20 34" stroke="currentColor"/><circle cx="20" cy="20" r="4" stroke="currentColor"/></svg>`,
             desc: '40道现实生活情景题，从四个维度深度剖析你的16型人格。',
             questions: [
-                // EI (10题)
+                // EI
                 { dim: 'EI', text: '周末公司团建，一边是热闹的KTV包厢，另一边是安静的密室逃脱，你更想去？',
-                options: ['KTV，越嗨越释放压力', '密室逃脱，专注解谜才舒服'] },
+                    options: ['KTV，越嗨越释放压力', '密室逃脱，专注解谜才舒服'] },
                 { dim: 'EI', text: '在社交派对中，你更倾向于？', options: ['主动穿梭人群，认识新朋友', '安静待在熟悉的朋友身边，偶尔搭话'] },
                 { dim: 'EI', text: '连续高强度社交三天后，你最想做的事是？', options: ['再约一波朋友聊个通宵', '一个人关房间，谁也别理我'] },
                 { dim: 'EI', text: '在会议讨论中，你通常如何贡献想法？', options: ['边想边说，越说思路越清晰', '深思熟虑后，一开口就是成熟观点'] },
@@ -674,7 +697,7 @@
                 { dim: 'EI', text: '你更喜欢哪种工作氛围？', options: ['开放工位，随时可以交谈', '独立隔间，专注不被打扰'] },
                 { dim: 'EI', text: '在团队中，你更常扮演什么角色？', options: ['活跃气氛、带动节奏的发动机', '默默支撑、提供深度思考的定海针'] },
                 { dim: 'EI', text: '你更愿意把业余时间花在？', options: ['参加社团、线下活动', '独自阅读、研究爱好'] },
-                // SN (10题)
+                // SN
                 { dim: 'SN', text: '老板给了你一个模糊概念“做一款极简产品”，你先做什么？', options: ['调研竞品数据与用户画像', '画思维导图，构思核心理念与故事'] },
                 { dim: 'SN', text: '你更信任哪种信息来源？', options: ['亲身实践获得的现实数据', '直觉捕捉到的潜在规律与可能性'] },
                 { dim: 'SN', text: '向别人描述一件事时，你习惯？', options: ['按时间线讲清楚细节过程', '直接提炼核心观点和象征意义'] },
@@ -685,7 +708,7 @@
                 { dim: 'SN', text: '你更擅长记忆什么？', options: ['具体的事例和细节', '整体的氛围和感受'] },
                 { dim: 'SN', text: '你更倾向于关注“是什么”还是“可能是什么”？', options: ['是什么（现实）', '可能是什么（潜力）'] },
                 { dim: 'SN', text: '你更喜欢哪种解谜游戏？', options: ['需要寻找线索的密室逃脱', '需要策略布局的桌游'] },
-                // TF (10题)
+                // TF
                 { dim: 'TF', text: '团队里有人犯了低级错误导致扣奖金，你作为组长会？', options: ['按制度扣罚，并制定SOP防止再犯', '私下请吃饭安慰，说大家都有责任'] },
                 { dim: 'TF', text: '朋友向你倾诉职场不公，你第一反应是？', options: ['帮他分析问题，找应对策略', '共情他的委屈，安抚情绪'] },
                 { dim: 'TF', text: '你更容易被哪种人打动？', options: ['逻辑严密、条理清晰的', '温柔体贴、充满同理心的'] },
@@ -696,7 +719,7 @@
                 { dim: 'TF', text: '你希望别人如何对待你？', options: ['客观公正地指出问题', '温柔体贴地照顾感受'] },
                 { dim: 'TF', text: '你更认同“对事不对人”还是“对人不对事”？', options: ['对事不对人', '先看人，再论事'] },
                 { dim: 'TF', text: '你更愿意相信“规则”还是“人情”？', options: ['规则，因为公平', '人情，因为灵活'] },
-                // JP (10题)
+                // JP
                 { dim: 'JP', text: '明天要交年终总结，但你只有一份草稿，今晚你会？', options: ['熬夜改到完美再睡', '先睡，早起凭直觉快速填满'] },
                 { dim: 'JP', text: '你更偏好哪种生活状态？', options: ['秩序井然，日程清晰', '充满弹性，随时可以改变计划'] },
                 { dim: 'JP', text: '旅行前你通常做多少准备？', options: ['详细攻略，按表打卡', '只订机酒，到了再说'] },
@@ -947,7 +970,6 @@
             document.getElementById('progressBar').style.width = `${currentQ/total*100}%`;
             document.getElementById('qText').textContent = q.text;
 
-            // 情景标签增强（标注现实场景）
             const scenarioEl = document.getElementById('qScenario');
             const hasScenario = q.text.includes('聚会') || q.text.includes('公司') || q.text.includes('伴侣') ||
                 q.text.includes('朋友') || q.text.includes('老板') || q.text.includes('深夜') ||
@@ -1046,8 +1068,14 @@
         function saveHistory(data) {
             const key = 'aurevny_multi_test_history';
             const hist = JSON.parse(localStorage.getItem(key) || '[]');
-            hist.unshift({ testName: data.testName, testIcon: data.testIcon, type: data.type, dims: data.dims || null,
-                date: new Date().toLocaleString('zh-CN') });
+            hist.unshift({
+                testName: data.testName,
+                testIcon: data.testIcon,
+                type: data.type,
+                description: data.description,
+                dims: data.dims || null,
+                date: new Date().toLocaleString('zh-CN')
+            });
             localStorage.setItem(key, JSON.stringify(hist.slice(0, 30)));
         }
 
@@ -1055,14 +1083,44 @@
             const key = 'aurevny_multi_test_history';
             const hist = JSON.parse(localStorage.getItem(key) || '[]');
             const list = document.getElementById('historyList');
-            if (hist.length === 0) { list.innerHTML = '<p style="color:var(--text-sub);font-size:14px;">暂无记录</p>'; } else {
-                list.innerHTML = hist.map(h => `<div class="history-item"><span class="hist-type">${h.testName} · ${h.type}</span><span class="hist-time">${h.date}</span>${h.dims?`<br><small style="color:var(--text-sub);">${Object.entries(h.dims).map(([k,v])=>`${k}:${v}`).join(' · ')}</small>`:''}</div>`)
-                    .join('');
+            if (hist.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-sub);font-size:14px;">暂无记录</p>';
+            } else {
+                list.innerHTML = hist.map((h, idx) => {
+                    const dimsStr = h.dims ? Object.entries(h.dims).map(([k, v]) => `${k}:${v}`).join(' · ') :
+                        '';
+                    return `<div class="history-item">
+                        <div style="flex:1; min-width:150px;">
+                            <span class="hist-type">${h.testName} · ${h.type}</span>
+                            <div class="hist-time">${h.date}</div>
+                            ${dimsStr ? `<div class="hist-dims">${dimsStr}</div>` : ''}
+                        </div>
+                        <div class="hist-actions">
+                            <button class="btn btn-primary btn-sm" onclick="regenHistory(${idx})">📸 重新生成</button>
+                        </div>
+                    </div>`;
+                }).join('');
             }
             document.getElementById('historyModal').classList.add('show');
         }
 
-        // ─── 分享图 ──────────────────────────────────────────────
+        // ─── 从历史记录重新生成图片 ──────────────────────────────
+        function regenHistory(index) {
+            const key = 'aurevny_multi_test_history';
+            const hist = JSON.parse(localStorage.getItem(key) || '[]');
+            if (index >= hist.length || index < 0) return;
+            const record = hist[index];
+            // 构造与 resultData 相同的结构
+            const data = {
+                testName: record.testName,
+                type: record.type,
+                description: record.description || '',
+                dims: record.dims || null
+            };
+            shareResultWithData(data);
+        }
+
+        // ─── 核心分享图绘制（3倍高清） ────────────────────────────
         function drawRoundRect(ctx, x, y, w, h, r) {
             if (r > w / 2) r = w / 2;
             if (r > h / 2) r = h / 2;
@@ -1077,61 +1135,138 @@
             ctx.quadraticCurveTo(x, y, x + r, y);
         }
 
-        function shareResult() {
-            if (!resultData) return;
+        function shareResultWithData(data) {
+            if (!data) return;
             const canvas = document.getElementById('shareCanvas');
             const ctx = canvas.getContext('2d');
             const isDark = document.getElementById('html-root').classList.contains('dark-mode');
-            ctx.clearRect(0, 0, 800, 1000);
+            // 缩放因子 3 倍
+            const S = 3;
+            const W = 800 * S,
+                H = 1000 * S;
+            canvas.width = W;
+            canvas.height = H;
+            // 清空
+            ctx.clearRect(0, 0, W, H);
+            // 背景
             ctx.fillStyle = isDark ? '#1a1a2e' : '#f5f3ee';
-            ctx.fillRect(0, 0, 800, 1000);
+            ctx.fillRect(0, 0, W, H);
+            // 卡片
+            const margin = 40 * S;
+            const cardW = W - 2 * margin;
+            const cardH = H - 2 * margin;
             ctx.fillStyle = isDark ? '#24243e' : '#ffffff';
             ctx.beginPath();
-            drawRoundRect(ctx, 40, 40, 720, 920, 32);
+            drawRoundRect(ctx, margin, margin, cardW, cardH, 32 * S);
             ctx.fill();
+
+            // 标题
             ctx.fillStyle = isDark ? '#c9b18a' : '#7b8d9e';
-            ctx.font = 'bold 36px sans-serif';
+            ctx.font = `bold ${34*S}px "Inter","PingFang SC",sans-serif`;
             ctx.textAlign = 'center';
-            ctx.fillText('认知棱镜 · ' + resultData.testName, 400, 120);
+            ctx.textBaseline = 'top';
+            ctx.fillText('认知棱镜 · ' + data.testName, W / 2, 70 * S);
+
+            // 图标
+            const cx = W / 2,
+                cy = 180 * S,
+                r = 50 * S;
             ctx.strokeStyle = isDark ? '#c9b18a' : '#7b8d9e';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 4 * S;
             ctx.beginPath();
-            ctx.arc(400, 260, 60, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(360, 260);
-            ctx.lineTo(440, 260);
-            ctx.moveTo(400, 220);
-            ctx.lineTo(400, 300);
+            ctx.moveTo(cx - r + 10 * S, cy);
+            ctx.lineTo(cx + r - 10 * S, cy);
+            ctx.moveTo(cx, cy - r + 10 * S);
+            ctx.lineTo(cx, cy + r - 10 * S);
             ctx.stroke();
+
+            // 结果类型
             ctx.fillStyle = isDark ? '#eae6e0' : '#2d2a24';
-            ctx.font = 'bold 44px sans-serif';
-            ctx.fillText(resultData.type, 400, 420);
-            ctx.font = '22px sans-serif';
+            ctx.font = `bold ${46*S}px "Inter","PingFang SC",sans-serif`;
+            ctx.textBaseline = 'top';
+            ctx.fillText(data.type, W / 2, 250 * S);
+
+            // 描述文本（自动换行）
             ctx.fillStyle = isDark ? '#9b9588' : '#7b7466';
-            const text = resultData.description || '';
-            let line = '',
-                startY = 490;
-            for (let n = 0; n < text.length; n++) {
-                let testLine = line + text[n];
-                if (ctx.measureText(testLine).width > 600 && n > 0) { ctx.fillText(line, 400, startY);
-                    line = text[n];
-                    startY += 36; } else line = testLine;
+            ctx.font = `${22*S}px "Inter","PingFang SC",sans-serif`;
+            ctx.textBaseline = 'top';
+            const desc = data.description || '';
+            const maxWidth = 620 * S;
+            const lineHeight = 38 * S;
+            let lines = [];
+            let currentLine = '';
+            for (let i = 0; i < desc.length; i++) {
+                const testLine = currentLine + desc[i];
+                if (ctx.measureText(testLine).width > maxWidth && i > 0) {
+                    lines.push(currentLine);
+                    currentLine = desc[i];
+                } else {
+                    currentLine = testLine;
+                }
             }
-            ctx.fillText(line, 400, startY);
-            if (resultData.dims && Object.keys(resultData.dims).length > 0) {
-                ctx.font = '16px monospace';
-                ctx.fillStyle = isDark ? '#c9b18a' : '#7b8d9e';
-                ctx.fillText(Object.entries(resultData.dims).map(([k, v]) => `${k}:${v}`).join('  '), 400, 680);
+            if (currentLine) lines.push(currentLine);
+            let yPos = 320 * S;
+            lines.forEach(line => {
+                ctx.fillText(line, W / 2, yPos);
+                yPos += lineHeight;
+            });
+
+            // 维度网格
+            const dims = data.dims;
+            if (dims && Object.keys(dims).length > 0) {
+                const entries = Object.entries(dims);
+                const cols = 5;
+                const itemWidth = 110 * S;
+                const itemHeight = 32 * S;
+                const gapX = 12 * S,
+                    gapY = 10 * S;
+                const startX = W / 2 - (cols * (itemWidth + gapX) - gapX) / 2;
+                const startY = yPos + 20 * S;
+
+                ctx.font = `${13*S}px "Inter","PingFang SC",monospace`;
+                ctx.textBaseline = 'top';
+                entries.forEach(([k, v], idx) => {
+                    const row = Math.floor(idx / cols);
+                    const col = idx % cols;
+                    const x = startX + col * (itemWidth + gapX);
+                    const y = startY + row * (itemHeight + gapY);
+                    // 背景框
+                    ctx.fillStyle = isDark ? '#2a2a44' : '#f0ede8';
+                    ctx.shadowColor = 'rgba(0,0,0,0.05)';
+                    ctx.shadowBlur = 4 * S;
+                    ctx.beginPath();
+                    drawRoundRect(ctx, x, y, itemWidth, itemHeight, 6 * S);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    // 文字
+                    ctx.fillStyle = isDark ? '#c9b18a' : '#7b8d9e';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${k}:${v}`, x + itemWidth / 2, y + 8 * S);
+                });
+                yPos = startY + Math.ceil(entries.length / cols) * (itemHeight + gapY) + 10 * S;
             }
-            ctx.font = '14px sans-serif';
+
+            // 底部脚注
             ctx.fillStyle = isDark ? '#555' : '#bbb';
-            ctx.fillText('Local Only · No Telemetry', 400, 900);
-            ctx.fillText(new Date().toLocaleString('zh-CN'), 400, 930);
+            ctx.font = `${14*S}px "Inter",sans-serif`;
+            ctx.textBaseline = 'bottom';
+            ctx.fillText('Local Only · No Telemetry', W / 2, 920 * S);
+            ctx.fillText(new Date().toLocaleString('zh-CN'), W / 2, 950 * S);
+
+            // 下载
             const link = document.createElement('a');
-            link.download = `test_${resultData.testName||'result'}_${Date.now()}.png`;
+            link.download = `test_${data.testName||'result'}_${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
+        }
+
+        // ─── 对外接口 ──────────────────────────────────────────────
+        function shareResult() {
+            if (!resultData) return;
+            shareResultWithData(resultData);
         }
 
         // ─── 键盘快捷键 ──────────────────────────────────────────────
