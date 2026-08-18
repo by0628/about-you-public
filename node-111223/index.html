@@ -658,6 +658,7 @@
             font-size: clamp(16px, 4.5vw, 22px);
             line-height: 1.7;
             font-weight: 400;
+            word-break: break-word;
         }
         .card .card-from {
             font-size: 10.5px;
@@ -1014,6 +1015,14 @@
             display: flex;
             justify-content: flex-end;
             margin-bottom: 6px;
+        }
+
+        /* 导出时卡片自适应高度 */
+        .card.export-mode {
+            aspect-ratio: auto !important;
+            height: auto !important;
+            min-height: 200px;
+            overflow: visible !important;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1470,7 +1479,7 @@
         loadReasons();
 
         /* ================================================================
-           10. 表白卡生成器 + QR 码 + 导出图片
+           10. 表白卡生成器 + QR 码 + 导出图片（修复文字溢出）
            ================================================================ */
         function onSelectChange(sel) {
             if (sel.value) {
@@ -1548,24 +1557,55 @@
             });
         }
 
-        /* ===== 导出图片（4x 高清） ===== */
+        /* ===== 导出图片（4x 高清，自适应文字高度） ===== */
         function exportCard() {
             const card = document.getElementById('cardResult');
             if (!card) return;
+
+            // 保存原始样式
+            const origClass = card.className;
+            const origOverflow = card.style.overflow;
+            const origAspect = card.style.aspectRatio;
+
+            // 切换为自适应模式（去除固定宽高比，允许高度随内容增长）
+            card.classList.add('export-mode');
+            card.style.overflow = 'visible';
+            card.style.aspectRatio = 'auto';
+
+            // 重新计算尺寸，确保文字完整
+            const rect = card.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+
             html2canvas(card, {
                 scale: 4,
                 useCORS: true,
                 allowTaint: true,
                 backgroundColor: null,
                 logging: false,
-                width: card.offsetWidth,
-                height: card.offsetHeight
+                width: width,
+                height: height,
+                onclone: (clonedDoc, clonedElement) => {
+                    // 确保克隆元素也应用自适应样式
+                    clonedElement.style.overflow = 'visible';
+                    clonedElement.style.aspectRatio = 'auto';
+                    // 强制重新布局
+                    clonedElement.style.height = 'auto';
+                }
             }).then(canvas => {
+                // 恢复原始样式
+                card.className = origClass;
+                card.style.overflow = origOverflow || '';
+                card.style.aspectRatio = origAspect || '';
                 const link = document.createElement('a');
                 link.download = '表白卡.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             }).catch(err => {
+                // 恢复样式
+                card.className = origClass;
+                card.style.overflow = origOverflow || '';
+                card.style.aspectRatio = origAspect || '';
                 alert('导出失败，请尝试截图保存。');
                 console.warn(err);
             });
