@@ -1665,9 +1665,16 @@
         })();
 
         /* ================================================================
-           12. 专属版入口（密码：260308，入口显示 Auevny）
+           12. 专属版入口 —— 支持多个密码（可在此增删）
            ================================================================ */
-        const SECRET = '260308';
+        // ★ 在这里定义允许的所有密码（大小写敏感）
+        const ALLOWED_SECRETS = [
+            '260308', // 原密码
+            'Aurevny', // 专属名
+            'love', // 简单情话
+            'justus' // 我们
+            // 您可以继续添加，例如 'iloveyou', '520' 等
+        ];
 
         document.getElementById('secretEntry').addEventListener('click', function() {
             document.getElementById('lockOverlay').classList.add('show');
@@ -1683,7 +1690,8 @@
         function checkPwd() {
             const input = document.getElementById('pwdInput');
             const err = document.getElementById('pwdErr');
-            if (input.value.trim() === SECRET) {
+            const entered = input.value.trim();
+            if (ALLOWED_SECRETS.includes(entered)) {
                 closeLock();
                 document.getElementById('screenHome').classList.remove('active');
                 document.getElementById('private').classList.add('show');
