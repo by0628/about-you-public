@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
     </script>
     <style>
-        /* ===== 主题变量（soft 档对比度增强） ===== */
+        /* ===== 主题变量 ===== */
         :root,
         [data-theme="soft"] {
             --bg-deep: #EEEBE7;
@@ -1017,11 +1017,18 @@
             margin-bottom: 6px;
         }
 
-        /* 导出时卡片自适应高度 */
+        /* 导出模式：自适应高度，不裁剪内容 */
         .card.export-mode {
             aspect-ratio: auto !important;
             height: auto !important;
-            min-height: 200px;
+            min-height: 120px;
+            overflow: visible !important;
+            padding: 24px 22px !important;
+            box-sizing: border-box !important;
+        }
+        .card.export-mode .card-msg {
+            white-space: normal !important;
+            word-break: break-word !important;
             overflow: visible !important;
         }
 
@@ -1479,7 +1486,7 @@
         loadReasons();
 
         /* ================================================================
-           10. 表白卡生成器 + QR 码 + 导出图片（修复文字溢出）
+           10. 表白卡生成器 + QR 码 + 导出图片（修复多行文字溢出）
            ================================================================ */
         function onSelectChange(sel) {
             if (sel.value) {
@@ -1557,7 +1564,7 @@
             });
         }
 
-        /* ===== 导出图片（4x 高清，自适应文字高度） ===== */
+        /* ===== 导出图片（4x 高清，自适应文字高度，修复多行） ===== */
         function exportCard() {
             const card = document.getElementById('cardResult');
             if (!card) return;
@@ -1566,17 +1573,23 @@
             const origClass = card.className;
             const origOverflow = card.style.overflow;
             const origAspect = card.style.aspectRatio;
+            const origHeight = card.style.height;
 
-            // 切换为自适应模式（去除固定宽高比，允许高度随内容增长）
-            card.classList.add('export-mode');
+            // 强制设置为自适应模式
+            card.className = origClass + ' export-mode';
             card.style.overflow = 'visible';
             card.style.aspectRatio = 'auto';
+            card.style.height = 'auto';
 
-            // 重新计算尺寸，确保文字完整
+            // 强制重排以获取正确尺寸
+            card.offsetHeight;
+
+            // 获取实际渲染尺寸（scrollHeight 可能包含 padding，但我们需要精确）
             const rect = card.getBoundingClientRect();
             const width = rect.width;
-            const height = rect.height;
+            const height = card.scrollHeight; // 使用 scrollHeight 确保包含所有内容
 
+            // 使用 html2canvas 导出
             html2canvas(card, {
                 scale: 4,
                 useCORS: true,
@@ -1589,7 +1602,6 @@
                     // 确保克隆元素也应用自适应样式
                     clonedElement.style.overflow = 'visible';
                     clonedElement.style.aspectRatio = 'auto';
-                    // 强制重新布局
                     clonedElement.style.height = 'auto';
                 }
             }).then(canvas => {
@@ -1597,6 +1609,8 @@
                 card.className = origClass;
                 card.style.overflow = origOverflow || '';
                 card.style.aspectRatio = origAspect || '';
+                card.style.height = origHeight || '';
+
                 const link = document.createElement('a');
                 link.download = '表白卡.png';
                 link.href = canvas.toDataURL('image/png');
@@ -1606,6 +1620,7 @@
                 card.className = origClass;
                 card.style.overflow = origOverflow || '';
                 card.style.aspectRatio = origAspect || '';
+                card.style.height = origHeight || '';
                 alert('导出失败，请尝试截图保存。');
                 console.warn(err);
             });
