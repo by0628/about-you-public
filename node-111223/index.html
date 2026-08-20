@@ -2,1798 +2,1371 @@
 <html lang="zh-CN" data-theme="soft">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>默然·热烈 · 一张表白卡</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js">
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
-    </script>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+    <title>专注飞行 - 真实民航模拟</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <style>
-        /* ===== 主题变量 ===== */
-        :root,
-        [data-theme="soft"] {
-            --bg-deep: #EEEBE7;
-            --bg-radial: ellipse at 30% 20%, #FAF8F5 0%, #EEEBE7 100%;
-            --glass-bg: rgba(255, 255, 255, 0.78);
-            --border-soft: rgba(120, 110, 100, 0.25);
-            --border-glow: rgba(255, 255, 255, 0.6);
-            --text-primary: #2E2A28;
-            --text-secondary: #5A504A;
-            --text-dim: rgba(80, 70, 60, 0.6);
-            --accent: #B5958A;
-            --accent-deep: #9A7A6E;
-            --rose: #C39B8A;
-            --champagne: #B8A89A;
-            --gold-particle: rgba(160, 140, 120, 0.3);
-            --shadow-heavy: 0 20px 50px rgba(120, 110, 100, 0.3);
-            --shadow-soft: 0 8px 30px rgba(120, 110, 100, 0.15);
-        }
-        [data-theme="warm"] {
-            --bg-deep: #F5F0EA;
-            --bg-radial: ellipse at 30% 20%, #FFFCF7 0%, #F5F0EA 100%;
-            --glass-bg: rgba(255, 252, 247, 0.78);
-            --border-soft: rgba(150, 130, 110, 0.25);
-            --border-glow: rgba(255, 255, 255, 0.5);
-            --text-primary: #4A3F3A;
-            --text-secondary: #7A6C62;
-            --text-dim: rgba(90, 78, 70, 0.5);
-            --accent: #D4B8A8;
-            --accent-deep: #B89888;
-            --rose: #C9A89A;
-            --champagne: #C4B0A0;
-            --gold-particle: rgba(180, 150, 120, 0.25);
-            --shadow-heavy: 0 20px 50px rgba(150, 130, 110, 0.3);
-            --shadow-soft: 0 8px 30px rgba(150, 130, 110, 0.15);
+        :root {
+            --bg: radial-gradient(ellipse at 30% 20%, #2b221d, #14100d 80%);
+            --glass: rgba(255,255,255,.08);
+            --glass-border: rgba(255,255,255,.2);
+            --glass-blur: 30px;
+            --text: #f8f1eb;
+            --muted: #a89f97;
+            --accent: #f0a890;
+            --accent2: #d48a7a;
+            --seat-avail: rgba(255,255,255,.15);
+            --shadow: 0 20px 60px rgba(0,0,0,.7);
+            --radius: 32px;
         }
         [data-theme="dark"] {
-            --bg-deep: #0E0C0A;
-            --bg-radial: ellipse at 28% 18%, #1E1A16 0%, #0E0C0A 70%;
-            --glass-bg: rgba(20, 18, 16, 0.82);
-            --border-soft: rgba(200, 185, 170, 0.2);
-            --border-glow: rgba(200, 185, 170, 0.06);
-            --text-primary: #EBE3D8;
-            --text-secondary: #B0A79C;
-            --text-dim: rgba(168, 159, 148, 0.6);
-            --accent: #C9A99A;
-            --accent-deep: #7A5A5A;
-            --rose: #A87A7A;
-            --champagne: #C4B0A0;
-            --gold-particle: rgba(201, 169, 110, 0.35);
-            --shadow-heavy: 0 20px 50px rgba(0, 0, 0, 0.7);
-            --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --bg: radial-gradient(ellipse at 30% 20%, #171412, #080706 80%);
+            --glass: rgba(255,255,255,.04);
+            --glass-border: rgba(255,255,255,.12);
+            --text: #e0d8d0;
+            --muted: #888078;
+            --accent: #dcb8ac;
+            --accent2: #b8988c;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        html,
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            height: 100%;
+            font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
+            background: var(--bg); color: var(--text); min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; transition: background .5s;
         }
-        body {
-            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Songti SC', serif;
-            color: var(--text-primary);
-            background: var(--bg-deep);
-            background-image: radial-gradient(var(--bg-radial));
-            overflow-x: hidden;
-            min-height: 100dvh;
-            position: relative;
-            transition: background-color .4s ease, color .4s ease;
-        }
-
-        #goldCanvas {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            opacity: .5;
-        }
-        #cursorHeart {
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 60;
-            pointer-events: none;
-            font-size: 17px;
-            color: var(--champagne);
-            transform: translate(-50%, -50%);
-            transition: opacity .2s;
-            will-change: transform;
-            user-select: none;
-        }
-        @media (hover: none) {
-            #cursorHeart {
-                display: none;
-            }
-        }
-
-        /* 主题切换 */
-        .theme-switch {
-            position: fixed;
-            top: 14px;
-            right: 14px;
-            z-index: 70;
-            display: flex;
-            gap: 4px;
-            background: var(--glass-bg);
-            border: 1px solid var(--border-soft);
-            border-radius: 999px;
-            padding: 4px;
-            backdrop-filter: blur(12px);
-            box-shadow: var(--shadow-soft);
-        }
-        .theme-switch button {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 1px solid transparent;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            color: var(--text-secondary);
-            transition: all .25s;
-        }
-        .theme-switch button.active {
-            border-color: var(--accent);
-            color: var(--text-primary);
-            background: rgba(200, 160, 140, .15);
-        }
-        .theme-switch button:hover {
-            color: var(--text-primary);
-        }
-
-        /* ===== 布局 ===== */
-        .wrap {
-            position: relative;
-            z-index: 2;
-            max-width: 680px;
-            margin: 0 auto;
-            padding: clamp(24px, 6vw, 56px) clamp(18px, 5vw, 32px) 120px;
-        }
-        .screen {
-            display: none;
-        }
-        .screen.active {
-            display: block;
-            animation: fadeIn .5s ease;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .glass {
-            background: var(--glass-bg);
-            border: 1px solid var(--border-soft);
-            border-radius: 24px;
-            backdrop-filter: blur(20px) saturate(130%);
-            -webkit-backdrop-filter: blur(20px) saturate(130%);
-            box-shadow: var(--shadow-heavy), inset 0 1px 0 var(--border-glow);
-            padding: clamp(24px, 5vw, 40px);
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 24px;
-        }
-        .glass::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -60%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .12), transparent);
-            transform: skewX(-18deg);
-            animation: sweep 9s ease-in-out infinite;
-        }
-        @keyframes sweep {
-            0% {
-                left: -60%;
-            }
-            55% {
-                left: 120%;
-            }
-            100% {
-                left: 120%;
-            }
-        }
-
-        h1 {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-weight: 400;
-            text-align: center;
-            font-size: clamp(28px, 7vw, 48px);
-            color: var(--champagne);
-            line-height: 1.15;
-            letter-spacing: .05em;
-        }
-        .sub {
-            text-align: center;
-            font-size: clamp(11px, 3vw, 13px);
-            color: var(--text-secondary);
-            margin-top: 8px;
-            letter-spacing: .16em;
-            font-weight: 300;
-        }
-
-        /* ===== 打字机 ===== */
-        .typewriter {
-            margin-top: 20px;
-            text-align: center;
-            min-height: 3.2em;
-            font-size: clamp(12px, 3.2vw, 13.5px);
-            line-height: 2;
-            color: var(--text-secondary);
-            font-weight: 300;
-            letter-spacing: .04em;
-        }
-        .typewriter .caret {
-            display: inline-block;
-            width: 1px;
-            height: 1em;
-            background: var(--champagne);
-            vertical-align: -1px;
-            animation: blink 1s steps(1) infinite;
-            margin-left: 2px;
-        }
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-
-        /* ===== 通用按钮 ===== */
-        .btn {
-            font-family: inherit;
-            cursor: pointer;
-            border-radius: 999px;
-            padding: 10px 24px;
-            font-size: 12px;
-            letter-spacing: .14em;
-            border: 1px solid var(--border-soft);
-            color: var(--text-secondary);
-            background: rgba(255, 255, 255, .15);
-            transition: all .35s ease;
-            box-shadow: var(--shadow-soft);
-        }
-        .btn:hover {
-            border-color: var(--accent);
-            color: var(--text-primary);
-            background: rgba(200, 160, 140, .15);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(120, 110, 100, .25);
-        }
-        .btn:active {
-            transform: scale(.96);
-        }
-        .btn-rose {
-            border-color: var(--rose);
-            color: var(--rose);
-            background: rgba(200, 160, 140, .05);
-        }
-        .btn-rose:hover {
-            border-color: var(--accent-deep);
-            background: rgba(200, 160, 140, .15);
-            color: var(--text-primary);
-        }
-        .btn-sm {
-            padding: 6px 14px;
-            font-size: 10.5px;
-        }
-        .btn-back {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .btn-back:hover {
-            background: rgba(200, 160, 140, .12);
-        }
-
-        /* ===== 主页功能区 ===== */
-        .action-row {
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-top: 24px;
-        }
-        .action-row .btn {
-            flex: 0 1 auto;
-        }
-
-        /* 幸运饼干 */
-        .cookie-wrap {
-            margin-top: 28px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-        .cookie-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 48px;
-            line-height: 1;
-            transition: transform .3s;
-            filter: drop-shadow(0 4px 12px rgba(120, 110, 100, .2));
-        }
-        .cookie-btn:hover {
-            transform: scale(1.08) rotate(-4deg);
-        }
-        .cookie-btn:active {
-            transform: scale(.92);
-        }
-        .cookie-line {
-            font-size: 13px;
-            color: var(--accent-deep);
-            min-height: 1.4em;
-            font-weight: 300;
-            text-align: center;
-            max-width: 90%;
-        }
-
-        /* 温度计 */
-        .thermo {
-            margin-top: 26px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-        .thermo-bar {
-            width: min(240px, 78%);
-            height: 5px;
-            border-radius: 999px;
-            background: rgba(160, 150, 140, .15);
-            overflow: hidden;
-            border: 1px solid var(--border-soft);
-        }
-        .thermo-fill {
-            height: 100%;
-            width: 0%;
-            border-radius: 999px;
-            background: linear-gradient(90deg, var(--champagne), var(--rose));
-            transition: width .4s ease;
-        }
-        .thermo-num {
-            font-size: 10px;
-            letter-spacing: .2em;
-            color: var(--text-dim);
-        }
-        .temp-final {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 40px;
-            text-align: center;
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: clamp(20px, 6vw, 34px);
-            color: var(--accent-deep);
-            z-index: 85;
-            opacity: 0;
-            transition: opacity .6s;
-            pointer-events: none;
-        }
-        .temp-final.show {
-            opacity: 1;
-        }
-
-        /* ===== Love 时间线 ===== */
-        .block {
-            margin-top: 12px;
-        }
-        .block-title {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: clamp(18px, 4.5vw, 24px);
-            color: var(--accent);
-            text-align: center;
-            margin-bottom: 2px;
-        }
-        .block-sub {
-            text-align: center;
-            font-size: 10px;
-            letter-spacing: .18em;
-            color: var(--text-dim);
-            margin-bottom: 14px;
-        }
-        .love-add {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-        }
-        .love-add input {
-            flex: 1;
-            min-width: 100px;
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 1px solid var(--border-soft);
-            background: rgba(255, 255, 255, .4);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 12px;
-            outline: none;
-        }
-        .love-add input:focus {
-            border-color: var(--accent);
-        }
-        .timeline {
-            position: relative;
-            padding-left: 18px;
-        }
-        .timeline::before {
-            content: "";
-            position: absolute;
-            left: 5px;
-            top: 4px;
-            bottom: 4px;
-            width: 1px;
-            background: var(--border-soft);
-        }
-        .tl-item {
-            position: relative;
-            padding: 6px 0 6px 14px;
-        }
-        .tl-item::before {
-            content: "";
-            position: absolute;
-            left: -13px;
-            top: 10px;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 0 3px var(--glass-bg);
-        }
-        .tl-date {
-            font-size: 10.5px;
-            letter-spacing: .1em;
-            color: var(--accent-deep);
-        }
-        .tl-event {
-            font-size: 12.5px;
-            color: var(--text-secondary);
-            margin-top: 2px;
-            line-height: 1.6;
-        }
-        .tl-del {
-            margin-left: 8px;
-            font-size: 10px;
-            color: var(--text-dim);
-            cursor: pointer;
-            border: none;
-            background: none;
-        }
-        .tl-del:hover {
-            color: var(--rose);
-        }
-        .empty-hint {
-            text-align: center;
-            font-size: 11px;
-            color: var(--text-dim);
-            padding: 8px 0;
-        }
-
-        /* ===== Reasons 翻牌 ===== */
-        .reason-add {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-        .reason-add input {
-            flex: 1;
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 1px solid var(--border-soft);
-            background: rgba(255, 255, 255, .4);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 12px;
-            outline: none;
-        }
-        .reason-add input:focus {
-            border-color: var(--accent);
-        }
-        .reason-grid {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .flip {
-            cursor: pointer;
-            width: 84px;
-            height: 112px;
-            perspective: 800px;
-            position: relative;
-        }
-        .flip-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform .6s cubic-bezier(.23, 1, .32, 1);
-            transform-style: preserve-3d;
-        }
-        .flip.open .flip-inner {
-            transform: rotateY(180deg);
-        }
-        .flip-face {
-            position: absolute;
-            inset: 0;
-            backface-visibility: hidden;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            text-align: center;
-            font-size: 10.5px;
-            line-height: 1.5;
-            font-weight: 300;
-        }
-        .flip-front {
-            background: linear-gradient(145deg, var(--accent-deep), var(--rose));
-            color: #fff;
-            border: 1px solid var(--border-soft);
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 20px;
-        }
-        .flip-back {
-            background: var(--glass-bg);
-            color: var(--text-primary);
-            transform: rotateY(180deg);
-            border: 1px solid var(--border-soft);
-        }
-        .flip-del {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--rose);
-            color: #fff;
-            border: none;
-            font-size: 10px;
-            cursor: pointer;
-            z-index: 3;
-            display: none;
-        }
-        .flip:hover .flip-del {
-            display: block;
-        }
-
-        /* ===== 表单 ===== */
-        .field {
-            margin-top: 16px;
-        }
-        .field label {
-            display: block;
-            font-size: 10px;
-            letter-spacing: .22em;
-            color: var(--text-dim);
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-        .field input,
-        .field textarea,
-        .field select {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: 1px solid var(--border-soft);
-            background: rgba(255, 255, 255, .4);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 13px;
-            letter-spacing: .03em;
-            outline: none;
-            transition: border-color .3s;
-        }
-        .field input:focus,
-        .field textarea:focus,
-        .field select:focus {
-            border-color: var(--accent);
-        }
-        .field textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-        .field select option {
-            background: var(--bg-deep);
-            color: var(--text-primary);
-        }
-
-        /* ===== 卡片预览 ===== */
-        .preview-wrap {
-            margin-top: 24px;
-            display: flex;
-            justify-content: center;
-        }
-        .card {
-            width: min(340px, 90vw);
-            aspect-ratio: 1.55/1;
-            border-radius: 14px;
-            padding: 24px 22px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            transition: all .4s ease;
-            box-shadow: var(--shadow-soft);
-        }
-        .card::before {
-            content: "";
-            position: absolute;
-            inset: 6px;
-            border-radius: 10px;
-            border: 1px solid currentColor;
-            opacity: .12;
-        }
-        .card .card-to {
-            font-size: 10.5px;
-            letter-spacing: .3em;
-            text-transform: uppercase;
-            opacity: .6;
-            margin-bottom: 8px;
-        }
-        .card .card-msg {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: clamp(16px, 4.5vw, 22px);
-            line-height: 1.7;
-            font-weight: 400;
-            word-break: break-word;
-        }
-        .card .card-from {
-            font-size: 10.5px;
-            letter-spacing: .2em;
-            opacity: .55;
-            margin-top: 12px;
-            text-align: right;
-        }
-        /* 5种卡片样式 */
-        .card-cream {
-            background: #FAF8F5;
-            color: #4A4444;
-            box-shadow: 0 8px 32px rgba(160, 150, 140, .2);
-        }
-        .card-green {
-            background: #E8EDE6;
-            color: #3A4A40;
-            box-shadow: 0 8px 32px rgba(160, 180, 150, .2);
-        }
-        .card-green::before {
-            color: var(--champagne);
-        }
-        .card-warm {
-            background: #F5E8D8;
-            color: #5A4A3A;
-            box-shadow: 0 8px 32px rgba(180, 150, 120, .2);
-        }
-        .card-warm::before {
-            border-color: #C4A080;
-        }
-        .card-gray {
-            background: #EAE6E0;
-            color: #3E3A38;
-            box-shadow: 0 8px 32px rgba(120, 110, 100, .15);
-        }
-        .card-gray::before {
-            border-color: #A09890;
-        }
-        .card-rose {
-            background: #F5E6E8;
-            color: #5A4040;
-            box-shadow: 0 8px 32px rgba(180, 130, 130, .15);
-        }
-        .card-rose::before {
-            border-color: #C9A0A0;
-        }
-
-        /* ===== 结果 ===== */
-        .result {
-            text-align: center;
-            margin-top: 24px;
-        }
-        .link-box {
-            margin-top: 14px;
-            padding: 10px 14px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, .3);
-            border: 1px dashed var(--accent);
-            font-size: 12px;
-            color: var(--text-primary);
-            word-break: break-all;
-            letter-spacing: .02em;
-        }
-        .hint {
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-top: 8px;
-            letter-spacing: .1em;
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-        .qr-img {
-            margin-top: 14px;
-            display: inline-block;
-            background: #fff;
-            padding: 6px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-soft);
-        }
-        .qr-img canvas,
-        .qr-img img {
-            display: block;
-            width: 120px !important;
-            height: 120px !important;
-        }
-
-        /* ===== 隐藏入口 ===== */
-        .secret-entry {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            margin-top: 48px;
-            font-size: 10px;
-            letter-spacing: .4em;
-            color: rgba(160, 150, 140, .3);
-            cursor: pointer;
-            user-select: none;
-            padding: 10px 0;
-            transition: color .3s;
-        }
-        .secret-entry:hover {
-            color: rgba(160, 150, 140, .6);
-        }
-        .footer-mark {
-            text-align: center;
-            margin-top: 16px;
-            font-size: 10px;
-            letter-spacing: .3em;
-            color: var(--text-dim);
-            opacity: .5;
-        }
-
-        /* ===== 弹窗 ===== */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 80;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: rgba(50, 45, 40, .5);
-            backdrop-filter: blur(8px);
-        }
-        .overlay.show {
-            display: flex;
-        }
-        .modal {
-            width: min(380px, 86vw);
-            background: var(--glass-bg);
-            border: 1px solid var(--accent);
-            border-radius: 20px;
-            padding: 28px;
-            box-shadow: var(--shadow-heavy);
-        }
-        .modal h3 {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-weight: 400;
-            font-size: 20px;
-            color: var(--champagne);
-            text-align: center;
-            margin-bottom: 14px;
-        }
-        .modal input {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid var(--accent);
-            background: rgba(255, 255, 255, .2);
-            color: var(--text-primary);
-            font-family: inherit;
-            letter-spacing: .3em;
-            text-align: center;
-            font-size: 14px;
-            outline: none;
-        }
-        .modal .err {
-            color: var(--rose);
-            font-size: 11px;
-            text-align: center;
-            min-height: 1.2em;
-            margin-top: 8px;
-            letter-spacing: .1em;
-        }
-        .modal .row {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 14px;
-        }
-        .shake {
-            animation: shake .4s;
-        }
-        @keyframes shake {
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-            25% {
-                transform: translateX(-6px);
-            }
-            75% {
-                transform: translateX(6px);
-            }
-        }
-
-        /* ===== 专属版 ===== */
-        #private {
-            display: none;
-        }
-        #private.show {
-            display: block;
-        }
-        .capsule {
-            text-align: center;
-            margin-top: 16px;
-            font-size: clamp(12px, 3.4vw, 14px);
-            color: var(--accent-deep);
-            letter-spacing: .06em;
-            line-height: 2;
-            font-weight: 300;
-        }
-        .cards {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-        .boxes {
-            display: flex;
-            gap: 18px;
-            justify-content: center;
-            margin-top: 24px;
-        }
-        .gift {
-            cursor: pointer;
-            text-align: center;
-        }
-        .gift .box {
-            width: 56px;
-            height: 48px;
-            border-radius: 8px;
-            background: linear-gradient(145deg, var(--rose), var(--accent-deep));
-            position: relative;
-            margin: 0 auto;
-            transition: transform .3s;
-            box-shadow: var(--shadow-soft);
-        }
-        .gift .lid {
-            position: absolute;
-            top: -10px;
-            left: -3px;
-            right: -3px;
-            height: 14px;
-            border-radius: 6px 6px 0 0;
-            background: var(--champagne);
-        }
-        .gift .ribbon {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            width: 8px;
-            height: 58px;
-            background: rgba(220, 200, 180, .55);
-            transform: translateX(-50%);
-        }
-        .gift.pop .box {
-            animation: pop .5s ease;
-        }
-        @keyframes pop {
-            0% {
-                transform: scale(1);
-            }
-            40% {
-                transform: scale(1.15) translateY(-8px);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-        .gift .item {
-            font-size: 22px;
-            margin-top: 6px;
-            opacity: 0;
-            transition: opacity .3s;
-        }
-        .gift.pop .item {
-            opacity: 1;
-        }
-
-        /* ===== 信封（专属版情书） ===== */
-        .envelope-wrap {
-            margin-top: 28px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 14px;
-        }
-        .envelope {
-            width: 280px;
-            height: 180px;
-            position: relative;
-            cursor: pointer;
-            perspective: 1000px;
-        }
-        .env-body {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(145deg, var(--champagne), var(--accent-deep));
-            border-radius: 6px;
-            box-shadow: var(--shadow-heavy);
-        }
-        .env-pocket {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(145deg, var(--accent), var(--accent-deep));
-            clip-path: polygon(0 35%, 50% 100%, 100% 35%, 100% 100%, 0 100%);
-            border-radius: 0 0 6px 6px;
-        }
-        .env-flap {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 62%;
-            background: linear-gradient(145deg, var(--champagne), var(--accent));
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-            transform-origin: top;
-            transition: transform .7s ease;
-            z-index: 3;
-        }
-        .envelope.open .env-flap {
-            transform: rotateX(180deg);
-        }
-        .env-letter {
-            position: absolute;
-            left: 14px;
-            right: 14px;
-            top: 20px;
-            bottom: 14px;
-            background: #FAF8F5;
-            color: #4A4444;
-            border-radius: 6px;
-            padding: 16px;
-            font-size: 12.5px;
-            line-height: 1.9;
-            font-weight: 300;
-            overflow: auto;
-            transform: translateY(40px);
-            opacity: 0;
-            transition: all .6s ease .2s;
-            z-index: 2;
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, .05);
-        }
-        .envelope.open .env-letter {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .env-hint {
-            font-size: 11px;
-            color: var(--text-dim);
-            letter-spacing: .1em;
-        }
-        .btn-close-env {
-            margin-top: 4px;
-        }
-
-        .private-header {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 6px;
-        }
-
-        /* 导出模式：自适应高度，不裁剪内容 */
-        .card.export-mode {
-            aspect-ratio: auto !important;
-            height: auto !important;
-            min-height: 120px;
-            overflow: visible !important;
-            padding: 24px 22px !important;
-            box-sizing: border-box !important;
-        }
-        .card.export-mode .card-msg {
-            white-space: normal !important;
-            word-break: break-word !important;
-            overflow: visible !important;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation: none !important;
-                transition: none !important;
-            }
-        }
+            background: var(--glass); backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border); border-radius: var(--radius);
+            box-shadow: var(--shadow), inset 0 1px 1px rgba(255,255,255,.2);
+            transition: all .3s ease;
+        }
+        .app { max-width: 480px; width: 100%; margin: 0 auto; padding: 10px 0 30px; }
+        .screen { display: none; animation: fadeUp .5s cubic-bezier(.2,.9,.3,1); }
+        .screen.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(20px) scale(.98); }
+            to { opacity:1; transform: translateY(0) scale(1); }
+        }
+        @keyframes turbulence-light {
+            0% { transform: translate(0,0) rotate(0deg); }
+            25% { transform: translate(1px,1.5px) rotate(0.2deg); }
+            50% { transform: translate(-1px,-1px) rotate(-0.2deg); }
+            75% { transform: translate(1.5px,-0.5px) rotate(0.1deg); }
+            100% { transform: translate(0,0) rotate(0deg); }
+        }
+        @keyframes turbulence-severe {
+            0% { transform: translate(0,0) rotate(0deg); }
+            20% { transform: translate(-4px,4px) rotate(-1deg); }
+            40% { transform: translate(4px,-3px) rotate(0.8deg); }
+            60% { transform: translate(-3px,-4px) rotate(-0.6deg); }
+            80% { transform: translate(3px,3px) rotate(1deg); }
+            100% { transform: translate(0,0) rotate(0deg); }
+        }
+        .shake-light { animation: turbulence-light 0.4s infinite ease-in-out; }
+        .shake-severe { animation: turbulence-severe 0.18s infinite ease-in-out; }
+        h1 { font-size: 26px; font-weight: 700; text-align: center; color: var(--accent); text-shadow: 0 2px 20px rgba(240,168,144,.25); }
+        .sub { text-align: center; color: var(--muted); font-size: 12px; letter-spacing: .25em; margin-top: 4px; }
+        .row { margin-top: 16px; }
+        label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+        .search-wrap { position: relative; }
+        .search-wrap input { width: 100%; padding: 14px 18px; border-radius: 20px; border: 1px solid var(--glass-border); background: rgba(0,0,0,.2); color: var(--text); font-size: 15px; outline: none; transition: .2s; }
+        .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(240,168,144,.2); }
+        .search-list { position: absolute; top: calc(100% + 6px); left: 0; right: 0; max-height: 220px; overflow-y: auto; background: rgba(20,15,12,.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--glass-border); display: none; z-index: 50; padding: 6px 0; }
+        .search-list.show { display: block; }
+        .search-list .item { padding: 10px 16px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .search-list .item:hover { background: rgba(240,168,144,.18); }
+        .search-list .item .code { color: var(--accent); font-weight: 700; }
+        .checkbox-wrap { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); padding: 12px 16px; border-radius: 18px; border: 1px solid var(--glass-border); margin-top: 6px; }
+        .checkbox-wrap input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+        .checkbox-wrap span { font-size: 13px; color: var(--text); }
+        .btn { display: block; width: 100%; padding: 16px; border: none; border-radius: 22px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 16px; font-weight: 600; letter-spacing: .08em; cursor: pointer; transition: transform .15s, box-shadow .2s; box-shadow: 0 8px 25px rgba(240,168,144,.25); margin-top: 18px; text-align: center; }
+        .btn:active { transform: scale(.97); }
+        .btn-secondary { background: var(--glass); color: var(--text); border: 1px solid var(--glass-border); box-shadow: none; }
+        .btn-small { padding: 10px 16px; font-size: 13px; width: auto; }
+        .flight-status-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); padding: 8px 14px; border-radius: 16px; margin-bottom: 8px; font-size: 12px; }
+        .seatbelt-light { display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--muted); transition: all .3s; }
+        .seatbelt-light.active { color: #ff4d4d; text-shadow: 0 0 10px rgba(255,77,77,0.6); }
+        .seatbelt-light .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+        .seatbelt-light.active .dot { background: #ff4d4d; box-shadow: 0 0 8px #ff4d4d; }
+        .event-banner { background: rgba(240,168,144,0.15); border: 1px solid var(--accent); border-radius: 14px; padding: 10px 14px; margin-top: 8px; font-size: 12px; display: flex; align-items: flex-start; gap: 10px; color: var(--text); animation: fadeUp 0.3s ease; line-height: 1.4; }
+        .event-banner.danger { background: rgba(230,80,80,0.2); border-color: #ff4d4d; color: #ffc0c0; }
+        .aircraft-container { margin-top: 14px; display: flex; flex-direction: column; align-items: center; max-height: 52vh; overflow-y: auto; padding: 6px 4px; }
+        .fuselage { width: 100%; max-width: 400px; background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%); border-radius: 100px 100px 40px 40px; padding: 18px 8px 24px; border: 1.5px solid var(--glass-border); box-shadow: inset 0 0 30px rgba(0,0,0,0.5); position: relative; overflow-x: auto; min-height: 300px; }
+        .cockpit { width: 60px; height: 18px; background: rgba(240,168,144,0.2); border: 1px solid var(--accent); border-radius: 30px 30px 6px 6px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--accent); letter-spacing: 1px; }
+        .seat-grid { display: flex; flex-direction: column; gap: 5px; align-items: center; width: 100%; }
+        .seat-row { display: flex; align-items: center; gap: 3px; justify-content: center; width: 100%; }
+        .row-num { font-size: 8px; color: var(--muted); width: 14px; text-align: center; font-weight: 700; flex-shrink: 0; }
+        .seat-icon { position: relative; background: var(--seat-avail); border: 1px solid var(--glass-border); border-radius: 5px 5px 3px 3px; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; font-size: 8px; color: var(--muted); flex-shrink: 0; width: 22px; height: 24px; }
+        .seat-icon.first-class { border-color: #ffd700; background: rgba(255,215,0,0.15); }
+        .seat-icon.selected { background: #4cd964 !important; border-color: #34c759 !important; color: #fff !important; font-weight: bold; transform: scale(1.12); box-shadow: 0 0 14px rgba(52,199,89,0.5); z-index: 5; }
+        .seat-icon.aisle { background: transparent; border: none; cursor: default; width: 6px; }
+        .model-select { width: 100%; padding: 12px 16px; border-radius: 18px; border: 1px solid var(--glass-border); background: var(--glass); color: var(--text); font-size: 14px; outline: none; }
+        .model-select option { background: #1a1410; color: #fff; }
+        #mapContainer { height: 30vh; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass-border); background: #100d0b; margin-top: 4px; position: relative; min-height: 160px; transition: filter 0.3s; }
+        .window-view { width: 100%; height: 100%; position: relative; background-size: cover; background-position: center; border-radius: 60px; border: 10px solid #1c1714; box-shadow: inset 0 0 40px rgba(0,0,0,0.9); overflow: hidden; display: flex; align-items: center; justify-content: center; transition: background-image 0.5s ease-in-out; }
+        .window-glass-shine { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 100%); pointer-events: none; z-index: 3; }
+        .window-watermark-blocker { position: absolute; bottom: 0; right: 0; width: 120px; height: 35px; background: #100d0b; z-index: 2; pointer-events: none; filter: blur(8px); opacity: 0.95; }
+        .music-panel { margin-top: 8px; background: rgba(0,0,0,0.25); border: 1px solid var(--glass-border); border-radius: 18px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+        .music-quote { font-size: 11px; color: var(--muted); font-style: italic; letter-spacing: .05em; text-align: center; }
+        .music-apps { display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 4px; }
+        .music-app-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--text); text-decoration: none; font-size: 10px; opacity: 0.8; transition: opacity .2s, transform .2s; cursor: pointer; background: transparent; border: none; }
+        .music-app-btn:active { transform: scale(0.9); opacity: 1; }
+        .music-app-btn span.icon { width: 28px; height: 28px; border-radius: 8px; background: var(--glass); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .pass { padding: 24px; }
+        .pass .line { display: flex; justify-content: space-between; margin: 6px 0; font-size: 13px; }
+        .pass .big { font-size: 22px; font-weight: 700; color: var(--accent); }
+        .pass .dash { border-top: 1px dashed var(--glass-border); margin: 10px 0; }
+        .barcode-section { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .barcode { width: 100%; height: 50px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: all .4s; cursor: grab; }
+        .barcode.torn { transform: translateY(50px) rotate(-6deg); opacity: 0; pointer-events: none; }
+        .barcode .bars { display: flex; height: 100%; width: 92%; align-items: center; justify-content: center; gap: 2px; }
+        .barcode .bar { height: 80%; background: #000; width: 2px; }
+        .barcode .bar.thick { width: 4px; }
+        .fly-meta { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px; }
+        .fly-time { font-size: 34px; font-weight: 300; font-variant-numeric: tabular-nums; color: var(--accent); }
+        .fly-info { text-align: right; font-size: 11px; color: var(--muted); line-height: 1.4; }
+        .fly-info strong { color: var(--text); }
+        .progress { height: 4px; border-radius: 4px; background: var(--glass-border); margin-top: 8px; overflow: hidden; }
+        .progress>div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .3s linear; }
+        .audio-control { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 14px; padding: 4px 10px; margin-top: 6px; font-size: 11px; }
+        .audio-control input[type="range"] { width: 70px; accent-color: var(--accent); cursor: pointer; }
+        .layer-control { display: flex; gap: 4px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
+        .layer-btn { padding: 3px 10px; border-radius: 14px; background: var(--glass); border: 1px solid var(--glass-border); color: var(--text); font-size: 10px; cursor: pointer; }
+        .layer-btn.active { background: rgba(240,168,144,.25); border-color: var(--accent); color: var(--accent); }
+        .theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 100; width: 40px; height: 40px; border-radius: 50%; background: var(--glass); border: 1px solid var(--glass-border); color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+        .stat-grid div { background: var(--glass); border-radius: 16px; padding: 12px 4px; text-align: center; border: 1px solid var(--glass-border); }
+        .stat-grid div span { font-size: 10px; color: var(--muted); }
+        .stat-grid div b { font-size: 18px; display: block; margin-top: 2px; color: var(--accent); }
+        .weather-text { width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--text); font-size:16px; background:rgba(0,0,0,0.5); backdrop-filter:blur(10px); border-radius:var(--radius); text-align:center; padding:20px; flex-direction:column; }
+        .weather-text .icon { font-size:36px; display:block; margin-bottom:8px; }
+        .weather-text .detail { font-size:14px; color:var(--muted); margin-top:4px; }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" onclick="toggleTheme()">◐</button>
 
-    <canvas id="goldCanvas"></canvas>
-    <div id="cursorHeart">✦</div>
+    <div class="app" id="appContainer">
+        <!-- 1. 登机主界面 -->
+        <section class="screen active" id="s-board">
+            <div class="glass" style="padding:24px 20px;">
+                <h1>✈️ 专注飞行</h1>
+                <div class="sub">民航物理动力学 · 真实气象</div>
 
-    <!-- 主题切换 -->
-    <div class="theme-switch">
-        <button data-t="warm" title="暖光">☀️</button>
-        <button data-t="soft" class="active" title="柔光">🌤️</button>
-        <button data-t="dark" title="暗室">🌙</button>
-    </div>
-
-    <!-- ===== 主页 ===== -->
-    <div class="wrap screen active" id="screenHome">
-        <div class="glass">
-            <h1>写一张表白卡</h1>
-            <div class="sub">送给你想送的人 · 默然，但热烈</div>
-            <div class="typewriter" id="typewriter"><span class="caret"></span></div>
-
-            <div class="action-row">
-                <button class="btn" onclick="showScreen('screenMake')">开始写 →</button>
-                <button class="btn" onclick="randomQuote()">换一句情话</button>
-            </div>
-
-            <!-- 幸运饼干 -->
-            <div class="cookie-wrap">
-                <button class="cookie-btn" id="cookieBtn" onclick="crackCookie()">🥠</button>
-                <div class="cookie-line" id="cookieLine">点一下饼干，听一句甜话</div>
-            </div>
-
-            <!-- 温度计（每次 +1） -->
-            <div class="thermo">
-                <button class="btn btn-rose" id="kissBtn" style="padding:6px 18px;font-size:11px">♡ 亲亲 +1℃</button>
-                <div class="thermo-bar"><div class="thermo-fill" id="thermoFill"></div></div>
-                <div class="thermo-num"><span id="thermoNum">0</span> / 100</div>
-            </div>
-            <div class="temp-final" id="tempFinal">今天也是，以后也是</div>
-        </div>
-
-        <!-- Love 时间线 -->
-        <div class="glass block">
-            <div class="block-title">Love · 我们的节点</div>
-            <div class="block-sub">自己写日期和事件，存在这台设备上</div>
-            <div class="love-add">
-                <input id="loveDate" type="text" placeholder="2024.5.20" />
-                <input id="loveEvent" type="text" placeholder="初遇" />
-                <button class="btn btn-sm" onclick="addLove()">添加</button>
-            </div>
-            <div class="timeline" id="loveTimeline"></div>
-        </div>
-
-        <!-- Reasons 翻牌 -->
-        <div class="glass block">
-            <div class="block-title">Reasons · 喜欢你的理由</div>
-            <div class="block-sub">写一条，翻一张牌；点牌看背面，右上角删</div>
-            <div class="reason-add">
-                <input id="reasonInput" type="text" placeholder="比如：你笑起来眼睛会弯" maxlength="40" />
-                <button class="btn btn-sm" onclick="addReason()">加一张</button>
-            </div>
-            <div class="reason-grid" id="reasonGrid"></div>
-        </div>
-
-        <div class="secret-entry" id="secretEntry">· Auevny ·</div>
-        <div class="footer-mark">Auevny · Lab · 2026</div>
-    </div>
-
-    <!-- ===== 制作页 ===== -->
-    <div class="wrap screen" id="screenMake">
-        <div class="glass">
-            <h1 style="font-size:clamp(22px,5.5vw,36px)">填写你的表白卡</h1>
-            <div class="sub">填完生成一张专属卡片，复制链接发给 ta</div>
-            <div class="field"><label>收件人昵称</label><input id="fTo" placeholder="比如：宝、Auevny" maxlength="20" /></div>
-            <div class="field"><label>你的昵称</label><input id="fFrom" placeholder="比如：匿名" maxlength="20" /></div>
-            <div class="field">
-                <label>选一句 / 自己写（备选丰富）</label>
-                <select id="fSelect" onchange="onSelectChange(this)">
-                    <option value="">—— 选一句 ——</option>
-                    <optgroup label="简约·温柔">
-                        <option value="晚霞是免费的，想发给你也是。">晚霞是免费的，想发给你也是。</option>
-                        <option value="不用每天说想你，但每天结束的时候，最后想到的是你。">不用每天说想你，但每天结束的时候，最后想到的是你。</option>
-                        <option value="降温的第一天，我穿了两件外套，想的是你会不会也觉得冷。">降温的第一天，我穿了两件外套，想的是你会不会也觉得冷。</option>
-                        <option value="耳机里随机到一首歌，刚好是你上次哼过的那首。">耳机里随机到一首歌，刚好是你上次哼过的那首。</option>
-                        <option value="你不在的时候我也在过日子，但你回来的时候日子才亮起来。">你不在的时候我也在过日子，但你回来的时候日子才亮起来。</option>
-                        <option value="我本来打算一个人过完这个冬天的，你来了，我就把冬天过成了春天。">我本来打算一个人过完这个冬天的，你来了，我就把冬天过成了春天。</option>
-                    </optgroup>
-                    <optgroup label="忧郁·深沉">
-                        <option value="我不太擅长靠近人，但对你是个例外。">我不太擅长靠近人，但对你是个例外。</option>
-                        <option value="有些话如果今天不说，可能以后就再也没机会用这种语气说了。">有些话如果今天不说，可能以后就再也没机会用这种语气说了。</option>
-                        <option value="你是我所有「随便」里唯一一个「不随便」的选项。">你是我所有「随便」里唯一一个「不随便」的选项。</option>
-                        <option value="其实我也不知道什么叫喜欢，但想到你的时候，心跳是诚实的。">其实我也不知道什么叫喜欢，但想到你的时候，心跳是诚实的。</option>
-                        <option value="如果有一天我不再给你发晚霞了，那大概是我终于学会一个人看了。">如果有一天我不再给你发晚霞了，那大概是我终于学会一个人看了。</option>
-                        <option value="你是我藏在黄昏里的秘密。">你是我藏在黄昏里的秘密。</option>
-                    </optgroup>
-                    <optgroup label="热烈·直白">
-                        <option value="我喜欢你，像风走了八千里，不问归期。">我喜欢你，像风走了八千里，不问归期。</option>
-                        <option value="你笑起来的时候，我手机屏幕都亮了一下。">你笑起来的时候，我手机屏幕都亮了一下。</option>
-                        <option value="别人都在问「以后会怎样」，我只想问「今晚吃什么」——然后每天晚上都跟你一起吃。">别人都在问「以后会怎样」，我只想问「今晚吃什么」</option>
-                        <option value="不是因为今天才说这些，是因为今天终于有理由说出口。">不是因为今天才说这些，是因为今天终于有理由说出口。</option>
-                        <option value="你一个眼神，就点燃了我的荒原。">你一个眼神，就点燃了我的荒原。</option>
-                        <option value="世界很吵，你这里刚好安静。">世界很吵，你这里刚好安静。</option>
-                    </optgroup>
-                    <optgroup label="诗意·浪漫">
-                        <option value="月亮在云端，你在心上。">月亮在云端，你在心上。</option>
-                        <option value="想和你一起，把黄昏走成深夜。">想和你一起，把黄昏走成深夜。</option>
-                        <option value="你是我所有诗句里，最温柔的那一行。">你是我所有诗句里，最温柔的那一行。</option>
-                        <option value="风是暖的，雨是软的，你是甜的。">风是暖的，雨是软的，你是甜的。</option>
-                        <option value="我路过许多风景，却只想在你这里定居。">我路过许多风景，却只想在你这里定居。</option>
-                        <option value="你的名字，是我听过最短的情诗。">你的名字，是我听过最短的情诗。</option>
-                    </optgroup>
-                </select>
-                <textarea id="fMsg" placeholder="或者在这里自己写……" style="margin-top:8px" maxlength="120"></textarea>
-            </div>
-            <div class="field">
-                <label>卡片样式（5种）</label>
-                <select id="fTheme">
-                    <option value="cream">米白 · 温柔</option>
-                    <option value="green">深绿 · 内敛</option>
-                    <option value="warm">暖杏 · 亲切</option>
-                    <option value="gray">灰调 · 极简</option>
-                    <option value="rose">浅粉 · 甜蜜</option>
-                </select>
-            </div>
-            <div class="preview-wrap">
-                <div class="card card-cream" id="cardPreview">
-                    <div class="card-to" id="pvTo">TO · 收件人</div>
-                    <div class="card-msg" id="pvMsg">这里会显示你写的话</div>
-                    <div class="card-from" id="pvFrom">— 你的名字</div>
-                </div>
-            </div>
-            <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-                <button class="btn" onclick="showScreen('screenHome')">← 返回</button>
-                <button class="btn" onclick="generateCard()">生成卡片 →</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 结果页 ===== -->
-    <div class="wrap screen" id="screenResult">
-        <div class="glass">
-            <h1 style="font-size:clamp(22px,5.5vw,36px)">你的表白卡已生成</h1>
-            <div class="sub">复制链接、扫二维码或导出高清图片</div>
-            <div class="preview-wrap">
-                <div class="card" id="cardResult"></div>
-            </div>
-            <div class="result">
-                <div class="link-box" id="resultLink"></div>
-                <div id="qrContainer" class="qr-img"></div>
-                <div class="hint" id="resultHint">点击链接可复制 · 截图时建议隐藏浏览器地址栏</div>
-                <div class="actions">
-                    <button class="btn" onclick="copyLink()">复制链接</button>
-                    <button class="btn btn-export" onclick="exportCard()">📷 导出图片（4x）</button>
-                    <button class="btn" onclick="showScreen('screenHome')">再做一张</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 专属版 ===== -->
-    <div class="wrap screen" id="private">
-        <div class="glass">
-            <div class="private-header">
-                <button class="btn btn-sm btn-back" onclick="goHomeFromPrivate()">← 返回</button>
-            </div>
-            <h1 style="font-size:clamp(24px,6vw,40px);color:var(--rose)">Just Us</h1>
-            <div class="sub" style="color:var(--accent)">从 2026.3.8 起</div>
-            <div class="capsule" id="capsule">计算中…</div>
-
-            <div class="cards" id="flipContainer"></div>
-
-            <div class="boxes">
-                <div class="gift" onclick="popGift(this)"><div class="box"><div class="lid"></div><div class="ribbon"></div></div><div class="item">💍</div></div>
-                <div class="gift" onclick="popGift(this)"><div class="box"><div class="lid"></div><div class="ribbon"></div></div><div class="item">🌹</div></div>
-                <div class="gift" onclick="popGift(this)"><div class="box"><div class="lid"></div><div class="ribbon"></div></div><div class="item">📿</div></div>
-            </div>
-
-            <!-- 信封（情书） -->
-            <div class="envelope-wrap">
-                <div class="envelope" id="envelope" onclick="toggleEnvelope()">
-                    <div class="env-body"></div>
-                    <div class="env-pocket"></div>
-                    <div class="env-letter" id="envLetter">
-                        有些话平时不太说，但在这个节点，还是想好好写下来。
-                        和你在一起之后，很多原本平常的瞬间，都开始有了意思。傍晚突然漫过来的晚霞，一首刚好撞进心里的歌，或者路边一棵形状奇怪的树——以前看过就过了，现在第一反应是想拍下来发给你。
-                        我不常把感情挂在嘴边，但你比谁都清楚，你在我这儿占了多大分量。比起预支遥远的未来，我更迷恋和你走过的每一个眼下。
-                        明天情人节，能和你在一起，真的很开心。
-                        情人节快乐，今天也是，以后也是。
+                <div class="row">
+                    <label>出发机场</label>
+                    <div class="search-wrap">
+                        <input type="text" id="depSearch" placeholder="搜索国内/国际机场或城市..." />
+                        <div class="search-list" id="depList"></div>
+                        <input type="hidden" id="depIndex" value="0" />
                     </div>
-                    <div class="env-flap"></div>
                 </div>
-                <div class="env-hint" id="envHint">✉️ 点信封展开</div>
-                <button class="btn btn-sm btn-close-env" onclick="closeEnvelope(event)">合上信封</button>
-            </div>
-        </div>
-    </div>
+                <div class="row">
+                    <label>到达机场</label>
+                    <div class="search-wrap">
+                        <input type="text" id="arrSearch" placeholder="搜索国内/国际机场或城市..." />
+                        <div class="search-list" id="arrList"></div>
+                        <input type="hidden" id="arrIndex" value="3" />
+                    </div>
+                </div>
 
-    <!-- ===== 密码弹窗 ===== -->
-    <div class="overlay" id="lockOverlay">
-        <div class="modal" id="lockModal">
-            <h3>一间小房间</h3>
-            <input id="pwdInput" type="password" placeholder="······" maxlength="12" autocomplete="off" />
-            <div class="err" id="pwdErr"></div>
-            <div class="row">
-                <button class="btn" onclick="checkPwd()">进入</button>
-                <button class="btn" onclick="closeLock()">离开</button>
+                <div class="row">
+                    <label>机型与座位</label>
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <span id="seatDisplay" style="font-size:15px;font-weight:600;color:var(--accent);">12A (A320-200)</span>
+                        <button class="btn btn-small btn-secondary" onclick="goToSeatSelect()">🪑 选座</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label>突发特情设置</label>
+                    <div class="checkbox-wrap">
+                        <input type="checkbox" id="allowEmergencies" />
+                        <span>开启突发特情事件 (真实民航极低概率)</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label>专注意图</label>
+                    <input type="text" id="intent" placeholder="例如：完成 1 篇学术阅读" style="width:100%;padding:14px 16px;border-radius:18px;border:1px solid var(--glass-border);background:rgba(0,0,0,.2);color:var(--text);font-size:15px;outline:none;" />
+                </div>
+
+                <div class="row">
+                    <label>预计专注时长</label>
+                    <div style="font-size:22px;font-weight:700;color:var(--accent);" id="displayDuration">-- min</div>
+                </div>
+
+                <button class="btn" onclick="board()">生成登机牌 · Board</button>
             </div>
-        </div>
+        </section>
+
+        <!-- 2. 选座界面 -->
+        <section class="screen" id="s-seat">
+            <div class="glass" style="padding:20px;">
+                <h1 style="font-size:20px;">🪑 舱位与座位</h1>
+                <div class="row">
+                    <label>切换机型</label>
+                    <select class="model-select" id="modelSelect"></select>
+                </div>
+                <div class="aircraft-container">
+                    <div class="fuselage" id="fuselage">
+                        <div class="cockpit">驾驶舱</div>
+                        <div class="seat-grid" id="seatGrid"></div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:12px;">
+                    <button class="btn btn-secondary" onclick="confirmSeat()" style="flex:1;">✅ 确认</button>
+                    <button class="btn btn-secondary" onclick="goBoard()" style="flex:1;">返回</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 登机牌 -->
+        <section class="screen" id="s-pass">
+            <div class="glass pass">
+                <div class="line"><span>航班号</span><b id="pFlight">FF---</b></div>
+                <div class="line"><span>座位</span><b id="pSeat">--</b></div>
+                <div class="dash"></div>
+                <div class="line"><span>出发地</span><span>目的地</span></div>
+                <div class="line"><b class="big" id="pDep">--</b><b class="big" id="pArr">--</b></div>
+                <div class="line"><span id="pDepCode">--</span><span id="pArrCode">--</span></div>
+                <div class="dash"></div>
+                <div class="line"><span>登机时间</span><b id="pBoarding">--:--</b></div>
+                <div class="line"><span>预计到达</span><b id="pEta">--:--</b></div>
+                <div class="line"><span>专注目标</span><b id="pIntent">--</b></div>
+
+                <div class="barcode-section">
+                    <div class="barcode" id="barcodeContainer">
+                        <div class="bars" id="barcodeBars"></div>
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);">→ 向右滑动撕下登机牌</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 飞行地图 / 窗景 -->
+        <section class="screen" id="s-fly">
+            <div class="glass" style="padding:14px;">
+                <div class="flight-status-bar">
+                    <div class="seatbelt-light active" id="seatbeltLight">
+                        <span class="dot"></span>
+                        <span>FASTEN SEATBELT</span>
+                    </div>
+                    <div style="color:var(--muted);" id="currentWeatherTitle">☀️ 航路平稳</div>
+                </div>
+
+                <div id="mapContainer"></div>
+
+                <div class="layer-control">
+                    <button class="layer-btn active" data-mode="map" onclick="switchViewMode('map')">🗺️ 航线</button>
+                    <button class="layer-btn" data-mode="terrain" onclick="switchViewMode('terrain')">⛰️ 地形</button>
+                    <button class="layer-btn" data-mode="weather" onclick="switchViewMode('weather')">🌤️ 天气</button>
+                    <button class="layer-btn" data-mode="window" onclick="switchViewMode('window')">🖼️ 窗景</button>
+                </div>
+
+                <!-- 🎧 独立音频/音乐板块 -->
+                <div class="music-panel">
+                    <div class="music-quote" id="musicQuote">“万呎高空之上，将思绪交由旋律与云浪。”</div>
+                    <div class="music-apps">
+                        <button class="music-app-btn" data-scheme="orpheus://" title="网易云音乐"><span class="icon">🔴</span><span>网易云</span></button>
+                        <button class="music-app-btn" data-scheme="qqmusic://" title="QQ音乐"><span class="icon">🟢</span><span>QQ音乐</span></button>
+                        <button class="music-app-btn" data-scheme="kugou://" title="酷狗音乐"><span class="icon">🔵</span><span>酷狗</span></button>
+                        <button class="music-app-btn" data-scheme="douyinqishui://" title="汽水音乐"><span class="icon">🥤</span><span>汽水</span></button>
+                        <button class="music-app-btn" data-scheme="music://" title="Apple Music"><span class="icon">🍎</span><span>Apple</span></button>
+                        <button class="music-app-btn" data-scheme="spotify://" title="Spotify"><span class="icon">🎧</span><span>Spotify</span></button>
+                    </div>
+                </div>
+
+                <div class="audio-control">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span>📢 机舱广播:</span>
+                        <input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.8" oninput="setVolume(this.value)" />
+                    </div>
+                    <button class="layer-btn" onclick="testBroadCast()" style="padding:2px 8px;">📢 测试广播</button>
+                </div>
+
+                <div class="event-banner" id="eventBanner" style="display:none;">
+                    <span style="font-size:18px;" id="eventIcon">⚠️</span>
+                    <span id="eventMsg">气流平稳，祝您专注愉快。</span>
+                </div>
+
+                <div class="fly-meta">
+                    <div class="fly-time" id="clock">--:--</div>
+                    <div class="fly-info">
+                        <div><strong id="fRoute">---</strong></div>
+                        <div id="fSeat">--</div>
+                        <div id="fPhase" style="color:var(--accent);font-weight:600;">🛫 地面滑跑</div>
+                        <div id="fAltitude">高度：0 m</div>
+                        <div id="fSpeed">地速：0 km/h (0 kt)</div>
+                    </div>
+                </div>
+                <div class="progress"><div id="prog"></div></div>
+                <button class="btn btn-secondary" onclick="abort()" style="margin-top:10px;padding:10px;">🛑 中止飞行</button>
+            </div>
+        </section>
+
+        <!-- 5. 结算报告 -->
+        <section class="screen" id="s-land">
+            <div class="glass" style="padding:28px 20px;text-align:center;">
+                <div style="font-size:36px;">🛬</div>
+                <div style="font-size:22px;font-weight:700;color:var(--accent);">顺利降落 · 专注完成</div>
+                <div class="sub" style="margin-top:4px;" id="landRoute">-- → --</div>
+                <div class="stat-grid">
+                    <div><span>专注时长</span><b id="rDur">--</b></div>
+                    <div><span>座位号</span><b id="rSeat">--</b></div>
+                    <div><span>到达时间</span><b id="rTime">--</b></div>
+                </div>
+                <button class="btn" onclick="goBoard()">开启下一班航程</button>
+            </div>
+        </section>
     </div>
 
     <script>
-        /* ================================================================
-           1. 主题切换
-           ================================================================ */
-        (function() {
-            const saved = localStorage.getItem('theme') || 'soft';
-            document.documentElement.dataset.theme = saved;
-            syncThemeBtns(saved);
-            document.querySelectorAll('.theme-switch button').forEach(b => {
-                b.addEventListener('click', () => {
-                    const t = b.dataset.t;
-                    document.documentElement.dataset.theme = t;
-                    localStorage.setItem('theme', t);
-                    syncThemeBtns(t);
+        // ========== 全部机场数据（250+） ==========
+        const AIRPORTS = [
+            { iata:"PEK", cn:"北京首都", country:"中国", lat:40.0801, lng:116.5846 },
+            { iata:"PKX", cn:"北京大兴", country:"中国", lat:39.5098, lng:116.4105 },
+            { iata:"TSN", cn:"天津滨海", country:"中国", lat:39.1243, lng:117.3462 },
+            { iata:"PVG", cn:"上海浦东", country:"中国", lat:31.1443, lng:121.8082 },
+            { iata:"SHA", cn:"上海虹桥", country:"中国", lat:31.1979, lng:121.3363 },
+            { iata:"CKG", cn:"重庆江北", country:"中国", lat:29.7192, lng:106.6417 },
+            { iata:"SJW", cn:"石家庄正定", country:"中国", lat:38.2812, lng:114.6973 },
+            { iata:"TVS", cn:"唐山三女河", country:"中国", lat:39.7174, lng:118.0130 },
+            { iata:"ZQZ", cn:"张家口宁远", country:"中国", lat:40.7396, lng:114.9500 },
+            { iata:"CDE", cn:"承德普宁", country:"中国", lat:41.0444, lng:118.0370 },
+            { iata:"HDG", cn:"邯郸机场", country:"中国", lat:36.5343, lng:114.4220 },
+            { iata:"TYN", cn:"太原武宿", country:"中国", lat:37.7469, lng:112.6284 },
+            { iata:"DAT", cn:"大同云冈", country:"中国", lat:40.0603, lng:113.4824 },
+            { iata:"CIH", cn:"长治王村", country:"中国", lat:36.2475, lng:113.1260 },
+            { iata:"YCU", cn:"运城盐湖", country:"中国", lat:35.1164, lng:111.0360 },
+            { iata:"LLV", cn:"吕梁大武", country:"中国", lat:37.6838, lng:111.1410 },
+            { iata:"LFQ", cn:"临汾尧都", country:"中国", lat:36.0780, lng:111.6400 },
+            { iata:"WUT", cn:"忻州五台山", country:"中国", lat:38.7000, lng:112.9000 },
+            { iata:"HET", cn:"呼和浩特白塔", country:"中国", lat:40.8514, lng:111.8240 },
+            { iata:"BAV", cn:"包头东河", country:"中国", lat:40.5600, lng:110.0100 },
+            { iata:"CIF", cn:"赤峰玉龙", country:"中国", lat:42.2566, lng:118.8696 },
+            { iata:"HLD", cn:"呼伦贝尔海拉尔", country:"中国", lat:49.2050, lng:119.8250 },
+            { iata:"NZH", cn:"满洲里西郊", country:"中国", lat:49.5667, lng:117.3333 },
+            { iata:"DSN", cn:"鄂尔多斯伊金霍洛", country:"中国", lat:39.4900, lng:109.8600 },
+            { iata:"HLH", cn:"乌兰浩特义勒力特", country:"中国", lat:46.1950, lng:122.0020 },
+            { iata:"TGO", cn:"通辽机场", country:"中国", lat:43.5571, lng:122.1990 },
+            { iata:"XIL", cn:"锡林浩特机场", country:"中国", lat:43.9187, lng:116.0970 },
+            { iata:"SHE", cn:"沈阳桃仙", country:"中国", lat:41.6398, lng:123.4834 },
+            { iata:"DLC", cn:"大连周水子", country:"中国", lat:38.9657, lng:121.5386 },
+            { iata:"DDG", cn:"丹东浪头", country:"中国", lat:40.0240, lng:124.2860 },
+            { iata:"JNZ", cn:"锦州湾", country:"中国", lat:40.8460, lng:121.2360 },
+            { iata:"YKH", cn:"营口兰旗", country:"中国", lat:40.5420, lng:122.3580 },
+            { iata:"CHG", cn:"朝阳机场", country:"中国", lat:41.5390, lng:120.4480 },
+            { iata:"CGQ", cn:"长春龙嘉", country:"中国", lat:43.9960, lng:125.6850 },
+            { iata:"YNJ", cn:"延吉朝阳川", country:"中国", lat:42.8828, lng:129.4500 },
+            { iata:"TNH", cn:"通化三源浦", country:"中国", lat:41.6760, lng:125.8630 },
+            { iata:"DBC", cn:"白城长安", country:"中国", lat:45.5050, lng:123.0190 },
+            { iata:"YSQ", cn:"松原查干湖", country:"中国", lat:44.7650, lng:124.6200 },
+            { iata:"HRB", cn:"哈尔滨太平", country:"中国", lat:45.6234, lng:126.2503 },
+            { iata:"NDG", cn:"齐齐哈尔三家子", country:"中国", lat:47.2397, lng:123.9180 },
+            { iata:"MDG", cn:"牡丹江海浪", country:"中国", lat:44.5240, lng:129.5690 },
+            { iata:"JMU", cn:"佳木斯东郊", country:"中国", lat:46.8430, lng:130.4650 },
+            { iata:"FUJ", cn:"抚远东极", country:"中国", lat:48.1990, lng:134.3660 },
+            { iata:"HEK", cn:"黑河瑷珲", country:"中国", lat:50.2450, lng:127.4450 },
+            { iata:"OHE", cn:"漠河古莲", country:"中国", lat:52.9130, lng:122.4280 },
+            { iata:"NKG", cn:"南京禄口", country:"中国", lat:31.7420, lng:118.8610 },
+            { iata:"WUX", cn:"无锡硕放", country:"中国", lat:31.4940, lng:120.4290 },
+            { iata:"CZX", cn:"常州奔牛", country:"中国", lat:31.9190, lng:119.7780 },
+            { iata:"XUZ", cn:"徐州观音", country:"中国", lat:34.0590, lng:117.5550 },
+            { iata:"NTG", cn:"南通兴东", country:"中国", lat:32.0700, lng:120.9760 },
+            { iata:"YNZ", cn:"盐城南洋", country:"中国", lat:33.4260, lng:120.2030 },
+            { iata:"LYG", cn:"连云港白塔埠", country:"中国", lat:34.5720, lng:119.1140 },
+            { iata:"HGH", cn:"杭州萧山", country:"中国", lat:30.2295, lng:120.4345 },
+            { iata:"NGB", cn:"宁波栎社", country:"中国", lat:29.8267, lng:121.4620 },
+            { iata:"WNZ", cn:"温州龙湾", country:"中国", lat:27.9122, lng:120.8520 },
+            { iata:"YIW", cn:"义乌机场", country:"中国", lat:29.3447, lng:120.0320 },
+            { iata:"HSN", cn:"舟山普陀山", country:"中国", lat:29.9342, lng:122.3620 },
+            { iata:"HYN", cn:"台州路桥", country:"中国", lat:28.5622, lng:121.4290 },
+            { iata:"JUZ", cn:"衢州机场", country:"中国", lat:28.9690, lng:118.8990 },
+            { iata:"HFE", cn:"合肥新桥", country:"中国", lat:31.7800, lng:116.9880 },
+            { iata:"TXN", cn:"黄山屯溪", country:"中国", lat:29.7330, lng:118.2560 },
+            { iata:"AQG", cn:"安庆天柱山", country:"中国", lat:30.5820, lng:117.0500 },
+            { iata:"FUG", cn:"阜阳西关", country:"中国", lat:32.8900, lng:115.7340 },
+            { iata:"FOC", cn:"福州长乐", country:"中国", lat:25.9350, lng:119.6630 },
+            { iata:"XMN", cn:"厦门高崎", country:"中国", lat:24.5440, lng:118.1280 },
+            { iata:"JJN", cn:"泉州晋江", country:"中国", lat:24.7960, lng:118.5900 },
+            { iata:"WUS", cn:"武夷山机场", country:"中国", lat:27.7020, lng:118.0010 },
+            { iata:"LCX", cn:"龙岩冠豸山", country:"中国", lat:25.6740, lng:116.7460 },
+            { iata:"KHN", cn:"南昌昌北", country:"中国", lat:28.8650, lng:115.9000 },
+            { iata:"KOW", cn:"赣州黄金", country:"中国", lat:25.8520, lng:114.7790 },
+            { iata:"JDZ", cn:"景德镇罗家", country:"中国", lat:29.3380, lng:117.1760 },
+            { iata:"JGS", cn:"吉安井冈山", country:"中国", lat:26.8600, lng:114.7420 },
+            { iata:"JIU", cn:"九江庐山", country:"中国", lat:29.7330, lng:115.9830 },
+            { iata:"YIC", cn:"宜春明月山", country:"中国", lat:27.8020, lng:114.3060 },
+            { iata:"TNA", cn:"济南遥墙", country:"中国", lat:36.8570, lng:117.2160 },
+            { iata:"TAO", cn:"青岛胶东", country:"中国", lat:36.3325, lng:120.0886 },
+            { iata:"YNT", cn:"烟台蓬莱", country:"中国", lat:37.6570, lng:120.9870 },
+            { iata:"WEH", cn:"威海大水泊", country:"中国", lat:37.1870, lng:122.2290 },
+            { iata:"LYI", cn:"临沂启阳", country:"中国", lat:35.0460, lng:118.4120 },
+            { iata:"WEF", cn:"潍坊南苑", country:"中国", lat:36.6470, lng:119.1190 },
+            { iata:"DOY", cn:"东营胜利", country:"中国", lat:37.5090, lng:118.7880 },
+            { iata:"JNG", cn:"济宁曲阜", country:"中国", lat:35.2930, lng:116.3470 },
+            { iata:"RIZ", cn:"日照山字河", country:"中国", lat:35.4050, lng:119.3250 },
+            { iata:"CGO", cn:"郑州新郑", country:"中国", lat:34.5197, lng:113.8400 },
+            { iata:"LYA", cn:"洛阳北郊", country:"中国", lat:34.7410, lng:112.3890 },
+            { iata:"NNY", cn:"南阳姜营", country:"中国", lat:32.9810, lng:112.6150 },
+            { iata:"HQQ", cn:"安阳红旗渠", country:"中国", lat:36.0530, lng:114.3930 },
+            { iata:"WUH", cn:"武汉天河", country:"中国", lat:30.7838, lng:114.2081 },
+            { iata:"YIH", cn:"宜昌三峡", country:"中国", lat:30.5560, lng:111.4790 },
+            { iata:"XFN", cn:"襄阳刘集", country:"中国", lat:32.1500, lng:112.2870 },
+            { iata:"ENH", cn:"恩施许家坪", country:"中国", lat:30.3200, lng:109.4850 },
+            { iata:"SHS", cn:"荆州沙市", country:"中国", lat:30.3290, lng:112.2580 },
+            { iata:"WDS", cn:"十堰武当山", country:"中国", lat:32.5920, lng:110.9070 },
+            { iata:"CSX", cn:"长沙黄花", country:"中国", lat:28.1892, lng:113.2197 },
+            { iata:"DYG", cn:"张家界荷花", country:"中国", lat:29.1028, lng:110.4430 },
+            { iata:"CGD", cn:"常德桃花源", country:"中国", lat:28.9190, lng:111.6400 },
+            { iata:"HJJ", cn:"怀化芷江", country:"中国", lat:27.5260, lng:109.6960 },
+            { iata:"LLF", cn:"永州零陵", country:"中国", lat:26.3380, lng:111.6100 },
+            { iata:"DXJ", cn:"湘西边城", country:"中国", lat:28.3430, lng:109.5520 },
+            { iata:"CAN", cn:"广州白云", country:"中国", lat:23.3924, lng:113.2988 },
+            { iata:"SZX", cn:"深圳宝安", country:"中国", lat:22.6393, lng:113.8107 },
+            { iata:"ZUH", cn:"珠海金湾", country:"中国", lat:22.0060, lng:113.3760 },
+            { iata:"SWA", cn:"揭阳潮汕", country:"中国", lat:23.5520, lng:116.5030 },
+            { iata:"ZHA", cn:"湛江吴川", country:"中国", lat:21.2150, lng:110.3580 },
+            { iata:"HUZ", cn:"惠州平潭", country:"中国", lat:23.0460, lng:114.6000 },
+            { iata:"FUO", cn:"佛山沙堤", country:"中国", lat:23.0820, lng:113.0700 },
+            { iata:"NNG", cn:"南宁吴圩", country:"中国", lat:22.6083, lng:108.1720 },
+            { iata:"KWL", cn:"桂林两江", country:"中国", lat:25.2180, lng:110.0390 },
+            { iata:"LZH", cn:"柳州白莲", country:"中国", lat:24.2080, lng:109.3910 },
+            { iata:"BHY", cn:"北海福成", country:"中国", lat:21.5390, lng:109.2940 },
+            { iata:"WUZ", cn:"梧州西江", country:"中国", lat:23.4020, lng:111.0990 },
+            { iata:"YLX", cn:"玉林福绵", country:"中国", lat:22.6150, lng:110.1500 },
+            { iata:"HAK", cn:"海口美兰", country:"中国", lat:19.9348, lng:110.4590 },
+            { iata:"SYX", cn:"三亚凤凰", country:"中国", lat:18.3020, lng:109.4120 },
+            { iata:"TFU", cn:"成都天府", country:"中国", lat:30.3082, lng:104.4455 },
+            { iata:"CTU", cn:"成都双流", country:"中国", lat:30.5785, lng:103.9471 },
+            { iata:"MIG", cn:"绵阳南郊", country:"中国", lat:31.4280, lng:104.7410 },
+            { iata:"LZO", cn:"泸州云龙", country:"中国", lat:28.8520, lng:105.3930 },
+            { iata:"YBP", cn:"宜宾五粮液", country:"中国", lat:28.8000, lng:104.5450 },
+            { iata:"NAO", cn:"南充高坪", country:"中国", lat:30.7950, lng:106.1620 },
+            { iata:"DZH", cn:"达州金垭", country:"中国", lat:31.1920, lng:107.4330 },
+            { iata:"GYS", cn:"广元盘龙", country:"中国", lat:32.3910, lng:105.7030 },
+            { iata:"XIC", cn:"西昌青山", country:"中国", lat:27.9890, lng:102.1840 },
+            { iata:"PZI", cn:"攀枝花保安营", country:"中国", lat:26.5400, lng:101.7980 },
+            { iata:"DCY", cn:"稻城亚丁", country:"中国", lat:29.3230, lng:100.0530 },
+            { iata:"BZX", cn:"巴中恩阳", country:"中国", lat:31.7400, lng:106.6450 },
+            { iata:"JZH", cn:"九寨黄龙", country:"中国", lat:32.8530, lng:103.6830 },
+            { iata:"KWE", cn:"贵阳龙洞堡", country:"中国", lat:26.5380, lng:106.8010 },
+            { iata:"WMT", cn:"遵义茅台", country:"中国", lat:27.8150, lng:106.3280 },
+            { iata:"ZYI", cn:"遵义新舟", country:"中国", lat:27.8160, lng:107.2480 },
+            { iata:"TEN", cn:"铜仁凤凰", country:"中国", lat:27.8840, lng:109.3100 },
+            { iata:"ACX", cn:"兴义万峰林", country:"中国", lat:25.0860, lng:104.9590 },
+            { iata:"KJH", cn:"凯里黄平", country:"中国", lat:26.9850, lng:107.9880 },
+            { iata:"BFV", cn:"毕节飞雄", country:"中国", lat:27.2670, lng:105.4850 },
+            { iata:"LPF", cn:"六盘水月照", country:"中国", lat:26.6090, lng:104.9440 },
+            { iata:"KMG", cn:"昆明长水", country:"中国", lat:25.1019, lng:102.9292 },
+            { iata:"LJG", cn:"丽江三义", country:"中国", lat:26.6800, lng:100.2460 },
+            { iata:"JHG", cn:"西双版纳嘎洒", country:"中国", lat:21.9630, lng:100.7600 },
+            { iata:"DLU", cn:"大理机场", country:"中国", lat:25.6490, lng:100.3180 },
+            { iata:"TCZ", cn:"腾冲驼峰", country:"中国", lat:24.9390, lng:98.4860 },
+            { iata:"LUM", cn:"德宏芒市", country:"中国", lat:24.4010, lng:98.5320 },
+            { iata:"DIG", cn:"迪庆香格里拉", country:"中国", lat:27.7930, lng:99.6770 },
+            { iata:"BSD", cn:"保山云端", country:"中国", lat:25.0530, lng:99.1680 },
+            { iata:"SYM", cn:"普洱思茅", country:"中国", lat:22.7930, lng:100.9590 },
+            { iata:"ZAT", cn:"昭通机场", country:"中国", lat:27.3240, lng:103.7550 },
+            { iata:"WNH", cn:"文山砚山", country:"中国", lat:23.5650, lng:104.3250 },
+            { iata:"NLH", cn:"宁蒗泸沽湖", country:"中国", lat:27.5460, lng:100.7590 },
+            { iata:"LXA", cn:"拉萨贡嘎", country:"中国", lat:29.2970, lng:90.9110 },
+            { iata:"LZY", cn:"林芝米林", country:"中国", lat:29.3030, lng:94.3350 },
+            { iata:"BPX", cn:"昌都邦达", country:"中国", lat:30.5530, lng:97.1080 },
+            { iata:"RKZ", cn:"日喀则和平", country:"中国", lat:29.3510, lng:89.3060 },
+            { iata:"NGQ", cn:"阿里昆莎", country:"中国", lat:32.1000, lng:80.0530 },
+            { iata:"XIY", cn:"西安咸阳", country:"中国", lat:34.4471, lng:108.7516 },
+            { iata:"UYN", cn:"榆林榆阳", country:"中国", lat:38.3590, lng:109.5910 },
+            { iata:"ENY", cn:"延安南泥湾", country:"中国", lat:36.4750, lng:109.4720 },
+            { iata:"HZG", cn:"汉中城固", country:"中国", lat:33.1280, lng:107.2040 },
+            { iata:"AKA", cn:"安康富强", country:"中国", lat:32.7080, lng:108.9310 },
+            { iata:"LHW", cn:"兰州中川", country:"中国", lat:36.5150, lng:103.6200 },
+            { iata:"DNH", cn:"敦煌莫高", country:"中国", lat:40.1610, lng:94.8090 },
+            { iata:"JGN", cn:"嘉峪关酒泉", country:"中国", lat:39.8590, lng:98.3410 },
+            { iata:"IQG", cn:"庆阳机场", country:"中国", lat:35.7990, lng:107.6030 },
+            { iata:"LNL", cn:"陇南成县", country:"中国", lat:33.7880, lng:105.7970 },
+            { iata:"XNN", cn:"西宁曹家堡", country:"中国", lat:36.5270, lng:102.0430 },
+            { iata:"GOQ", cn:"格尔木机场", country:"中国", lat:36.4020, lng:94.7860 },
+            { iata:"YUS", cn:"玉树巴塘", country:"中国", lat:32.8360, lng:97.0360 },
+            { iata:"INC", cn:"银川河东", country:"中国", lat:38.3210, lng:106.3920 },
+            { iata:"URC", cn:"乌鲁木齐地窝堡", country:"中国", lat:43.9071, lng:87.4742 },
+            { iata:"KHG", cn:"喀什徕宁", country:"中国", lat:39.5430, lng:76.0200 },
+            { iata:"YIN", cn:"伊宁机场", country:"中国", lat:43.9550, lng:81.3310 },
+            { iata:"KRL", cn:"库尔勒机场", country:"中国", lat:41.7130, lng:86.1290 },
+            { iata:"AKU", cn:"阿克苏红旗坡", country:"中国", lat:41.2620, lng:80.2910 },
+            { iata:"HTN", cn:"和田机场", country:"中国", lat:37.0360, lng:79.8650 },
+            { iata:"KRY", cn:"克拉玛依机场", country:"中国", lat:45.6170, lng:84.8830 },
+            { iata:"TLQ", cn:"吐鲁番交河", country:"中国", lat:43.0310, lng:89.0970 },
+            { iata:"AAT", cn:"阿勒泰雪都", country:"中国", lat:47.7500, lng:88.0830 },
+            { iata:"TCG", cn:"塔城千泉", country:"中国", lat:46.6600, lng:83.3120 },
+            { iata:"IQM", cn:"且末玉都", country:"中国", lat:38.1400, lng:85.5300 },
+            { iata:"FYN", cn:"富蕴可可托海", country:"中国", lat:47.0000, lng:89.5170 },
+            { iata:"SHF", cn:"石河子花园", country:"中国", lat:44.3440, lng:86.0430 },
+            { iata:"HKG", cn:"香港国际", country:"中国香港", lat:22.3089, lng:113.9144 },
+            { iata:"MFM", cn:"澳门国际", country:"中国澳门", lat:22.1495, lng:113.5916 },
+            { iata:"TPE", cn:"台北桃园", country:"中国台湾", lat:25.0777, lng:121.2328 },
+            { iata:"TSA", cn:"台北松山", country:"中国台湾", lat:25.0697, lng:121.5523 },
+            { iata:"KHH", cn:"高雄国际", country:"中国台湾", lat:22.5770, lng:120.3500 },
+            { iata:"NRT", cn:"东京成田", country:"日本", lat:35.7720, lng:140.3929 },
+            { iata:"HND", cn:"东京羽田", country:"日本", lat:35.5494, lng:139.7798 },
+            { iata:"KIX", cn:"大阪关西", country:"日本", lat:34.4345, lng:135.2440 },
+            { iata:"FUK", cn:"福冈国际", country:"日本", lat:33.5850, lng:130.4510 },
+            { iata:"ICN", cn:"首尔仁川", country:"韩国", lat:37.4602, lng:126.4407 },
+            { iata:"PUS", cn:"釜山金海", country:"韩国", lat:35.1795, lng:128.9482 },
+            { iata:"CJU", cn:"济州国际", country:"韩国", lat:33.5113, lng:126.4920 },
+            { iata:"SIN", cn:"新加坡樟宜", country:"新加坡", lat:1.3644, lng:103.9915 },
+            { iata:"KUL", cn:"吉隆坡国际", country:"马来西亚", lat:2.7456, lng:101.7099 },
+            { iata:"BKI", cn:"亚庇国际", country:"马来西亚", lat:5.9369, lng:116.0480 },
+            { iata:"PEN", cn:"槟城国际", country:"马来西亚", lat:5.2920, lng:100.2650 },
+            { iata:"BKK", cn:"曼谷素万那普", country:"泰国", lat:13.6900, lng:100.7501 },
+            { iata:"DMK", cn:"曼谷廊曼", country:"泰国", lat:13.9126, lng:100.6068 },
+            { iata:"HKT", cn:"普吉国际", country:"泰国", lat:8.1130, lng:98.3160 },
+            { iata:"CGK", cn:"雅加达苏加诺-哈达", country:"印尼", lat:-6.1256, lng:106.6558 },
+            { iata:"DPS", cn:"登巴萨努拉莱伊", country:"印尼", lat:-8.7485, lng:115.1670 },
+            { iata:"SUB", cn:"泗水朱安达", country:"印尼", lat:-7.3798, lng:112.7860 },
+            { iata:"MNL", cn:"马尼拉尼诺伊·阿基诺", country:"菲律宾", lat:14.5086, lng:121.0190 },
+            { iata:"CEB", cn:"宿务马克坦", country:"菲律宾", lat:10.3076, lng:123.9790 },
+            { iata:"HAN", cn:"河内内排", country:"越南", lat:21.2212, lng:105.8070 },
+            { iata:"SGN", cn:"胡志明市新山一", country:"越南", lat:10.8188, lng:106.6519 },
+            { iata:"DAD", cn:"岘港国际", country:"越南", lat:16.0438, lng:108.1980 },
+            { iata:"DEL", cn:"德里英迪拉·甘地", country:"印度", lat:28.5562, lng:77.1000 },
+            { iata:"BOM", cn:"孟买贾特拉帕蒂·希瓦吉", country:"印度", lat:19.0890, lng:72.8680 },
+            { iata:"BLR", cn:"班加罗尔机场", country:"印度", lat:13.1989, lng:77.7067 },
+            { iata:"DXB", cn:"迪拜国际", country:"阿联酋", lat:25.2532, lng:55.3657 },
+            { iata:"AUH", cn:"阿布扎比国际", country:"阿联酋", lat:24.4330, lng:54.6510 },
+            { iata:"DOH", cn:"多哈哈马德", country:"卡塔尔", lat:25.2761, lng:51.6080 },
+            { iata:"IST", cn:"伊斯坦布尔机场", country:"土耳其", lat:41.2750, lng:28.7519 },
+            { iata:"AYT", cn:"安塔利亚机场", country:"土耳其", lat:36.9000, lng:30.8000 },
+            { iata:"ESB", cn:"安卡拉埃森博阿", country:"土耳其", lat:40.1280, lng:32.9950 },
+            { iata:"RUH", cn:"利雅得哈立德国王", country:"沙特", lat:24.9576, lng:46.6988 },
+            { iata:"JED", cn:"吉达阿卜杜勒·阿齐兹国王", country:"沙特", lat:21.6796, lng:39.1566 },
+            { iata:"TLV", cn:"本·古里安国际", country:"以色列", lat:32.0114, lng:34.8867 },
+            { iata:"ALA", cn:"阿拉木图国际", country:"哈萨克斯坦", lat:43.3520, lng:77.0405 },
+            { iata:"NQZ", cn:"阿斯塔纳努尔苏丹", country:"哈萨克斯坦", lat:51.0220, lng:71.4670 },
+            { iata:"TAS", cn:"塔什干国际", country:"乌兹别克斯坦", lat:41.2578, lng:69.2810 },
+            { iata:"SKD", cn:"撒马尔罕国际", country:"乌兹别克斯坦", lat:39.7000, lng:66.9830 },
+            { iata:"LHR", cn:"伦敦希思罗", country:"英国", lat:51.4700, lng:-0.4543 },
+            { iata:"LGW", cn:"伦敦盖特威克", country:"英国", lat:51.1481, lng:-0.1903 },
+            { iata:"MAN", cn:"曼彻斯特机场", country:"英国", lat:53.3537, lng:-2.2750 },
+            { iata:"CDG", cn:"巴黎戴高乐", country:"法国", lat:49.0097, lng:2.5479 },
+            { iata:"ORY", cn:"巴黎奥利", country:"法国", lat:48.7250, lng:2.3590 },
+            { iata:"NCE", cn:"尼斯蔚蓝海岸", country:"法国", lat:43.6650, lng:7.2150 },
+            { iata:"FRA", cn:"法兰克福机场", country:"德国", lat:50.0379, lng:8.5622 },
+            { iata:"MUC", cn:"慕尼黑机场", country:"德国", lat:48.3538, lng:11.7860 },
+            { iata:"BER", cn:"柏林勃兰登堡", country:"德国", lat:52.3660, lng:13.5030 },
+            { iata:"AMS", cn:"阿姆斯特丹史基浦", country:"荷兰", lat:52.3086, lng:4.7639 },
+            { iata:"RTM", cn:"鹿特丹海牙", country:"荷兰", lat:51.9569, lng:4.4372 },
+            { iata:"MAD", cn:"马德里巴拉哈斯", country:"西班牙", lat:40.4719, lng:-3.5626 },
+            { iata:"BCN", cn:"巴塞罗那埃尔普拉特", country:"西班牙", lat:41.2970, lng:2.0830 },
+            { iata:"AGP", cn:"马拉加机场", country:"西班牙", lat:36.6749, lng:-4.4991 },
+            { iata:"FCO", cn:"罗马菲乌米奇诺", country:"意大利", lat:41.8045, lng:12.2509 },
+            { iata:"MXP", cn:"米兰马尔彭萨", country:"意大利", lat:45.6300, lng:8.7280 },
+            { iata:"VCE", cn:"威尼斯马可·波罗", country:"意大利", lat:45.5053, lng:12.3519 },
+            { iata:"ZRH", cn:"苏黎世机场", country:"瑞士", lat:47.4647, lng:8.5490 },
+            { iata:"GVA", cn:"日内瓦机场", country:"瑞士", lat:46.2380, lng:6.1080 },
+            { iata:"DUB", cn:"都柏林机场", country:"爱尔兰", lat:53.4277, lng:-6.2440 },
+            { iata:"VIE", cn:"维也纳国际", country:"奥地利", lat:48.1103, lng:16.5697 },
+            { iata:"SZG", cn:"萨尔茨堡机场", country:"奥地利", lat:47.7930, lng:13.0050 },
+            { iata:"BRU", cn:"布鲁塞尔扎芬特姆", country:"比利时", lat:50.9014, lng:4.4844 },
+            { iata:"CPH", cn:"哥本哈根凯斯楚普", country:"丹麦", lat:55.6179, lng:12.6560 },
+            { iata:"OSL", cn:"奥斯陆加勒穆恩", country:"挪威", lat:60.1939, lng:11.1000 },
+            { iata:"BGO", cn:"卑尔根机场", country:"挪威", lat:60.2930, lng:5.2180 },
+            { iata:"ARN", cn:"斯德哥尔摩阿兰达", country:"瑞典", lat:59.6519, lng:17.9186 },
+            { iata:"GOT", cn:"哥德堡兰德维特", country:"瑞典", lat:57.6660, lng:12.2798 },
+            { iata:"HEL", cn:"赫尔辛基万塔", country:"芬兰", lat:60.3172, lng:24.9633 },
+            { iata:"ATH", cn:"雅典国际", country:"希腊", lat:37.9364, lng:23.9475 },
+            { iata:"SKG", cn:"塞萨洛尼基", country:"希腊", lat:40.5197, lng:22.9700 },
+            { iata:"LIS", cn:"里斯本机场", country:"葡萄牙", lat:38.7750, lng:-9.1340 },
+            { iata:"OPO", cn:"波尔图机场", country:"葡萄牙", lat:41.2370, lng:-8.6700 },
+            { iata:"WAW", cn:"华沙肖邦", country:"波兰", lat:52.1657, lng:20.9670 },
+            { iata:"KRK", cn:"克拉科夫机场", country:"波兰", lat:50.0770, lng:19.7860 },
+            { iata:"PRG", cn:"布拉格瓦茨拉夫·哈维尔", country:"捷克", lat:50.1008, lng:14.2600 },
+            { iata:"BUD", cn:"布达佩斯李斯特·费伦茨", country:"匈牙利", lat:47.4360, lng:19.2630 },
+            { iata:"ATL", cn:"亚特兰大哈兹菲尔德-杰克逊", country:"美国", lat:33.6367, lng:-84.4281 },
+            { iata:"LAX", cn:"洛杉矶国际", country:"美国", lat:33.9416, lng:-118.4085 },
+            { iata:"ORD", cn:"芝加哥奥黑尔", country:"美国", lat:41.9742, lng:-87.9073 },
+            { iata:"DFW", cn:"达拉斯-沃斯堡", country:"美国", lat:32.8975, lng:-97.0372 },
+            { iata:"DEN", cn:"丹佛国际", country:"美国", lat:39.8550, lng:-104.6730 },
+            { iata:"JFK", cn:"纽约肯尼迪", country:"美国", lat:40.6413, lng:-73.7781 },
+            { iata:"EWR", cn:"纽瓦克自由", country:"美国", lat:40.6925, lng:-74.1687 },
+            { iata:"SFO", cn:"旧金山国际", country:"美国", lat:37.6190, lng:-122.3740 },
+            { iata:"MIA", cn:"迈阿密国际", country:"美国", lat:25.7932, lng:-80.2906 },
+            { iata:"SEA", cn:"西雅图-塔科马", country:"美国", lat:47.4500, lng:-122.3090 },
+            { iata:"BOS", cn:"波士顿洛根", country:"美国", lat:42.3650, lng:-71.0080 },
+            { iata:"IAD", cn:"华盛顿杜勒斯", country:"美国", lat:38.9470, lng:-77.4560 },
+            { iata:"YYZ", cn:"多伦多皮尔逊", country:"加拿大", lat:43.6777, lng:-79.6248 },
+            { iata:"YVR", cn:"温哥华国际", country:"加拿大", lat:49.1939, lng:-123.1840 },
+            { iata:"YUL", cn:"蒙特利尔特鲁多", country:"加拿大", lat:45.4660, lng:-73.7400 },
+            { iata:"YYC", cn:"卡尔加里国际", country:"加拿大", lat:51.1139, lng:-114.0203 },
+            { iata:"MEX", cn:"墨西哥城贝尼托·华雷斯", country:"墨西哥", lat:19.4363, lng:-99.0721 },
+            { iata:"CUN", cn:"坎昆国际", country:"墨西哥", lat:21.0365, lng:-86.8770 },
+            { iata:"PTY", cn:"巴拿马城托库门", country:"巴拿马", lat:9.0714, lng:-79.3835 },
+            { iata:"SYD", cn:"悉尼金斯福德·史密斯", country:"澳大利亚", lat:-33.9461, lng:151.1772 },
+            { iata:"MEL", cn:"墨尔本机场", country:"澳大利亚", lat:-37.6733, lng:144.8430 },
+            { iata:"BNE", cn:"布里斯班机场", country:"澳大利亚", lat:-27.3842, lng:153.1175 },
+            { iata:"PER", cn:"珀斯机场", country:"澳大利亚", lat:-31.9403, lng:115.9670 },
+            { iata:"ADL", cn:"阿德莱德机场", country:"澳大利亚", lat:-34.9450, lng:138.5310 },
+            { iata:"AKL", cn:"奥克兰机场", country:"新西兰", lat:-37.0080, lng:174.7850 },
+            { iata:"WLG", cn:"惠灵顿机场", country:"新西兰", lat:-41.3270, lng:174.8060 },
+            { iata:"CHC", cn:"基督城机场", country:"新西兰", lat:-43.4890, lng:172.5320 },
+            { iata:"NAN", cn:"楠迪国际", country:"斐济", lat:-17.7550, lng:177.4430 },
+            { iata:"POM", cn:"莫尔兹比港杰克逊", country:"巴布亚新几内亚", lat:-9.4430, lng:147.2200 },
+            { iata:"JNB", cn:"约翰内斯堡奥利弗·坦博", country:"南非", lat:-26.1390, lng:28.2460 },
+            { iata:"CPT", cn:"开普敦机场", country:"南非", lat:-33.9640, lng:18.6010 },
+            { iata:"DUR", cn:"德班沙卡国王", country:"南非", lat:-29.9700, lng:30.9510 },
+            { iata:"CAI", cn:"开罗国际", country:"埃及", lat:30.1219, lng:31.4056 },
+            { iata:"HRG", cn:"赫尔格达国际", country:"埃及", lat:27.1780, lng:33.7990 },
+            { iata:"ADD", cn:"亚的斯亚贝巴博莱", country:"埃塞俄比亚", lat:9.0318, lng:38.7570 },
+            { iata:"CMN", cn:"卡萨布兰卡穆罕默德五世", country:"摩洛哥", lat:33.3670, lng:-7.5890 },
+            { iata:"RAK", cn:"马拉喀什迈纳拉", country:"摩洛哥", lat:31.6060, lng:-8.0360 },
+            { iata:"NBO", cn:"内罗毕乔莫·肯雅塔", country:"肯尼亚", lat:-1.3190, lng:36.9278 },
+            { iata:"LOS", cn:"拉各斯穆尔塔拉·穆罕默德", country:"尼日利亚", lat:6.5770, lng:3.3210 },
+            { iata:"ALG", cn:"阿尔及尔胡阿里·布迈丁", country:"阿尔及利亚", lat:36.7000, lng:3.2150 },
+            { iata:"MRU", cn:"西沃萨古尔·拉姆古兰爵士", country:"毛里求斯", lat:-20.4310, lng:57.6830 },
+            { iata:"KGL", cn:"基加利国际", country:"卢旺达", lat:-1.9680, lng:30.1390 },
+            { iata:"GRU", cn:"圣保罗瓜鲁柳斯", country:"巴西", lat:-23.4350, lng:-46.4690 },
+            { iata:"GIG", cn:"里约热内卢加利昂", country:"巴西", lat:-22.8090, lng:-43.2500 },
+            { iata:"BSB", cn:"巴西利亚国际", country:"巴西", lat:-15.8710, lng:-47.9180 },
+            { iata:"BOG", cn:"波哥大埃尔多拉多", country:"哥伦比亚", lat:4.7016, lng:-74.1469 },
+            { iata:"EZE", cn:"布宜诺斯艾利斯埃塞萨", country:"阿根廷", lat:-34.8220, lng:-58.5360 },
+            { iata:"LIM", cn:"利马豪尔赫·查韦斯", country:"秘鲁", lat:-12.0219, lng:-77.1143 },
+            { iata:"SCL", cn:"圣地亚哥阿图罗·梅里诺", country:"智利", lat:-33.3930, lng:-70.7860 },
+            { iata:"UIO", cn:"基多苏克雷元帅", country:"厄瓜多尔", lat:-0.1410, lng:-78.4880 },
+            { iata:"MVD", cn:"蒙得维的亚卡拉斯科", country:"乌拉圭", lat:-34.8380, lng:-56.0300 },
+            { iata:"ASU", cn:"亚松森西尔维奥·佩蒂罗西", country:"巴拉圭", lat:-25.2390, lng:-57.5190 }
+        ];
+
+        // ========== 全部机型（40+） ==========
+        const MODELS = {
+            C909: { name:"国产 C909 (ARJ21)", rows:7, layout:[2,3], firstClassRows:1 },
+            C919: { name:"国产 C919", rows:8, layout:[3,3], firstClassRows:1 },
+            A220_100: { name:"空客 A220-100", rows:7, layout:[2,3], firstClassRows:1 },
+            A220_300: { name:"空客 A220-300", rows:8, layout:[2,3], firstClassRows:1 },
+            A318: { name:"空客 A318", rows:6, layout:[3,3], firstClassRows:1 },
+            A319: { name:"空客 A319", rows:7, layout:[3,3], firstClassRows:1 },
+            A320: { name:"空客 A320-200", rows:8, layout:[3,3], firstClassRows:1 },
+            A320neo: { name:"空客 A320neo", rows:8, layout:[3,3], firstClassRows:1 },
+            A321: { name:"空客 A321-200", rows:10, layout:[3,3], firstClassRows:2 },
+            A321neo: { name:"空客 A321neo", rows:10, layout:[3,3], firstClassRows:2 },
+            B737_700: { name:"波音 737-700", rows:8, layout:[3,3], firstClassRows:1 },
+            B737_800: { name:"波音 737-800", rows:8, layout:[3,3], firstClassRows:1 },
+            B737_900: { name:"波音 737-900ER", rows:9, layout:[3,3], firstClassRows:1 },
+            B737_MAX8: { name:"波音 737 MAX 8", rows:8, layout:[3,3], firstClassRows:1 },
+            B737_MAX9: { name:"波音 737 MAX 9", rows:9, layout:[3,3], firstClassRows:1 },
+            B737_MAX10:{ name:"波音 737 MAX 10", rows:10, layout:[3,3], firstClassRows:2 },
+            B757: { name:"波音 757-200", rows:8, layout:[3,3], firstClassRows:2 },
+            A330_200: { name:"空客 A330-200", rows:8, layout:[2,4,2], firstClassRows:2 },
+            A330_300: { name:"空客 A330-300", rows:8, layout:[2,4,2], firstClassRows:2 },
+            A330_800: { name:"空客 A330-800neo", rows:8, layout:[2,4,2], firstClassRows:2 },
+            A330_900: { name:"空客 A330-900neo", rows:9, layout:[2,4,2], firstClassRows:2 },
+            A350_900: { name:"空客 A350-900", rows:9, layout:[3,3,3], firstClassRows:2 },
+            A350_1000:{ name:"空客 A350-1000", rows:10, layout:[3,3,3], firstClassRows:3 },
+            A380: { name:"空客 A380-800", rows:10, layout:[3,4,3], firstClassRows:3 },
+            B767: { name:"波音 767", rows:7, layout:[2,3,2], firstClassRows:2 },
+            B777_200: { name:"波音 777-200", rows:9, layout:[3,4,3], firstClassRows:2 },
+            B777_200ER:{ name:"波音 777-200ER", rows:9, layout:[3,4,3], firstClassRows:2 },
+            B777_300ER:{ name:"波音 777-300ER", rows:10, layout:[3,4,3], firstClassRows:3 },
+            B777X: { name:"波音 777X", rows:10, layout:[3,4,3], firstClassRows:3 },
+            B787_8: { name:"波音 787-8", rows:8, layout:[3,3,3], firstClassRows:2 },
+            B787_9: { name:"波音 787-9", rows:9, layout:[3,3,3], firstClassRows:2 },
+            B787_10:{ name:"波音 787-10", rows:10, layout:[3,3,3], firstClassRows:2 },
+            E170: { name:"巴航 E170", rows:6, layout:[2,2], firstClassRows:1 },
+            E175: { name:"巴航 E175", rows:7, layout:[2,2], firstClassRows:1 },
+            E190: { name:"巴航 E190", rows:7, layout:[2,2], firstClassRows:1 },
+            E195: { name:"巴航 E195", rows:8, layout:[2,2], firstClassRows:1 },
+            E190_E2:{ name:"巴航 E190-E2", rows:7, layout:[2,2], firstClassRows:1 },
+            E195_E2:{ name:"巴航 E195-E2", rows:8, layout:[2,2], firstClassRows:1 },
+            ATR42: { name:"ATR 42-600", rows:5, layout:[2,2], firstClassRows:0 },
+            ATR72: { name:"ATR 72-600", rows:6, layout:[2,2], firstClassRows:0 }
+        };
+        const SEAT_LETTERS = ['A','B','C','D','E','F','G','H','J','K'];
+
+        // ========== 全局状态 ==========
+        let S = {
+            dur: 60, seat: "12A", model: "A320", dep: null, arr: null, intent: "",
+            start: 0, timer: null, gc: null, currentViewMode: 'map',
+            currentPos: { lat:0, lng:0 }, audioVol: 0.8,
+            announced: { cruise:false, descent:false, landed:false },
+            allowEmergencies: false, currentEvent: 'NORMAL',
+            actualSpeed: 0, actualAlt: 0,
+            eventTicksRemaining: 0,
+            lastWindowLat: null, lastWindowLng: null,
+            weatherUpdateTime: 0,
+            weatherData: null
+        };
+        let selectedSeat = "12A";
+        let selectedModel = "A320";
+        let mapInstance = null, markerInstance = null, tileLayerInstance = null;
+
+        // ========== 天气数据（模拟+API） ==========
+        const WEATHER_API_KEY = ''; // 填入你的 OpenWeatherMap API Key，留空则使用模拟数据
+
+        function generateDynamicWeather(lat, lng, alt, phase) {
+            // 根据经纬度、高度、飞行阶段生成动态天气描述
+            const time = Date.now() / 1000;
+            const seed = Math.sin(lat * 0.1 + lng * 0.05 + alt * 0.001 + time * 0.001);
+            const cloud = Math.max(0, Math.min(100, 50 + 30 * Math.sin(seed * 1.3 + 1.2)));
+            const temp = Math.round(-50 + 10 * Math.sin(seed * 0.7 + 2.1) + alt / 2000);
+            const wind = Math.round(20 + 30 * Math.sin(seed * 1.1 + 0.5));
+            const turbulence = Math.random() < 0.02 ? '轻度颠簸' : '平稳';
+            const phaseText = phase.includes('巡航') ? '巡航' : (phase.includes('爬升') ? '爬升' : (phase.includes('进近') ? '进近' : '地面'));
+            let icon = '☀️';
+            if (cloud > 70) icon = '☁️';
+            else if (cloud > 40) icon = '⛅';
+            else icon = '☀️';
+            if (turbulence.includes('颠簸')) icon = '🌬️';
+            return {
+                icon,
+                cloud,
+                temp,
+                wind,
+                turbulence,
+                phaseText,
+                text: `${icon} 航路天气：${phaseText}阶段 · 云量 ${Math.round(cloud)}% · 温度 ${temp}°C · 风速 ${wind} km/h · 气流${turbulence}`
+            };
+        }
+
+        function fetchRealWeather(lat, lng, callback) {
+            if (!WEATHER_API_KEY) {
+                // 没有 Key 则模拟
+                callback(null);
+                return;
+            }
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${WEATHER_API_KEY}&units=metric&lang=zh_cn`;
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.weather) {
+                        const desc = data.weather[0].description;
+                        const temp = Math.round(data.main.temp);
+                        const wind = Math.round(data.wind.speed * 3.6);
+                        const cloud = data.clouds.all;
+                        const icon = data.weather[0].icon;
+                        callback({ icon: `https://openweathermap.org/img/wn/${icon}@2x.png`, cloud, temp, wind, desc });
+                    } else {
+                        callback(null);
+                    }
+                })
+                .catch(() => callback(null));
+        }
+
+        function updateWeatherDisplay(forceUpdate = false) {
+            const container = document.getElementById('mapContainer');
+            if (S.currentViewMode !== 'weather') return;
+            const now = Date.now();
+            if (!forceUpdate && now - S.weatherUpdateTime < 15000) return; // 15秒更新一次
+            S.weatherUpdateTime = now;
+
+            const lat = S.currentPos.lat || (S.dep ? S.dep.lat : 0);
+            const lng = S.currentPos.lng || (S.dep ? S.dep.lng : 0);
+            const alt = S.actualAlt || 0;
+            const phase = document.getElementById('fPhase')?.textContent || '';
+
+            if (WEATHER_API_KEY) {
+                fetchRealWeather(lat, lng, (data) => {
+                    if (data) {
+                        const html = `<div class="weather-text">
+                            <span class="icon"><img src="${data.icon}" style="width:48px;height:48px;filter:drop-shadow(0 0 8px rgba(255,255,255,0.3));" /></span>
+                            <div style="font-size:18px;font-weight:600;">${data.desc}</div>
+                            <div class="detail">温度 ${data.temp}°C · 风速 ${data.wind} km/h · 云量 ${data.cloud}%</div>
+                            <div class="detail">当前位置：${lat.toFixed(2)}, ${lng.toFixed(2)}</div>
+                        </div>`;
+                        container.innerHTML = html;
+                    } else {
+                        // API 失败，使用模拟
+                        const w = generateDynamicWeather(lat, lng, alt, phase);
+                        container.innerHTML = `<div class="weather-text"><span class="icon">${w.icon}</span><div>${w.text}</div></div>`;
+                    }
                 });
-            });
-
-            function syncThemeBtns(t) {
-                document.querySelectorAll('.theme-switch button').forEach(b => b.classList.toggle('active', b
-                .dataset.t === t));
+            } else {
+                // 使用模拟实时天气
+                const w = generateDynamicWeather(lat, lng, alt, phase);
+                container.innerHTML = `<div class="weather-text"><span class="icon">${w.icon}</span><div>${w.text}</div></div>`;
             }
-        })();
+        }
 
-        /* ================================================================
-           2. 金箔粒子
-           ================================================================ */
-        (function() {
-            const c = document.getElementById('goldCanvas'),
-                ctx = c.getContext('2d');
-            let W, H, pts = [];
-
-            function resize() { W = c.width = innerWidth;
-                H = c.height = innerHeight; }
-            addEventListener('resize', resize);
-            resize();
-
-            function mk() { return { x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .15, vy: .12 +
-                        Math.random() * .3, r: .4 + Math.random() * 1.2, a: .15 + Math.random() * .35 }; }
-            for (let i = 0; i < (innerWidth < 600 ? 40 : 80); i++) pts.push(mk());
-
-            function draw() {
-                ctx.clearRect(0, 0, W, H);
-                const col = getComputedStyle(document.documentElement).getPropertyValue('--gold-particle');
-                for (const p of pts) {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    if (p.y > H) { p.y = -2;
-                        p.x = Math.random() * W; }
-                    ctx.fillStyle = col;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, 7);
-                    ctx.fill();
+        // ========== 地图 & 视图切换 ==========
+        function initMap() {
+            const container = document.getElementById('mapContainer');
+            container.innerHTML = '';
+            if (!S.dep || !S.arr) return;
+            try {
+                const map = L.map(container, { zoomControl: false, attributionControl: false })
+                    .setView([S.dep.lat, S.dep.lng], 4);
+                let tileUrl;
+                switch (S.currentViewMode) {
+                    case 'terrain':
+                        // Esri World Topo Map (稳定，无key)
+                        tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
+                        break;
+                    case 'map':
+                    default:
+                        tileUrl = 'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}';
+                        break;
                 }
-                requestAnimationFrame(draw);
-            }
-            draw();
-            addEventListener('mousemove', e => {
-                for (const p of pts) {
-                    const dx = p.x - e.clientX,
-                        dy = p.y - e.clientY;
-                    if (dx * dx + dy * dy < 2000) { p.vx += dx * .0008;
-                        p.vy += dy * .0008; }
+                tileLayerInstance = L.tileLayer(tileUrl, { subdomains: ["1","2","3","4"], maxZoom: 18 })
+                    .addTo(map);
+
+                S.gc = greatCircle(S.dep, S.arr);
+                const path = [];
+                for (let i=0; i<=100; i++) {
+                    const p = S.gc.lerp(i/100);
+                    path.push([p.lat, p.lng]);
                 }
+                L.polyline(path, { color:'#f0a890', weight:3, dashArray:'6,6' }).addTo(map);
+
+                const initialBearing = S.gc.bearing(0.01);
+                const planeIcon = L.divIcon({
+                    html: `<div style="transform:rotate(${initialBearing}deg);transition:transform 0.2s;font-size:24px;text-align:center;line-height:24px;">✈️</div>`,
+                    className: '', iconSize:[28,28], iconAnchor:[14,14]
+                });
+                markerInstance = L.marker([S.dep.lat, S.dep.lng], { icon: planeIcon }).addTo(map);
+                mapInstance = map;
+            } catch(e) { console.log('Map init error', e); }
+        }
+
+        function destroyMap() {
+            if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+            markerInstance = null; tileLayerInstance = null;
+        }
+
+        function switchViewMode(mode) {
+            S.currentViewMode = mode;
+            document.querySelectorAll('.layer-btn').forEach(btn => {
+                if (btn.dataset.mode) btn.classList.toggle('active', btn.dataset.mode === mode);
             });
-        })();
+            if (mode === 'window') {
+                destroyMap();
+                S.lastWindowLat = null; S.lastWindowLng = null;
+                updateWindowView(S.currentPos.lat, S.currentPos.lng, true);
+            } else if (mode === 'weather') {
+                destroyMap();
+                const container = document.getElementById('mapContainer');
+                container.innerHTML = `<div class="weather-text"><span class="icon">🌤️</span><div>加载天气数据...</div></div>`;
+                S.weatherUpdateTime = 0;
+                updateWeatherDisplay(true);
+                // 每15秒自动更新
+                if (S.weatherTimer) clearInterval(S.weatherTimer);
+                S.weatherTimer = setInterval(() => updateWeatherDisplay(false), 15000);
+            } else {
+                if (S.weatherTimer) { clearInterval(S.weatherTimer); S.weatherTimer = null; }
+                destroyMap();
+                initMap();
+            }
+        }
 
-        /* ================================================================
-           3. 光标（无烟花）
-           ================================================================ */
-        const ch = document.getElementById('cursorHeart');
-        addEventListener('mousemove', e => { ch.style.left = e.clientX + 'px';
-            ch.style.top = e.clientY + 'px'; });
+        function updateWindowView(lat, lng, force = false) {
+            const container = document.getElementById('mapContainer');
+            if (S.currentViewMode !== 'window') return;
+            if (!force && S.lastWindowLat !== null && S.lastWindowLng !== null) {
+                const dist = Math.hypot(lat - S.lastWindowLat, lng - S.lastWindowLng);
+                if (dist < 0.02) return;
+            }
+            S.lastWindowLat = lat; S.lastWindowLng = lng;
+            const url = `https://static-maps.yandex.ru/1.x/?ll=${lng.toFixed(2)},${lat.toFixed(2)}&z=12&l=sat&size=600,350&lang=zh_CN`;
+            if (container.querySelector('.window-view')) {
+                const img = new Image();
+                img.onload = () => {
+                    const wv = container.querySelector('.window-view');
+                    if (wv) wv.style.backgroundImage = `url('${url}')`;
+                };
+                img.src = url;
+            } else {
+                container.innerHTML = `
+                    <div class="window-view" style="background-image:url('${url}')">
+                        <div class="window-glass-shine"></div>
+                        <div class="window-watermark-blocker"></div>
+                    </div>`;
+            }
+        }
 
-        /* ================================================================
-           4. 打字机
-           ================================================================ */
-        (function() {
-            const el = document.getElementById('typewriter');
-            const txt = '有些话平时不说，但在这个节点，想好好写下来。\n致每一个愿意停下来的人。';
-            let i = 0;
-            (function step() {
-                if (i <= txt.length) {
-                    el.innerHTML = txt.slice(0, i).replace(/\n/g, '<br>') + '<span class="caret"></span>';
-                    i++;
-                    setTimeout(step, 48);
+        // ========== 大圆航线计算 ==========
+        function greatCircle(a, b) {
+            const toR = d => d * Math.PI / 180, toD = r => r * 180 / Math.PI;
+            const lat1 = toR(a.lat), lon1 = toR(a.lng), lat2 = toR(b.lat), lon2 = toR(b.lng);
+            const v1 = [Math.cos(lat1) * Math.cos(lon1), Math.cos(lat1) * Math.sin(lon1), Math.sin(lat1)];
+            const v2 = [Math.cos(lat2) * Math.cos(lon2), Math.cos(lat2) * Math.sin(lon2), Math.sin(lat2)];
+            const omega = Math.acos(Math.max(-1, Math.min(1, v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2])));
+            return {
+                lerp: t => {
+                    if (omega === 0) return { lat: a.lat, lng: a.lng };
+                    const so = Math.sin(omega), k1 = Math.sin((1 - t) * omega) / so, k2 = Math.sin(t * omega) / so;
+                    const x = k1 * v1[0] + k2 * v2[0], y = k1 * v1[1] + k2 * v2[1], z = k1 * v1[2] + k2 * v2[2];
+                    return { lat: toD(Math.atan2(z, Math.sqrt(x*x + y*y))), lng: toD(Math.atan2(y, x)) };
+                },
+                bearing: t => {
+                    const p1 = this.lerp ? this.lerp(Math.max(0, t - 0.005)) : a;
+                    const p2 = this.lerp ? this.lerp(Math.min(1, t + 0.005)) : b;
+                    const dLon = toR(p2.lng - p1.lng);
+                    const y = Math.sin(dLon) * Math.cos(toR(p2.lat));
+                    const x = Math.cos(toR(p1.lat)) * Math.sin(toR(p2.lat)) - Math.sin(toR(p1.lat)) * Math.cos(toR(p2.lat)) * Math.cos(dLon);
+                    let brng = toD(Math.atan2(y, x));
+                    return (brng + 360) % 360;
+                }
+            };
+        }
+
+        // ========== 座位渲染（无图标） ==========
+        function renderSeats() {
+            const config = MODELS[selectedModel] || MODELS['A320'];
+            const grid = document.getElementById('seatGrid');
+            grid.innerHTML = '';
+            for (let r=1; r<=config.rows; r++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+                const rNum = document.createElement('div');
+                rNum.className = 'row-num';
+                rNum.textContent = r;
+                rowDiv.appendChild(rNum);
+                let letterIdx = 0;
+                config.layout.forEach((gSize, gIdx) => {
+                    if (gIdx > 0) {
+                        const aisle = document.createElement('div');
+                        aisle.className = 'seat-icon aisle';
+                        rowDiv.appendChild(aisle);
+                    }
+                    for (let s=0; s<gSize; s++) {
+                        const letter = SEAT_LETTERS[letterIdx++] || '?';
+                        const seatId = r + letter;
+                        const seatIcon = document.createElement('div');
+                        seatIcon.className = 'seat-icon';
+                        if (r <= config.firstClassRows) seatIcon.classList.add('first-class');
+                        seatIcon.textContent = letter;
+                        if (selectedSeat === seatId) seatIcon.classList.add('selected');
+                        seatIcon.onclick = () => {
+                            document.querySelectorAll('.seat-icon.selected').forEach(el => el.classList.remove('selected'));
+                            seatIcon.classList.add('selected');
+                            selectedSeat = seatId;
+                        };
+                        rowDiv.appendChild(seatIcon);
+                    }
+                });
+                grid.appendChild(rowDiv);
+            }
+        }
+
+        // ========== 搜索框等 ==========
+        function renderAirportList(input, listEl, indexInput) {
+            const query = input.value.trim().toLowerCase();
+            listEl.innerHTML = '';
+            if (!query) { listEl.classList.remove('show'); return; }
+            const matches = AIRPORTS.filter(a => a.cn.includes(query) || a.iata.toLowerCase().includes(query) || a.country.includes(query));
+            if (!matches.length) { listEl.classList.remove('show'); return; }
+            listEl.classList.add('show');
+            matches.forEach(a => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `<span>${a.cn} <small style="color:var(--muted)">(${a.country})</small></span><span class="code">${a.iata}</span>`;
+                div.onclick = () => {
+                    input.value = `${a.cn} (${a.iata})`;
+                    indexInput.value = AIRPORTS.indexOf(a);
+                    listEl.classList.remove('show');
+                    updateDuration();
+                };
+                listEl.appendChild(div);
+            });
+        }
+
+        function updateDuration() {
+            const dep = AIRPORTS[+document.getElementById('depIndex').value];
+            const arr = AIRPORTS[+document.getElementById('arrIndex').value];
+            if (dep && arr) {
+                const dist = 6371 * Math.acos(Math.sin(dep.lat*Math.PI/180)*Math.sin(arr.lat*Math.PI/180) + Math.cos(dep.lat*Math.PI/180)*Math.cos(arr.lat*Math.PI/180)*Math.cos((arr.lng-dep.lng)*Math.PI/180));
+                S.dur = Math.max(5, Math.round(dist / 820 * 60));
+                document.getElementById('displayDuration').textContent = S.dur + ' min';
+            }
+        }
+
+        function generateBarcode() {
+            const bars = document.getElementById('barcodeBars');
+            bars.innerHTML = '';
+            for (let i=0; i<40; i++) {
+                const b = document.createElement('div');
+                b.className = 'bar' + (Math.random() > 0.5 ? ' thick' : '');
+                bars.appendChild(b);
+            }
+        }
+
+        // ========== 广播与声音 ==========
+        function playChime(volume) {
+            if (volume <= 0) return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(volume * 0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.setValueAtTime(587.33, now + 0.35);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(now); osc.stop(now + 1.2);
+            } catch(e) {}
+        }
+
+        function speakAnnouncement(text) {
+            if (S.audioVol <= 0 || !text) return;
+            playChime(S.audioVol);
+            setTimeout(() => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utter = new SpeechSynthesisUtterance(text);
+                    utter.lang = 'zh-CN'; utter.rate = 0.92; utter.volume = S.audioVol;
+                    window.speechSynthesis.speak(utter);
+                }
+            }, 600);
+        }
+
+        function testBroadCast() {
+            speakAnnouncement("女士们先生们，欢迎乘坐本次专注航班。我们将全力守护您的高效专注时光，祝您飞行愉快。");
+        }
+
+        function setVolume(val) { S.audioVol = parseFloat(val); }
+
+        // ========== 特情事件 ==========
+        const ROUTINE_EVENTS = [
+            { id:'NORMAL', chance:0.90, icon:'☀️', title:'航路平稳', shake:'', seatbelt:false, text:'航路天气良好，气流平稳。' },
+            { id:'CAT_LIGHT', chance:0.08, icon:'🌤', title:'轻度气流', shake:'shake-light', seatbelt:true, duration:180, text:'受微弱高空气流扰动，机体轻微颠簸。', speech:'女士们先生们，飞机受轻微气流影响有轻微颠簸，请您在座位上系好安全带。' },
+            { id:'CAT_MODERATE', chance:0.02, icon:'🌬️', title:'中度颠簸', shake:'shake-severe', seatbelt:true, duration:150, text:'遭遇局地强气流扰动，客舱服务暂停。', speech:'女士们先生们，受强气流影响，飞机正经历颠簸。请乘务组停止服务，请各位乘客立即回到座位并扣好安全带。' }
+        ];
+        const EMERGENCY_EVENTS = [
+            { id:'MEDICAL', chance:0.0015, icon:'🚑', title:'乘客突发疾病', shake:'', seatbelt:false, duration:250, isDanger:false, text:'客舱内有乘客突发不适，乘务组正在进行广播寻医并提供协助。', speech:'女士们先生们，现在广播寻医。客舱内有一位乘客突发身体不适，如果乘客中有医生或护士，请立即与乘务员联系，谢谢。' },
+            { id:'DEPRESSURIZATION', chance:0.00005, icon:'⚠️', title:'客舱失压/紧急下降', shake:'shake-severe', seatbelt:true, duration:200, isDanger:true, text:'监测到高空客舱压力异常，机组已执行紧急下降程序降至安全高度。', speech:'紧急广播！客舱压力异常，请迅速拉下氧气面罩，罩在口鼻上，系紧安全带！' }
+        ];
+
+        function checkWeatherEventTrigger(progress) {
+            if (progress < 0.20 || progress > 0.82) { clearEvent(); return; }
+            if (S.currentEvent !== 'NORMAL') return;
+            if (Math.random() < 0.008) {
+                if (S.allowEmergencies) {
+                    for (let ev of EMERGENCY_EVENTS) {
+                        if (Math.random() < ev.chance * 10) { applyEvent(ev); return; }
+                    }
+                }
+                let rand = Math.random(), cum = 0;
+                for (let ev of ROUTINE_EVENTS) {
+                    cum += ev.chance;
+                    if (rand <= cum) { applyEvent(ev); break; }
+                }
+            }
+        }
+
+        function applyEvent(ev) {
+            if (ev.id === 'NORMAL') return;
+            S.currentEvent = ev.id;
+            S.eventTicksRemaining = ev.duration || 180;
+            const seatbeltEl = document.getElementById('seatbeltLight');
+            const titleEl = document.getElementById('currentWeatherTitle');
+            const banner = document.getElementById('eventBanner');
+            const appComp = document.getElementById('appContainer');
+            titleEl.textContent = `${ev.icon} ${ev.title}`;
+            if (ev.seatbelt) seatbeltEl.classList.add('active');
+            else seatbeltEl.classList.remove('active');
+            appComp.className = 'app ' + (ev.shake || '');
+            banner.style.display = 'flex';
+            banner.className = 'event-banner' + (ev.isDanger ? ' danger' : '');
+            document.getElementById('eventIcon').textContent = ev.icon;
+            document.getElementById('eventMsg').textContent = ev.text;
+            if (ev.speech) speakAnnouncement(ev.speech);
+        }
+
+        function clearEvent() {
+            if (S.currentEvent === 'NORMAL') return;
+            const hadTurbulence = S.currentEvent.startsWith('CAT_');
+            S.currentEvent = 'NORMAL';
+            S.eventTicksRemaining = 0;
+            document.getElementById('currentWeatherTitle').textContent = '☀️ 航路平稳';
+            document.getElementById('eventBanner').style.display = 'none';
+            document.getElementById('appContainer').className = 'app';
+            document.getElementById('seatbeltLight').classList.remove('active');
+            if (hadTurbulence) {
+                speakAnnouncement("女士们先生们，我们已穿过气流区域，安全带指示灯已熄灭，感谢您的配合。");
+            }
+        }
+
+        // ========== 核心飞行逻辑 ==========
+        function board() {
+            S.dep = AIRPORTS[+document.getElementById('depIndex').value] || AIRPORTS[0];
+            S.arr = AIRPORTS[+document.getElementById('arrIndex').value] || AIRPORTS[3];
+            S.intent = document.getElementById('intent').value || '专注飞行';
+            S.allowEmergencies = document.getElementById('allowEmergencies').checked;
+
+            document.getElementById('pFlight').textContent = 'FF' + Math.floor(100 + Math.random() * 899);
+            document.getElementById('pSeat').textContent = S.seat;
+            document.getElementById('pDep').textContent = S.dep.cn;
+            document.getElementById('pDepCode').textContent = S.dep.iata;
+            document.getElementById('pArr').textContent = S.arr.cn;
+            document.getElementById('pArrCode').textContent = S.arr.iata;
+            document.getElementById('pBoarding').textContent = new Date().toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+            document.getElementById('pEta').textContent = new Date(Date.now() + S.dur * 60000).toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+            document.getElementById('pIntent').textContent = S.intent;
+
+            generateBarcode();
+            show('s-pass');
+        }
+
+        function startFly() {
+            show('s-fly');
+            destroyMap();
+            S.announced = { cruise:false, descent:false, landed:false };
+            S.actualSpeed = 0; S.actualAlt = 0;
+            S.lastWindowLat = null; S.lastWindowLng = null;
+            S.weatherUpdateTime = 0;
+            clearEvent();
+
+            document.getElementById('musicQuote').textContent = [
+                "“万呎高空之上，将思绪交由旋律与云浪。”",
+                "“穿过平流层的风，会在歌声里变得安稳。”",
+                "“舷窗外的黄昏，正适合听一首缓拍的歌。”",
+                "“云端无杂音，此刻唯有专注与诗意。”"
+            ][Math.floor(Math.random() * 4)];
+
+            document.getElementById('fRoute').textContent = `${S.dep.iata} → ${S.arr.iata}`;
+            document.getElementById('fSeat').textContent = S.seat;
+
+            if (S.currentViewMode === 'window') {
+                updateWindowView(S.dep.lat, S.dep.lng, true);
+            } else if (S.currentViewMode === 'weather') {
+                const container = document.getElementById('mapContainer');
+                container.innerHTML = `<div class="weather-text"><span class="icon">🌤️</span><div>加载天气数据...</div></div>`;
+                S.weatherUpdateTime = 0;
+                updateWeatherDisplay(true);
+                if (S.weatherTimer) clearInterval(S.weatherTimer);
+                S.weatherTimer = setInterval(() => updateWeatherDisplay(false), 15000);
+            } else {
+                initMap();
+            }
+
+            S.start = performance.now();
+            if (S.timer) clearInterval(S.timer);
+            S.timer = setInterval(tick, 100);
+        }
+
+        function tick() {
+            const el = (performance.now() - S.start) / 1000;
+            const total = S.dur * 60;
+            const left = Math.max(0, total - el);
+            const t = Math.min(1, el / total);
+
+            document.getElementById('clock').textContent = `${String(Math.floor(left/60)).padStart(2,'0')}:${String(Math.floor(left%60)).padStart(2,'0')}`;
+            document.getElementById('prog').style.width = (t * 100) + '%';
+
+            S.gc = greatCircle(S.dep, S.arr);
+            S.currentPos = S.gc.lerp(t);
+
+            if (S.currentViewMode !== 'window' && S.currentViewMode !== 'weather' && markerInstance) {
+                markerInstance.setLatLng([S.currentPos.lat, S.currentPos.lng]);
+                const p1 = S.gc.lerp(Math.max(0, t - 0.002));
+                const p2 = S.gc.lerp(Math.min(1, t + 0.002));
+                const dLon = (p2.lng - p1.lng) * Math.PI / 180;
+                const lat1 = p1.lat * Math.PI / 180, lat2 = p2.lat * Math.PI / 180;
+                const y = Math.sin(dLon) * Math.cos(lat2);
+                const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+                let bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+                const iconEl = markerInstance.getElement();
+                if (iconEl) {
+                    const inner = iconEl.querySelector('div');
+                    if (inner) inner.style.transform = `rotate(${bearing}deg)`;
+                }
+            } else if (S.currentViewMode === 'window') {
+                updateWindowView(S.currentPos.lat, S.currentPos.lng);
+            } else if (S.currentViewMode === 'weather') {
+                // 天气模式也会在tick中定期更新
+                if (Date.now() - S.weatherUpdateTime > 15000) {
+                    updateWeatherDisplay(false);
+                }
+            }
+
+            const cruiseAlt = 10600, cruiseSpeed = 850;
+            let targetAlt = 0, targetSpeed = 0, phaseStr = "";
+            if (t < 0.05) {
+                const p = t / 0.05;
+                targetSpeed = (1 - Math.pow(1 - p, 1.5)) * 280;
+                targetAlt = 0;
+                if (targetSpeed < 80) phaseStr = "🛫 发动机推力建立 (N1 提升)";
+                else if (targetSpeed < 230) phaseStr = "🛫 跑道起飞加速 (TOGA 推力)";
+                else phaseStr = "🛫 V1 → VR (抬轮离地)";
+                document.getElementById('seatbeltLight').classList.add('active');
+            } else if (t < 0.20) {
+                const p = (t - 0.05) / 0.15;
+                targetSpeed = 280 + (cruiseSpeed - 280) * Math.sqrt(p);
+                targetAlt = cruiseAlt * Math.pow(p, 0.8);
+                phaseStr = "🛫 正上升率 / 正在爬升至巡航高度";
+                if (targetAlt > 3000 && S.currentEvent === 'NORMAL') {
+                    document.getElementById('seatbeltLight').classList.remove('active');
+                }
+            } else if (t < 0.80) {
+                targetSpeed = cruiseSpeed + (Math.sin(t * 10) * 4);
+                targetAlt = cruiseAlt + (Math.sin(t * 8) * 8);
+                phaseStr = "✈ 巡航阶段";
+                if (!S.announced.cruise) {
+                    S.announced.cruise = true;
+                    speakAnnouncement(`女士们先生们，我们已进入巡航高度，平稳飞行中。祝您专注愉快。`);
+                }
+                if (S.currentEvent !== 'NORMAL') {
+                    S.eventTicksRemaining--;
+                    if (S.eventTicksRemaining <= 0) clearEvent();
                 } else {
-                    el.innerHTML = txt.replace(/\n/g, '<br>') + '<span class="caret"></span>';
+                    checkWeatherEventTrigger(t);
                 }
-            })();
-        })();
+            } else if (t < 0.97) {
+                const p = (t - 0.80) / 0.17;
+                targetSpeed = cruiseSpeed * (1 - p * 0.68);
+                targetAlt = cruiseAlt * (1 - p);
+                phaseStr = "🛬 进近降落程序";
+                document.getElementById('seatbeltLight').classList.add('active');
+                clearEvent();
+                if (!S.announced.descent) {
+                    S.announced.descent = true;
+                    speakAnnouncement("女士们先生们，飞机正降低高度准备降落，请系好安全带。");
+                }
+            } else {
+                const p = (t - 0.97) / 0.03;
+                targetSpeed = 260 * (1 - p);
+                targetAlt = 0;
+                phaseStr = "🛬 触地接地 / 减速反推";
+            }
 
-        /* ================================================================
-           5. 屏幕切换
-           ================================================================ */
-        function showScreen(id) {
+            const maxSpeedStep = 3.5;
+            if (Math.abs(targetSpeed - S.actualSpeed) > maxSpeedStep) {
+                S.actualSpeed += Math.sign(targetSpeed - S.actualSpeed) * maxSpeedStep;
+            } else {
+                S.actualSpeed = targetSpeed;
+            }
+            const maxAltStep = 20;
+            if (Math.abs(targetAlt - S.actualAlt) > maxAltStep) {
+                S.actualAlt += Math.sign(targetAlt - S.actualAlt) * maxAltStep;
+            } else {
+                S.actualAlt = targetAlt;
+            }
+
+            const knots = Math.round(S.actualSpeed / 1.852);
+            document.getElementById('fPhase').textContent = phaseStr;
+            document.getElementById('fAltitude').textContent = `高度：${Math.round(S.actualAlt).toLocaleString()} m`;
+            document.getElementById('fSpeed').textContent = `地速：${Math.round(S.actualSpeed)} km/h (${knots} kt)`;
+
+            if (left <= 0) { clearInterval(S.timer); land(); }
+        }
+
+        function land() {
+            if (!S.announced.landed) {
+                S.announced.landed = true;
+                speakAnnouncement("飞机已安全降落。恭喜您顺利完成专注目标。");
+            }
+            document.getElementById('landRoute').textContent = `${S.dep.cn} → ${S.arr.cn}`;
+            document.getElementById('rDur').textContent = S.dur + ' min';
+            document.getElementById('rSeat').textContent = S.seat;
+            document.getElementById('rTime').textContent = new Date().toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+            show('s-land');
+            destroyMap();
+            if (S.weatherTimer) clearInterval(S.weatherTimer);
+        }
+
+        function abort() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (S.timer) clearInterval(S.timer);
+            if (S.weatherTimer) clearInterval(S.weatherTimer);
+            destroyMap();
+            show('s-board');
+        }
+
+        // ========== 界面切换 ==========
+        function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if (id === 'screenMake') updatePreview();
         }
 
-        /* ================================================================
-           6. 幸运饼干 + 随机情话（扩充）
-           ================================================================ */
-        const COOKIE_LINES = [
-            '你是我藏在黄昏里的秘密。',
-            '世界很吵，你这里刚好安静。',
-            '你一个眼神，就点燃了我的荒原。',
-            '晚霞是免费的，想发给你也是。',
-            '不用每天说想你，但每天最后想到的是你。',
-            '我喜欢你，像风走了八千里，不问归期。',
-            '我不太擅长靠近人，但对你是个例外。',
-            '你是我所有「随便」里唯一一个「不随便」的选项。',
-            '月亮在云端，你在心上。',
-            '想和你一起，把黄昏走成深夜。',
-            '你是我所有诗句里，最温柔的那一行。',
-            '风是暖的，雨是软的，你是甜的。',
-            '我路过许多风景，却只想在你这里定居。',
-            '你的名字，是我听过最短的情诗。',
-            '我本来打算一个人过完这个冬天的，你来了，我就把冬天过成了春天。',
-            '你不在的时候我也在过日子，但你回来的时候日子才亮起来。',
-            '耳机里随机到一首歌，刚好是你上次哼过的那首。',
-            '其实我也不知道什么叫喜欢，但想到你的时候，心跳是诚实的。'
-        ];
-
-        function crackCookie() {
-            document.getElementById('cookieLine').textContent = '🥠 ' + COOKIE_LINES[Math.floor(Math.random() * COOKIE_LINES
-            .length)];
+        function goBoard() { 
+            destroyMap(); 
+            if (S.weatherTimer) clearInterval(S.weatherTimer);
+            show('s-board'); 
+        }
+        function goToSeatSelect() { renderSeats(); show('s-seat'); }
+        function confirmSeat() {
+            S.seat = selectedSeat;
+            S.model = selectedModel;
+            document.getElementById('seatDisplay').textContent = `${S.seat} (${MODELS[S.model].name})`;
+            goBoard();
         }
 
-        function randomQuote() {
-            const line = COOKIE_LINES[Math.floor(Math.random() * COOKIE_LINES.length)];
-            document.getElementById('cookieLine').textContent = '💬 ' + line;
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'soft' : 'dark');
         }
 
-        /* ================================================================
-           7. 温度计（每次固定 +1）
-           ================================================================ */
-        let temp = 0;
-        const kissBtn = document.getElementById('kissBtn');
-
-        function kiss() {
-            temp = Math.min(100, temp + 1);
-            document.getElementById('thermoFill').style.width = temp + '%';
-            document.getElementById('thermoNum').textContent = temp;
-            if (temp >= 100) {
-                confetti({
-                    particleCount: 180,
-                    spread: 130,
-                    startVelocity: 42,
-                    origin: { y: .65 },
-                    colors: ['#dcc8af', '#b86878', '#f0e8dc']
-                });
-                const f = document.getElementById('tempFinal');
-                f.classList.add('show');
-                setTimeout(() => f.classList.remove('show'), 2600);
-            }
+        // ========== 音乐 App 调起 ==========
+        function launchMusicApp(scheme) {
+            if (!scheme) return;
+            const a = document.createElement('a');
+            a.href = scheme;
+            a.target = '_blank';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => document.body.removeChild(a), 100);
+            setTimeout(() => window.open(scheme, '_blank'), 200);
         }
-        kissBtn.addEventListener('click', kiss);
+        document.querySelectorAll('.music-app-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const scheme = this.dataset.scheme;
+                if (scheme) launchMusicApp(scheme);
+            });
+        });
 
-        /* ================================================================
-           8. Love 时间线（本地存储）
-           ================================================================ */
-        function loadLove() {
-            const data = JSON.parse(localStorage.getItem('loveTimeline')) || [];
-            const container = document.getElementById('loveTimeline');
-            if (data.length === 0) {
-                container.innerHTML = '<div class="empty-hint">还没有节点，添加一个吧 ☁️</div>';
-                return;
-            }
-            container.innerHTML = data.map((item, idx) =>
-                `<div class="tl-item">
-              <div class="tl-date">${item.date}</div>
-              <div class="tl-event">${item.event} <button class="tl-del" onclick="delLove(${idx})">✕</button></div>
-            </div>`
-            ).join('');
-        }
-
-        function addLove() {
-            const date = document.getElementById('loveDate').value.trim();
-            const event = document.getElementById('loveEvent').value.trim();
-            if (!date || !event) return;
-            const data = JSON.parse(localStorage.getItem('loveTimeline')) || [];
-            data.push({ date, event });
-            localStorage.setItem('loveTimeline', JSON.stringify(data));
-            document.getElementById('loveDate').value = '';
-            document.getElementById('loveEvent').value = '';
-            loadLove();
-        }
-
-        function delLove(idx) {
-            const data = JSON.parse(localStorage.getItem('loveTimeline')) || [];
-            data.splice(idx, 1);
-            localStorage.setItem('loveTimeline', JSON.stringify(data));
-            loadLove();
-        }
-        loadLove();
-
-        /* ================================================================
-           9. Reasons 翻牌（本地存储）
-           ================================================================ */
-        function loadReasons() {
-            const data = JSON.parse(localStorage.getItem('reasons')) || [];
-            const container = document.getElementById('reasonGrid');
-            if (data.length === 0) {
-                container.innerHTML = '<div class="empty-hint">还没有理由，写一条吧 💭</div>';
-                return;
-            }
-            container.innerHTML = data.map((text, idx) =>
-                `<div class="flip" onclick="this.classList.toggle('open')">
-              <div class="flip-inner">
-                <div class="flip-face flip-front">?</div>
-                <div class="flip-face flip-back">${text}</div>
-              </div>
-              <button class="flip-del" onclick="event.stopPropagation();delReason(${idx})">✕</button>
-            </div>`
-            ).join('');
-        }
-
-        function addReason() {
-            const input = document.getElementById('reasonInput');
-            const text = input.value.trim();
-            if (!text) return;
-            const data = JSON.parse(localStorage.getItem('reasons')) || [];
-            data.push(text);
-            localStorage.setItem('reasons', JSON.stringify(data));
-            input.value = '';
-            loadReasons();
-        }
-
-        function delReason(idx) {
-            const data = JSON.parse(localStorage.getItem('reasons')) || [];
-            data.splice(idx, 1);
-            localStorage.setItem('reasons', JSON.stringify(data));
-            loadReasons();
-        }
-        loadReasons();
-
-        /* ================================================================
-           10. 表白卡生成器 + QR 码 + 导出图片（修复多行文字溢出）
-           ================================================================ */
-        function onSelectChange(sel) {
-            if (sel.value) {
-                document.getElementById('fMsg').value = sel.value;
-                updatePreview();
-            }
-        }
-
-        function updatePreview() {
-            const to = document.getElementById('fTo').value.trim() || '收件人';
-            const msg = document.getElementById('fMsg').value.trim() || '这里会显示你写的话';
-            const from = document.getElementById('fFrom').value.trim() || '你的名字';
-            const theme = document.getElementById('fTheme').value;
-
-            const preview = document.getElementById('cardPreview');
-            preview.className = 'card card-' + theme;
-            document.getElementById('pvTo').textContent = 'TO · ' + to;
-            document.getElementById('pvMsg').textContent = msg;
-            document.getElementById('pvFrom').textContent = '— ' + from;
-        }
-        document.getElementById('fTo').addEventListener('input', updatePreview);
-        document.getElementById('fFrom').addEventListener('input', updatePreview);
-        document.getElementById('fMsg').addEventListener('input', updatePreview);
-        document.getElementById('fTheme').addEventListener('change', updatePreview);
-
-        let lastLink = '';
-
-        function generateCard() {
-            const to = document.getElementById('fTo').value.trim() || '你';
-            const from = document.getElementById('fFrom').value.trim() || '匿名';
-            const msg = document.getElementById('fMsg').value.trim() || '今天也是，以后也是。';
-            const theme = document.getElementById('fTheme').value;
-
-            const params = new URLSearchParams({ to, from, msg, theme });
-            const url = location.origin + location.pathname + '?' + params.toString();
-            lastLink = url;
-
-            // 渲染结果卡片
-            const resultCard = document.getElementById('cardResult');
-            resultCard.className = 'card card-' + theme;
-            resultCard.innerHTML =
-                `<div class="card-to">TO · ${to}</div><div class="card-msg">${msg}</div><div class="card-from">— ${from}</div>`;
-            document.getElementById('resultLink').textContent = url;
-
-            // 生成 QR 码
-            const qrContainer = document.getElementById('qrContainer');
-            qrContainer.innerHTML = '';
-            try {
-                new QRCode(qrContainer, {
-                    text: url,
-                    width: 120,
-                    height: 120,
-                    colorDark: '#4A4444',
-                    colorLight: '#FAF8F5',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            } catch (e) {
-                qrContainer.textContent = '二维码生成失败';
-            }
-
-            document.getElementById('resultHint').textContent = '点击链接可复制 · 截图时建议隐藏浏览器地址栏';
-            showScreen('screenResult');
-
-            if (window.confetti) {
-                confetti({ particleCount: 60, spread: 60, colors: ['#dcc8af', '#b86878', '#f0e8dc'] });
-            }
-        }
-
-        function copyLink() {
-            if (!lastLink) return;
-            navigator.clipboard?.writeText(lastLink).then(() => {
-                const hint = document.getElementById('resultHint');
-                hint.textContent = '已复制 ✓';
-                setTimeout(() => hint.textContent = '点击链接可复制 · 截图时建议隐藏浏览器地址栏', 1500);
+        // ========== 初始化 ==========
+        function initModelSelect() {
+            const sel = document.getElementById('modelSelect');
+            sel.innerHTML = '';
+            Object.keys(MODELS).forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = MODELS[key].name;
+                if (key === 'A320') opt.selected = true;
+                sel.appendChild(opt);
+            });
+            sel.addEventListener('change', (e) => {
+                selectedModel = e.target.value;
+                selectedSeat = "1A";
+                renderSeats();
             });
         }
 
-        /* ===== 导出图片（4x 高清，自适应文字高度，修复多行） ===== */
-        function exportCard() {
-            const card = document.getElementById('cardResult');
-            if (!card) return;
-
-            // 保存原始样式
-            const origClass = card.className;
-            const origOverflow = card.style.overflow;
-            const origAspect = card.style.aspectRatio;
-            const origHeight = card.style.height;
-
-            // 强制设置为自适应模式
-            card.className = origClass + ' export-mode';
-            card.style.overflow = 'visible';
-            card.style.aspectRatio = 'auto';
-            card.style.height = 'auto';
-
-            // 强制重排以获取正确尺寸
-            card.offsetHeight;
-
-            // 获取实际渲染尺寸（scrollHeight 可能包含 padding，但我们需要精确）
-            const rect = card.getBoundingClientRect();
-            const width = rect.width;
-            const height = card.scrollHeight; // 使用 scrollHeight 确保包含所有内容
-
-            // 使用 html2canvas 导出
-            html2canvas(card, {
-                scale: 4,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: null,
-                logging: false,
-                width: width,
-                height: height,
-                onclone: (clonedDoc, clonedElement) => {
-                    // 确保克隆元素也应用自适应样式
-                    clonedElement.style.overflow = 'visible';
-                    clonedElement.style.aspectRatio = 'auto';
-                    clonedElement.style.height = 'auto';
+        // 登机牌滑动撕下
+        (function initSwipe() {
+            const card = document.getElementById('barcodeContainer');
+            let sx = 0, isDragging = false;
+            card.addEventListener('touchstart', e => { sx = e.touches[0].clientX; isDragging = true; });
+            card.addEventListener('touchmove', e => {
+                if (isDragging && e.touches[0].clientX - sx > 60) {
+                    card.classList.add('torn');
+                    isDragging = false;
+                    setTimeout(startFly, 500);
                 }
-            }).then(canvas => {
-                // 恢复原始样式
-                card.className = origClass;
-                card.style.overflow = origOverflow || '';
-                card.style.aspectRatio = origAspect || '';
-                card.style.height = origHeight || '';
-
-                const link = document.createElement('a');
-                link.download = '表白卡.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }).catch(err => {
-                // 恢复样式
-                card.className = origClass;
-                card.style.overflow = origOverflow || '';
-                card.style.aspectRatio = origAspect || '';
-                card.style.height = origHeight || '';
-                alert('导出失败，请尝试截图保存。');
-                console.warn(err);
             });
-        }
-
-        /* ================================================================
-           11. URL 直开模式
-           ================================================================ */
-        (function() {
-            const params = new URLSearchParams(location.search);
-            if (params.has('to')) {
-                const to = params.get('to') || '你';
-                const from = params.get('from') || '匿名';
-                const msg = params.get('msg') || '今天也是，以后也是。';
-                const theme = params.get('theme') || 'cream';
-
-                document.getElementById('screenHome').classList.remove('active');
-                document.getElementById('screenResult').classList.add('active');
-
-                const card = document.getElementById('cardResult');
-                card.className = 'card card-' + theme;
-                card.innerHTML =
-                    `<div class="card-to">TO · ${to}</div><div class="card-msg">${msg}</div><div class="card-from">— ${from}</div>`;
-                document.getElementById('resultLink').textContent = location.href;
-                lastLink = location.href;
-                // 生成二维码
-                const qrContainer = document.getElementById('qrContainer');
-                qrContainer.innerHTML = '';
-                try {
-                    new QRCode(qrContainer, {
-                        text: location.href,
-                        width: 120,
-                        height: 120,
-                        colorDark: '#4A4444',
-                        colorLight: '#FAF8F5',
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                } catch (e) {
-                    qrContainer.textContent = '二维码生成失败';
-                }
-            }
+            card.addEventListener('touchend', () => { isDragging = false; });
         })();
 
-        /* ================================================================
-           12. 专属版入口 —— 支持多个密码（可在此增删）
-           ================================================================ */
-        // ★ 在这里定义允许的所有密码（大小写敏感）
-        const ALLOWED_SECRETS = [
-            '260308', // 原密码
-            'Aurevny', // 专属名
-            'love', // 简单情话
-            'justus' // 我们
-            // 您可以继续添加，例如 'iloveyou', '520' 等
-        ];
-
-        document.getElementById('secretEntry').addEventListener('click', function() {
-            document.getElementById('lockOverlay').classList.add('show');
-            setTimeout(() => document.getElementById('pwdInput').focus(), 50);
-            document.getElementById('pwdErr').textContent = '';
-        });
-
-        function closeLock() {
-            document.getElementById('lockOverlay').classList.remove('show');
-            document.getElementById('pwdErr').textContent = '';
-        }
-
-        function checkPwd() {
-            const input = document.getElementById('pwdInput');
-            const err = document.getElementById('pwdErr');
-            const entered = input.value.trim();
-            if (ALLOWED_SECRETS.includes(entered)) {
-                closeLock();
-                document.getElementById('screenHome').classList.remove('active');
-                document.getElementById('private').classList.add('show');
-                startCapsule();
-                initFlips();
-                if (window.confetti) {
-                    confetti({ particleCount: 60, spread: 80, colors: ['#dcc8af', '#b86878'] });
-                }
-                input.value = '';
-            } else {
-                const modal = document.getElementById('lockModal');
-                modal.classList.add('shake');
-                err.textContent = '再想想？';
-                setTimeout(() => modal.classList.remove('shake'), 400);
-            }
-        }
-        document.getElementById('pwdInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') checkPwd();
-        });
-
-        /* ================================================================
-           13. 返回按钮：从专属版回到主页
-           ================================================================ */
-        function goHomeFromPrivate() {
-            document.getElementById('private').classList.remove('show');
-            document.getElementById('screenHome').classList.add('active');
-        }
-
-        /* ================================================================
-           14. 时间胶囊（2026.3.8）
-           ================================================================ */
-        function startCapsule() {
-            const start = new Date(2026, 2, 8, 0, 0, 0);
-            const el = document.getElementById('capsule');
-
-            function tick() {
-                const now = new Date();
-                let seconds = Math.floor((now - start) / 1000);
-                if (seconds < 0) seconds = 0;
-                const years = Math.floor(seconds / 31557600);
-                seconds -= years * 31557600;
-                const days = Math.floor(seconds / 86400);
-                seconds -= days * 86400;
-                const hours = Math.floor(seconds / 3600);
-                seconds -= hours * 3600;
-                const mins = Math.floor(seconds / 60);
-                seconds -= mins * 60;
-                el.textContent =
-                    `我们在一起 ${years} 年 ${days} 天 ${hours} 小时 ${mins} 分 ${seconds} 秒`;
-                setTimeout(tick, 1000);
-            }
-            tick();
-        }
-
-        /* ================================================================
-           15. 专属翻牌
-           ================================================================ */
-        const FLIP_BACKS = [
-            '傍晚的晚霞<br>我第一反应是想拍给你',
-            '你在旁边<br>杂音就被自动滤掉了',
-            '奖励一个抱抱',
-            '降温的第一天<br>我穿了两件外套',
-            '耳机随机到一首歌<br>刚好是你上次哼的',
-            '不用每天说想你<br>但每天最后想到的是你',
-            '你是我所有「随便」里<br>唯一一个「不随便」的选项',
-            '其实我也不知道什么叫喜欢<br>但心跳是诚实的'
-        ];
-
-        function initFlips() {
-            const container = document.getElementById('flipContainer');
-            container.innerHTML = '';
-            const shuffled = [...FLIP_BACKS].sort(() => Math.random() - 0.5).slice(0, 3);
-            shuffled.forEach(text => {
-                const div = document.createElement('div');
-                div.className = 'flip';
-                div.innerHTML =
-                    `<div class="flip-inner"><div class="flip-face flip-front">?</div><div class="flip-face flip-back">${text}</div></div>`;
-                div.addEventListener('click', function() { this.classList.toggle('open'); });
-                container.appendChild(div);
-            });
-        }
-
-        /* ================================================================
-           16. 礼盒 & 信封
-           ================================================================ */
-        function popGift(el) {
-            el.classList.add('pop');
-            setTimeout(() => el.classList.remove('pop'), 500);
-        }
-
-        function toggleEnvelope() {
-            const env = document.getElementById('envelope');
-            env.classList.toggle('open');
-            document.getElementById('envHint').textContent = env.classList.contains('open') ? '✉️ 展开中' : '✉️ 点信封展开';
-        }
-
-        function closeEnvelope(e) {
-            e.stopPropagation();
-            const env = document.getElementById('envelope');
-            env.classList.remove('open');
-            document.getElementById('envHint').textContent = '✉️ 点信封展开';
-        }
+        window.onload = function() {
+            initModelSelect();
+            renderSeats();
+            const depInput = document.getElementById('depSearch');
+            const arrInput = document.getElementById('arrSearch');
+            depInput.addEventListener('input', () => renderAirportList(depInput, document.getElementById('depList'), document.getElementById('depIndex')));
+            arrInput.addEventListener('input', () => renderAirportList(arrInput, document.getElementById('arrList'), document.getElementById('arrIndex')));
+            depInput.value = `${AIRPORTS[0].cn} (${AIRPORTS[0].iata})`;
+            arrInput.value = `${AIRPORTS[3].cn} (${AIRPORTS[3].iata})`;
+            document.getElementById('depIndex').value = 0;
+            document.getElementById('arrIndex').value = 3;
+            updateDuration();
+            // 预置天气更新定时器（启动后由switchViewMode接管）
+        };
     </script>
 </body>
 </html>
