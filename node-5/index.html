@@ -1,1 +1,925 @@
-111
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Sky · 真实天体</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+canvas:active { cursor: grabbing; }
+#ui {
+  position: fixed; top: 0; left: 0; width: 100%; pointer-events: none;
+  padding: 16px 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 10;
+}
+#time-box { pointer-events: auto; display: flex; flex-direction: column; gap: 4px; }
+#time {
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 15px; font-weight: 300; letter-spacing: .15em; color: rgba(255,255,255,.9);
+  text-shadow: 0 0 10px rgba(0,0,0,.6); line-height: 1.5;
+}
+#mode-btn {
+  background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 4px 10px; border-radius: 6px; color: rgba(255,255,255,0.95); font-size: 10px;
+  letter-spacing: .1em; cursor: pointer; backdrop-filter: blur(6px); transition: all 0.2s;
+  width: fit-content;
+}
+#mode-btn:active { background: rgba(255, 255, 255, 0.3); }
+#toggle-curtain {
+  background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 4px 10px; border-radius: 6px; color: rgba(255,255,255,0.95); font-size: 10px;
+  letter-spacing: .1em; cursor: pointer; backdrop-filter: blur(6px); transition: all 0.2s;
+  width: fit-content; margin-top: 4px;
+}
+#toggle-curtain:active { background: rgba(255, 255, 255, 0.3); }
+#status {
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 11px; letter-spacing: .1em; color: rgba(255,255,255,.55);
+  text-align: right; text-shadow: 0 0 8px rgba(0,0,0,.6); line-height: 1.5;
+}
+</style>
+</head>
+<body>
+<div id="ui">
+  <div id="time-box">
+    <div id="time">--:--</div>
+    <button id="mode-btn" onclick="toggleMode()">模式: 自动时间</button>
+    <button id="toggle-curtain" onclick="toggleCurtain()" style="display:none;">帘子: 开</button>
+  </div>
+  <div id="status">定位中…</div>
+</div>
+<canvas id="c"></canvas>
+
+<script>
+// ============================================================
+//  CONFIG
+// ============================================================
+const CFG = {
+  maxFalling: 6, birdChance: 0.004, cloudCount: 10,
+  phases: [
+    { name: 'deepNight',    min: -90, max: -24,  label: '星沉如海' },
+    { name: 'nightSky',     min: -24, max: -18,  label: '静夜流光' },
+    { name: 'astroDawn',    min: -18, max: -12,  label: '天际初醒' },
+    { name: 'nauticalDawn', min: -12, max: -6,   label: '薄蓝拂晓' },
+    { name: 'civilDawn',    min: -6,  max: -0.8, label: '微光破晓' },
+    { name: 'sunrise',      min: -0.8,max: 6,    label: '朝霞染天' },
+    { name: 'morning',      min: 6,   max: 25,   label: '清风晨光' },
+    { name: 'day',          min: 25,  max: 60,   label: '碧空万里' },
+    { name: 'goldenHour',   min: 60,  max: 85,   label: '琥珀黄昏' },
+    { name: 'sunset',       min: 85,  max: 90.8, label: '落日熔金' },
+    { name: 'nauticalDusk', min: -12, max: -6,   label: '暮色沉蓝' },
+    { name: 'astroDusk',    min: -18, max: -12,  label: '星河初现' }
+  ]
+};
+
+let manualMode = false, manualPhaseIdx = 7;
+let sunTimeString = '日出 --:-- · 日落 --:--';
+let curtainVisible = true;
+
+function toggleMode() {
+  manualMode = !manualMode;
+  const btn = document.getElementById('mode-btn');
+  if (manualMode) {
+    btn.textContent = `手动: ${CFG.phases[manualPhaseIdx].label}`;
+    document.getElementById('status').textContent = `已切入手动 · ${CFG.phases[manualPhaseIdx].label}`;
+  } else {
+    btn.textContent = '模式: 自动时间';
+    document.getElementById('status').textContent = sunTimeString;
+  }
+}
+function toggleCurtain() {
+  curtainVisible = !curtainVisible;
+  document.getElementById('toggle-curtain').textContent = `帘子: ${curtainVisible ? '开' : '关'}`;
+}
+
+// ============================================================
+//  CANVAS
+// ============================================================
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, DPR, horizonY;
+
+function resize() {
+  DPR = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  horizonY = H * 0.7;
+  initCurtain(); initClouds();
+}
+window.addEventListener('resize', resize);
+
+// ============================================================
+//  LOCATION & SUN DATA
+// ============================================================
+let userLat = 31.23, userLon = 121.47, sunData = null;
+
+function initLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => { userLat = pos.coords.latitude; userLon = pos.coords.longitude; fetchSunTimes(); },
+      () => fetchSunTimes(), { timeout: 5000, maximumAge: 60000 }
+    );
+  } else fetchSunTimes();
+}
+
+async function fetchSunTimes() {
+  try {
+    const today = new Date();
+    const y = today.getFullYear(), m = today.getMonth() + 1, d = today.getDate();
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${userLat}&longitude=${userLon}&daily=sunrise,sunset&timezone=auto&start_date=${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}&end_date=${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const j = await res.json();
+      const parseH = s => { const dt = new Date(s); return dt.getHours() + dt.getMinutes()/60; };
+      sunData = { rise: parseH(j.daily.sunrise[0]), set: parseH(j.daily.sunset[0]) };
+      sunTimeString = `日出 ${Math.floor(sunData.rise)}:${String(Math.floor((sunData.rise%1)*60)).padStart(2,'0')} · 日落 ${Math.floor(sunData.set)}:${String(Math.floor((sunData.set%1)*60)).padStart(2,'0')}`;
+      if (!manualMode) document.getElementById('status').textContent = sunTimeString;
+    }
+  } catch(e) {}
+}
+initLocation();
+
+// ============================================================
+//  MATH HELPERS
+// ============================================================
+function lerp(a, b, t) { return a + (b - a) * Math.max(0, Math.min(1, t)); }
+function lerpColor(c1, c2, t) { return [lerp(c1[0],c2[0],t), lerp(c1[1],c2[1],t), lerp(c1[2],c2[2],t)]; }
+function rgb(c, a=1) { return `rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`; }
+function toRad(d) { return d * Math.PI / 180; }
+function toDeg(r) { return r * 180 / Math.PI; }
+
+// ============================================================
+//  真实天体位置计算
+// ============================================================
+
+// 太阳：高度角 + 方位角
+function getSolarPosition(date, lat, lon) {
+  const phi = toRad(lat);
+  const d = date;
+  const dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+  const decl = 0.4093 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365);
+  const hour = d.getHours() + d.getMinutes()/60 + d.getSeconds()/3600;
+  const solarNoon = sunData ? (sunData.rise + sunData.set) / 2 : 12;
+  const hra = toRad((hour - solarNoon) * 15);
+  const sinEl = Math.sin(phi) * Math.sin(decl) + Math.cos(phi) * Math.cos(decl) * Math.cos(hra);
+  const elevation = Math.asin(Math.max(-1, Math.min(1, sinEl)));
+  const cosAz = (Math.sin(decl) - Math.sin(phi) * sinEl) / (Math.cos(phi) * Math.cos(elevation));
+  let azimuth = Math.acos(Math.max(-1, Math.min(1, cosAz)));
+  if (hour > solarNoon) azimuth = 2 * Math.PI - azimuth;
+  return { elevation: toDeg(elevation), azimuth: toDeg(azimuth) };
+}
+
+// 真实月亮位置（Meeus 简化版 -> 赤纬）
+function getLunarPosition(date, lat, lon) {
+  const T = (date.getTime() / 86400000 + 2440587.5 - 2451545.0) / 36525.0;
+  const L = (218.316 + 13.176396 * 36525 * T / 100) % 360;
+  const M = (134.963 + 13.064993 * 36525 * T / 100) % 360;
+  const N = (93.272 + 13.229350 * 36525 * T / 100) % 360;
+  const L_rad = toRad(L), M_rad = toRad(M), N_rad = toRad(N);
+  const lambdaDeg = L +
+    6.289 * Math.sin(M_rad) +
+    1.274 * Math.sin(2 * L_rad - M_rad) +
+    0.658 * Math.sin(2 * L_rad) -
+    0.214 * Math.sin(2 * M_rad);
+  const betaDeg = 5.128 * Math.sin(N_rad);
+  const epsDeg = 23.439 - 0.0000004 * 36525 * T / 100;
+  const epsRad = toRad(epsDeg);
+  const lambdaRad = toRad(lambdaDeg), betaRad = toRad(betaDeg);
+  const sinDecl = Math.sin(betaRad) * Math.sin(epsRad) +
+    Math.cos(betaRad) * Math.cos(epsRad) * Math.sin(lambdaRad);
+  const decl = Math.asin(Math.max(-1, Math.min(1, sinDecl)));
+  let ra = Math.atan2(
+    Math.sin(lambdaRad) * Math.cos(epsRad) - Math.tan(betaRad) * Math.sin(epsRad),
+    Math.cos(lambdaRad)
+  );
+  if (ra < 0) ra += 2 * Math.PI;
+  return { ra: toDeg(ra), decl: toDeg(decl) };
+}
+
+// 高度角+方位角 -> 屏幕坐标
+// 方位角 az: 0=北, 90=东, 180=南, 270=西
+// 映射：南(180)居中；东(90)偏左，西(270)偏右；北(0/360)在两侧边缘
+// 用 tanh 软饱和，让极端方位不会跑出屏外；高度角允许轻度负值(淡出)
+function celestialToScreen(elevation, azimuth, lat) {
+  const span = (azimuth - 180) / 180; // -1(东)~0(南)~1(西)
+  const x = W * 0.5 + Math.tanh(span * 1.6) * W * 0.42;
+  // 高度角映射到 y：el=+90(天顶)->顶部；el=0(地平)->horizonY；el<0 略低于地平线淡出
+  const normEl = Math.max(-0.35, Math.min(1, elevation / 90));
+  const y = horizonY - Math.sin(Math.max(0, normEl) * Math.PI * 0.5) * (horizonY * 0.85)
+            - (normEl < 0 ? Math.sin(-normEl * Math.PI * 0.5) * (horizonY * 0.12) : 0);
+  return { x, y };
+}
+
+const PHASE_ELEVATION = {
+  deepNight: -60, nightSky: -21, astroDawn: -15, nauticalDawn: -9,
+  civilDawn: -3, sunrise: 3, morning: 15, day: 45,
+  goldenHour: 70, sunset: 88, nauticalDusk: -9, astroDusk: -15
+};
+
+function getCurrentPhase() {
+  if (manualMode) {
+    const key = CFG.phases[manualPhaseIdx].name;
+    return { phaseIdx: manualPhaseIdx, progress: 0.5, elevation: PHASE_ELEVATION[key], key };
+  }
+  const now = new Date();
+  let elevation = 45;
+  if (sunData) {
+    const hour = now.getHours() + now.getMinutes()/60 + now.getSeconds()/3600;
+    const { rise, set } = sunData;
+    const halfDay = (set - rise) / 2;
+    const noon = rise + halfDay;
+    const angle = ((hour - noon) / halfDay) * 90;
+    elevation = 90 - Math.abs(angle);
+    if (hour < rise || hour > set) {
+      elevation = -((hour < rise ? (rise - hour) : (hour - set)) * 14);
+    }
+  }
+  let phaseIdx = 7;
+  for (let i = 0; i < CFG.phases.length; i++) {
+    const p = CFG.phases[i];
+    if (elevation >= p.min && elevation <= p.max) { phaseIdx = i; break; }
+  }
+  if (elevation > 90) phaseIdx = 7;
+  if (elevation < -24) phaseIdx = 0;
+  const p = CFG.phases[phaseIdx];
+  const range = p.max - p.min;
+  const progress = range > 0 ? (elevation - p.min) / range : 0;
+  return { phaseIdx, progress: Math.max(0, Math.min(1, progress)), elevation, key: CFG.phases[phaseIdx].name };
+}
+
+// ============================================================
+//  SKY COLORS & PHASE PARAMS
+// ============================================================
+const SKY_COLORS = {
+  deepNight:    [[2, 3, 10],   [8, 10, 22]],
+  nightSky:     [[5, 8, 20],   [15, 20, 40]],
+  astroDawn:    [[10, 14, 32], [25, 30, 60]],
+  nauticalDawn: [[18, 25, 55], [50, 60, 100]],
+  civilDawn:    [[35, 45, 90], [110, 85, 120]],
+  sunrise:      [[85, 55, 75], [230, 140, 90]],
+  morning:      [[70, 120, 190],[165, 205, 245]],
+  day:          [[55, 135, 220],[180, 215, 250]],
+  goldenHour:   [[200, 130, 75],[255, 195, 125]],
+  sunset:       [[140, 60, 60], [220, 110, 80]],
+  nauticalDusk: [[22, 24, 60],  [45, 50, 95]],
+  astroDusk:    [[8, 10, 25],   [18, 22, 45]]
+};
+
+const PHASE_PARAMS = {
+  deepNight:    { stars: 1.0,  starAlpha: 0.9,  sunVis: 0,    moonVis: 1.0 },
+  nightSky:     { stars: 0.9,  starAlpha: 0.8,  sunVis: 0,    moonVis: 0.85 },
+  astroDawn:    { stars: 0.7,  starAlpha: 0.55, sunVis: 0,    moonVis: 0.5 },
+  nauticalDawn: { stars: 0.4,  starAlpha: 0.3,  sunVis: 0.05, moonVis: 0.2 },
+  civilDawn:    { stars: 0.1,  starAlpha: 0.1,  sunVis: 0.25, moonVis: 0.05 },
+  sunrise:      { stars: 0,    starAlpha: 0,    sunVis: 0.75, moonVis: 0 },
+  morning:      { stars: 0,    starAlpha: 0,    sunVis: 1.0,  moonVis: 0 },
+  day:          { stars: 0,    starAlpha: 0,    sunVis: 1.0,  moonVis: 0 },
+  goldenHour:   { stars: 0.05, starAlpha: 0.05, sunVis: 0.85, moonVis: 0 },
+  sunset:       { stars: 0.15, starAlpha: 0.2,  sunVis: 0.6,  moonVis: 0.1 },
+  nauticalDusk: { stars: 0.6,  starAlpha: 0.5,  sunVis: 0,    moonVis: 0.6 },
+  astroDusk:    { stars: 0.9,  starAlpha: 0.8,  sunVis: 0,    moonVis: 0.9 }
+};
+
+// ============================================================
+//  月相计算（精确）
+// ============================================================
+function getMoonPhase() {
+  const knownNew = new Date(Date.UTC(2024, 0, 11, 11, 57, 0));
+  const synodic = 29.53058867;
+  const days = (new Date() - knownNew) / 86400000;
+  return (days % synodic) / synodic;
+}
+
+function drawMoon(x, y, radius, moonVis, phase) {
+  if (moonVis < 0.01) return;
+  ctx.save();
+  ctx.globalAlpha = moonVis;
+  const glow = ctx.createRadialGradient(x, y, radius * 0.8, x, y, radius * 4);
+  glow.addColorStop(0, `rgba(210,215,200,${0.2 * moonVis})`);
+  glow.addColorStop(1, 'rgba(210,215,200,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(x - radius * 4, y - radius * 4, radius * 8, radius * 8);
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(60,65,55,0.4)'; ctx.fill();
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.clip();
+  ctx.fillStyle = '#f5f5e8'; ctx.fill();
+  ctx.fillStyle = 'rgba(20,25,20,0.92)';
+  if (phase < 0.5) {
+    const darkW = radius * 2 * (1 - phase * 2);
+    const darkX = x + radius - darkW / 2;
+    ctx.beginPath(); ctx.ellipse(darkX, y, darkW / 2, radius, 0, 0, Math.PI * 2); ctx.fill();
+  } else {
+    const darkW = radius * 2 * ((phase - 0.5) * 2);
+    const darkX = x - radius + darkW / 2;
+    ctx.beginPath(); ctx.ellipse(darkX, y, darkW / 2, radius, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 0.12; ctx.fillStyle = '#555';
+  const spots = [[-0.3,-0.2,0.35],[0.2,-0.3,0.25],[0.1,0.2,0.3],[-0.1,0.4,0.2],[0.4,0.1,0.22],[-0.4,0.2,0.18]];
+  for (const [sx,sy,sr] of spots) {
+    ctx.beginPath(); ctx.arc(x+sx*radius, y+sy*radius, sr*radius, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  ctx.globalAlpha = moonVis * 0.3;
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,240,0.4)'; ctx.lineWidth = 0.5; ctx.stroke();
+  ctx.restore();
+}
+
+// ============================================================
+//  CLOUDS
+// ============================================================
+let clouds = [];
+function initClouds() {
+  clouds = [];
+  for (let i = 0; i < CFG.cloudCount; i++) {
+    clouds.push({
+      baseX: Math.random() * W,
+      y: horizonY * 0.1 + Math.random() * horizonY * 0.35,
+      z: Math.random() * 0.5 + 0.5,
+      scale: Math.random() * 0.6 + 0.6,
+      speed: Math.random() * 0.015 + 0.005
+    });
+  }
+}
+function drawClouds(sunVis, windForce) {
+  if (sunVis < 0.08) return;
+  const baseAlpha = Math.min(0.85, 0.3 + sunVis * 0.5);
+  for (const cl of clouds) {
+    cl.baseX += cl.speed + windForce * cl.z * 1.2;
+    if (cl.baseX > W + 200) cl.baseX = -200;
+    if (cl.baseX < -200) cl.baseX = W + 200;
+    const rx = cl.baseX; const alpha = baseAlpha * cl.z;
+    ctx.save(); ctx.globalAlpha = alpha;
+    let r = 220, g = 225, b = 235;
+    if (sunVis > 0.6) { r = 255; g = 252; b = 245; }
+    else if (sunVis > 0.3) { r = 255; g = 230; b = 200; }
+    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+    const s = cl.scale;
+    ctx.beginPath();
+    ctx.arc(rx, cl.y, 25*s, 0, Math.PI*2);
+    ctx.arc(rx+20*s, cl.y-10*s, 18*s, 0, Math.PI*2);
+    ctx.arc(rx+40*s, cl.y-5*s, 20*s, 0, Math.PI*2);
+    ctx.arc(rx+60*s, cl.y, 18*s, 0, Math.PI*2);
+    ctx.arc(rx+28*s, cl.y+8*s, 15*s, 0, Math.PI*2);
+    ctx.arc(rx-15*s, cl.y+5*s, 14*s, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = alpha * 0.15; ctx.fillStyle = 'rgba(100,90,110,0.3)';
+    ctx.beginPath(); ctx.ellipse(rx+25*s, cl.y+12*s, 35*s, 5*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ============================================================
+//  CURTAIN
+// ============================================================
+const STAR_COLORS = [[180,210,255],[200,170,255],[255,180,220],[255,230,150],[160,240,230]];
+const STRAND_COUNT = 30, SEGS = 12, SEG_LEN = 32;
+let curtainLines = [];
+
+function initCurtain() {
+  curtainLines = [];
+  const gap = 18;
+  const startX = (W - (STRAND_COUNT - 1) * gap) / 2;
+  for (let i = 0; i < STRAND_COUNT; i++) {
+    const ax = startX + i * gap;
+    const ay = H * 0.05 + (Math.random() - 0.5) * H * 0.03;
+    const segs = [];
+    for (let s = 0; s < SEGS; s++) segs.push({ x: ax, y: ay + s * SEG_LEN, vx: 0, vy: 0 });
+    curtainLines.push({ segs, ax, ay, stars: [] });
+  }
+  for (let i = 0; i < STRAND_COUNT; i++) curtainLines[i].stars.push(makeCurtainStar(i));
+}
+function makeCurtainStar(lineIdx) {
+  const col = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+  return {
+    segIdx: Math.floor(Math.random() * (SEGS - 3)), t: Math.random(),
+    slideSpeed: 0.003 + Math.random() * 0.002, size: 3.5 + Math.random() * 3.5,
+    blinkSpeed: 0.015 + Math.random() * 0.02, blinkOff: Math.random() * Math.PI * 2,
+    color: col, state: 'sliding',
+    freeX: 0, freeY: 0, freeVy: 0, freeVx: 0,
+    settleTimer: 0, settleDuration: 100 + Math.random() * 80,
+    fadeTimer: 0, fadeDuration: 60 + Math.random() * 40,
+    baseAlpha: 0.85, dead: false
+  };
+}
+function drawCurtainStar(cx, cy, size) {
+  const outer = size, inner = size * 0.2;
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const r = i % 2 === 0 ? outer : inner;
+    const angle = (i * Math.PI) / 4 - Math.PI / 2;
+    const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath(); ctx.fill();
+}
+function updateAndDrawCurtain(globalAlpha, windForce) {
+  if (!curtainVisible || globalAlpha < 0.01) return;
+  if (Math.random() < 0.02) {
+    const candidates = [];
+    for (let i = 0; i < STRAND_COUNT; i++) if (curtainLines[i].stars.length < 3) candidates.push(i);
+    if (candidates.length > 0) {
+      const pick = candidates[Math.floor(Math.random() * candidates.length)];
+      curtainLines[pick].stars.push(makeCurtainStar(pick));
+    }
+  }
+  for (let i = 0; i < curtainLines.length; i++) {
+    const line = curtainLines[i], segs = line.segs;
+    segs[0].x = line.ax + windForce * 8; segs[0].y = line.ay;
+    for (let s = 1; s < SEGS; s++) {
+      segs[s].vy += 0.12;
+      segs[s].vx = (segs[s].vx || 0) * 0.94; segs[s].vy *= 0.94;
+      segs[s].x += segs[s].vx; segs[s].y += segs[s].vy;
+    }
+    for (let iter = 0; iter < 3; iter++) {
+      for (let s = 1; s < SEGS; s++) {
+        const dx = segs[s].x - segs[s-1].x, dy = segs[s].y - segs[s-1].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist > 0) {
+          const diff = (dist - SEG_LEN) / dist;
+          segs[s].x -= dx*diff*0.5; segs[s].y -= dy*diff*0.5;
+          segs[s-1].x += dx*diff*0.5; segs[s-1].y += dy*diff*0.5;
+        }
+      }
+      segs[0].x = line.ax + windForce * 8; segs[0].y = line.ay;
+    }
+    if (pointerDown) {
+      for (let s = 1; s < SEGS; s++) {
+        const seg = segs[s];
+        const dd = Math.sqrt((currentTouchX-seg.x)**2 + (pointerY-seg.y)**2);
+        if (dd < 70) {
+          const ff = (1 - dd/70) * 0.4;
+          seg.vx += (currentTouchX - prevTouchX) * ff;
+          seg.vy += (pointerY - prevTouchY) * ff;
+        }
+      }
+    }
+    ctx.beginPath(); ctx.moveTo(segs[0].x, segs[0].y);
+    for (let s = 1; s < SEGS - 1; s++) {
+      const xc = (segs[s].x + segs[s+1].x)/2, yc = (segs[s].y + segs[s+1].y)/2;
+      ctx.quadraticCurveTo(segs[s].x, segs[s].y, xc, yc);
+    }
+    ctx.strokeStyle = `rgba(155,190,255,${0.5 * globalAlpha})`;
+    ctx.lineWidth = 1.0; ctx.lineCap = 'round'; ctx.stroke();
+    for (let si = line.stars.length - 1; si >= 0; si--) {
+      const star = line.stars[si];
+      if (star.state === 'sliding') {
+        star.t += star.slideSpeed;
+        if (star.t >= 1) { star.segIdx++; star.t = 0; }
+        if (star.segIdx >= SEGS - 2) {
+          star.freeX = segs[SEGS-2].x + (segs[SEGS-1].x - segs[SEGS-2].x) * star.t;
+          star.freeY = segs[SEGS-2].y + (segs[SEGS-1].y - segs[SEGS-2].y) * star.t;
+          star.freeVx = segs[SEGS-1].vx * 0.3 + windForce * 0.5; star.freeVy = 0.3 + Math.random() * 0.3;
+          star.state = 'falling';
+        }
+      } else if (star.state === 'falling') {
+        star.freeVy += 0.02; star.freeX += star.freeVx; star.freeY += star.freeVy;
+        star.freeVx *= 0.98; star.freeVy *= 0.98;
+        if (star.freeVy < 0.05 && star.freeY > segs[SEGS-1].y + 20) { star.state = 'settling'; star.settleTimer = 0; }
+      } else if (star.state === 'settling') {
+        star.settleTimer++;
+        if (star.settleTimer >= star.settleDuration) { star.state = 'fading'; star.fadeTimer = 0; }
+      } else if (star.state === 'fading') {
+        star.fadeTimer++;
+        if (star.fadeTimer >= star.fadeDuration) star.dead = true;
+      }
+      let sx, sy;
+      if (star.state === 'sliding') {
+        sx = segs[star.segIdx].x + (segs[star.segIdx+1].x - segs[star.segIdx].x) * star.t;
+        sy = segs[star.segIdx].y + (segs[star.segIdx+1].y - segs[star.segIdx].y) * star.t;
+      } else { sx = star.freeX; sy = star.freeY; }
+      star.blinkOff += star.blinkSpeed;
+      const blink = 0.5 + 0.5 * Math.sin(star.blinkOff);
+      let alpha = star.baseAlpha * globalAlpha * (0.7 + blink * 0.3);
+      if (star.state === 'fading') alpha *= (1 - star.fadeTimer / star.fadeDuration);
+      ctx.fillStyle = `rgba(${star.color[0]},${star.color[1]},${star.color[2]},${alpha})`;
+      drawCurtainStar(sx, sy, star.size);
+    }
+    line.stars = line.stars.filter(st => !st.dead);
+  }
+}
+
+// ============================================================
+//  ENTITIES
+// ============================================================
+let fallings = [];
+function spawnFalling() {
+  if (fallings.length >= CFG.maxFalling) return;
+  const hues = ['#f5c6d6','#f5d98a','#ffb88a','#c8e6c9','#e8c8f0'];
+  fallings.push({
+    x: Math.random() * W, y: -20, z: Math.random() * 0.7 + 0.3,
+    vx: (Math.random()-0.5)*0.4, vy: Math.random()*0.8+0.4,
+    rot: Math.random()*Math.PI*2, rotSpeed: (Math.random()-0.5)*0.015,
+    size: Math.random()*4+3, swing: Math.random()*Math.PI*2,
+    hue: hues[Math.floor(Math.random()*hues.length)]
+  });
+}
+
+// ---- 鸟：随机自然路径（多段目标点 + 平滑插值 + 随机俯仰）----
+let birds = [];
+function spawnBird() {
+  const fromLeft = Math.random() > 0.5;
+  const flockSize = 2 + Math.floor(Math.random() * 4);
+  // 领头鸟生成一个随机路点列表，群鸟跟随并带偏移
+  const startX = fromLeft ? -40 : W + 40;
+  const baseY = H * 0.18 + Math.random() * H * 0.18;
+  const waypoints = [];
+  let cx = startX;
+  // 生成 3~5 个路点，x 逐步向屏幕另一侧推进
+  const stepCount = 3 + Math.floor(Math.random() * 3);
+  for (let k = 1; k <= stepCount; k++) {
+    cx += (fromLeft ? 1 : -1) * (W / stepCount) * (0.7 + Math.random() * 0.6);
+    const cy = baseY + (Math.random() - 0.5) * H * 0.25;
+    waypoints.push({ x: cx, y: cy });
+  }
+  const speed = 0.9 + Math.random() * 0.5;
+  for (let f = 0; f < flockSize; f++) {
+    birds.push({
+      x: startX + (fromLeft ? f * 9 : -f * 9),
+      y: baseY + (Math.random() - 0.5) * 14 + f * 3,
+      vx: (fromLeft ? 1 : -1) * speed,
+      baseY: baseY,
+      // 路径
+      waypoints: waypoints.slice(),
+      wpIdx: 0,
+      speed,
+      fromLeft,
+      // 随机扰动
+      wanderPhase: Math.random() * Math.PI * 2,
+      wanderSpeed: 0.02 + Math.random() * 0.02,
+      wanderAmp: 12 + Math.random() * 18,
+      // 外观
+      t: Math.random() * Math.PI * 2,
+      wingPhase: Math.random() * Math.PI * 2,
+      wingSpeed: 0.25 + Math.random() * 0.15,
+      // 个体偏移（相对领头）
+      ox: (fromLeft ? f * 9 : -f * 9),
+      oy: (Math.random() - 0.5) * 14 + f * 3
+    });
+  }
+}
+
+let meteors = [];
+function spawnMeteor(x, y) {
+  const angle = Math.random() * Math.PI * 2;
+  const speed = 5 + Math.random() * 4;
+  meteors.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, len: 60+Math.random()*40, life: 1, decay: 0.012+Math.random()*0.008 });
+}
+
+let fireflies = [];
+function initFireflies() {
+  fireflies = [];
+  for (let i = 0; i < 15; i++) {
+    fireflies.push({
+      x: Math.random() * W, y: horizonY - 20 - Math.random() * H * 0.3,
+      vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.2,
+      phase: Math.random()*Math.PI*2, glow: Math.random()*0.02+0.01
+    });
+  }
+}
+initFireflies();
+
+// ============================================================
+//  TOUCH -> WIND
+// ============================================================
+let pointerDown = false, startX = 0, currentTouchX = 0, currentTouchY = 0;
+let prevTouchX = 0, prevTouchY = 0, pointerY = 0;
+let windForce = 0, targetWindForce = 0;
+
+canvas.addEventListener('pointerdown', e => {
+  if (e.clientX < 140 && e.clientY < 100) return;
+  pointerDown = true; startX = e.clientX;
+  currentTouchX = prevTouchX = e.clientX; currentTouchY = prevTouchY = pointerY = e.clientY;
+});
+canvas.addEventListener('pointermove', e => {
+  if (!pointerDown) return;
+  prevTouchX = currentTouchX; prevTouchY = currentTouchY;
+  currentTouchX = e.clientX; currentTouchY = e.clientY; pointerY = e.clientY;
+  const dx = e.clientX - prevTouchX;
+  targetWindForce = Math.max(-0.8, Math.min(0.8, targetWindForce + dx * 0.003));
+});
+canvas.addEventListener('pointerup', e => {
+  if (!pointerDown) return; pointerDown = false;
+  if (Math.abs(e.clientX - startX) < 10) {
+    if (manualMode) {
+      manualPhaseIdx = (manualPhaseIdx + 1) % 12;
+      document.getElementById('mode-btn').textContent = `手动: ${CFG.phases[manualPhaseIdx].label}`;
+      document.getElementById('status').textContent = `已切入手动 · ${CFG.phases[manualPhaseIdx].label}`;
+    } else spawnMeteor(e.clientX, e.clientY);
+  }
+  targetWindForce *= 0.3;
+});
+canvas.addEventListener('pointercancel', () => { pointerDown = false; targetWindForce = 0; });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+// ============================================================
+//  RENDER
+// ============================================================
+let frameCount = 0;
+
+function render() {
+  frameCount++;
+  windForce += (targetWindForce - windForce) * 0.05;
+  targetWindForce *= 0.98;
+
+  const { phaseIdx, progress, elevation, key } = getCurrentPhase();
+  const nextIdx = (phaseIdx + 1) % 12;
+  const nextKey = CFG.phases[nextIdx].name;
+  const pi = PHASE_PARAMS[key];
+  const pn = PHASE_PARAMS[nextKey];
+  const starsDensity = lerp(pi.stars, pn.stars, progress);
+  const starAlpha = lerp(pi.starAlpha, pn.starAlpha, progress);
+  const sunVis = lerp(pi.sunVis, pn.sunVis, progress);
+  const moonVis = lerp(pi.moonVis, pn.moonVis, progress);
+  document.getElementById('toggle-curtain').style.display = starsDensity > 0.3 ? 'block' : 'none';
+
+  // ---- 天空 ----
+  const cTop = lerpColor(SKY_COLORS[key][0], SKY_COLORS[nextKey][0], progress);
+  const cBot = lerpColor(SKY_COLORS[key][1], SKY_COLORS[nextKey][1], progress);
+  const grad = ctx.createLinearGradient(0, 0, 0, horizonY);
+  grad.addColorStop(0, rgb(cTop)); grad.addColorStop(1, rgb(cBot));
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, horizonY);
+
+  // ---- 太阳（真实位置）----
+  let sunPos;
+  if (manualMode) {
+    const el = PHASE_ELEVATION[key];
+    // 手动模式给一个随阶段变化的方位，让太阳左右展开
+    const az = 130 + (PHASE_ELEVATION[key] + 60) * 0.9; // -60->38(东) ... 88->209(西)
+    sunPos = celestialToScreen(el, az, userLat);
+  } else {
+    const now = new Date();
+    const solar = getSolarPosition(now, userLat, userLon);
+    sunPos = celestialToScreen(solar.elevation, solar.azimuth, userLat);
+  }
+  if (sunVis > 0.01 && elevation > -2) {
+    const glow = ctx.createRadialGradient(sunPos.x, sunPos.y, 2, sunPos.x, sunPos.y, 90);
+    glow.addColorStop(0, `rgba(255,245,210,${sunVis})`);
+    glow.addColorStop(1, 'rgba(255,180,90,0)');
+    ctx.fillStyle = glow; ctx.fillRect(sunPos.x - 90, sunPos.y - 90, 180, 180);
+    ctx.beginPath(); ctx.arc(sunPos.x, sunPos.y, 14 + sunVis * 6, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,252,240,${sunVis})`; ctx.fill();
+  }
+
+  // ---- 月亮（真实位置：时角 = 本地恒星时 - 月亮赤经）----
+  // 本地恒星时(度) LST = 100.46 + 0.985647*dUT + lon + 15*(hour-12)
+  // 其中 dUT = 自 J2000.0 起的天数（UT）
+  let moonPos;
+  if (manualMode) {
+    // 手动模式：按阶段给一个固定的合理方位（不再每帧随机），高度给正值让月亮上天
+    const el = PHASE_ELEVATION[key];
+    // 夜间/晨昏阶段：月亮在天空可见；白天阶段：月亮在高位或淡出
+    const azMap = {
+      deepNight: 120, nightSky: 150, astroDawn: 170, nauticalDawn: 185,
+      civilDawn: 195, sunrise: 210, morning: 225, day: 240,
+      goldenHour: 300, sunset: 315, nauticalDusk: 60, astroDusk: 90
+    };
+    const az = azMap[key] || 180;
+    // 夜间给较高高度(可见)，白天给低高度(被阳光淹没)
+    const visEl = (moonVis > 0.3) ? 35 + (el + 60) * 0.4 : el;
+    moonPos = celestialToScreen(visEl, az, userLat);
+  } else {
+    const now = new Date();
+    const lunar = getLunarPosition(now, userLat, userLon);
+    const hour = now.getHours() + now.getMinutes()/60 + now.getSeconds()/3600;
+    // J2000.0 起算的 UT 天数
+    const dUT = (now.getTime() / 86400000) - (new Date(Date.UTC(2000,0,1,12,0,0)).getTime() / 86400000);
+    const lstDeg = (100.46 + 0.985647 * dUT + userLon + (hour - 12) * 15 + 36000) % 360;
+    const moonHraDeg = (lstDeg - lunar.ra + 540) % 360 - 180; // 归一化到 -180~180
+    const phi = toRad(userLat);
+    const decl = toRad(lunar.decl);
+    const cosHra = Math.cos(toRad(moonHraDeg));
+    const sinEl = Math.sin(phi) * Math.sin(decl) + Math.cos(phi) * Math.cos(decl) * cosHra;
+    const moonEl = Math.asin(Math.max(-1, Math.min(1, sinEl)));
+    // 方位角：北起顺时针；对天体用 atan2 形式
+    const cosAz = (Math.sin(decl) - Math.sin(phi) * sinEl) / (Math.cos(phi) * Math.cos(moonEl));
+    let moonAz = Math.acos(Math.max(-1, Math.min(1, cosAz)));
+    if (moonHraDeg > 0) moonAz = 2 * Math.PI - moonAz; // 西侧
+    // 夜间可见时，若真实高度偏低(<15°)，抬升至 15~55° 区间（仅显示用，保月亮在天上）
+    let showEl = toDeg(moonEl);
+    if (moonVis > 0.3 && showEl < 15) showEl = 15 + (showEl + 60) * 0.5;
+    moonPos = celestialToScreen(showEl, toDeg(moonAz), userLat);
+  }
+  const moonPhase = getMoonPhase();
+  drawMoon(moonPos.x, moonPos.y, 14, moonVis, moonPhase);
+
+  // ---- 萤火虫 ----
+  if (key === 'nightSky' || key === 'astroDawn') {
+    for (const ff of fireflies) {
+      ff.x += ff.vx + windForce * 0.5; ff.y += ff.vy; ff.phase += ff.glow;
+      if (ff.x < 0) ff.x = W; if (ff.x > W) ff.x = 0;
+      const a = 0.4 + 0.4 * Math.sin(ff.phase);
+      ctx.fillStyle = `rgba(180,255,100,${a * starsDensity})`;
+      ctx.beginPath(); ctx.arc(ff.x, ff.y, 1.5, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  // ---- 帘子 ----
+  updateAndDrawCurtain(starsDensity * starAlpha, windForce);
+
+  // ---- 远山 ----
+  if (sunVis > 0.1) {
+    ctx.save();
+    const ma = sunVis * 0.25;
+    ctx.fillStyle = `rgba(35,55,85,${ma})`;
+    ctx.beginPath(); ctx.moveTo(0, horizonY);
+    ctx.quadraticCurveTo(W*0.25,horizonY-50,W*0.5,horizonY-30);
+    ctx.quadraticCurveTo(W*0.75,horizonY-55,W,horizonY-20); ctx.lineTo(W,horizonY); ctx.fill();
+    ctx.fillStyle = `rgba(25,42,65,${ma*1.2})`;
+    ctx.beginPath(); ctx.moveTo(0, horizonY);
+    ctx.quadraticCurveTo(W*0.3,horizonY-35,W*0.6,horizonY-15);
+    ctx.quadraticCurveTo(W*0.85,horizonY-25,W,horizonY-10); ctx.lineTo(W,horizonY); ctx.fill();
+    ctx.restore();
+  }
+
+  // ---- 云 ----
+  drawClouds(sunVis, windForce);
+
+  // ---- 叶子 ----
+  if (sunVis > 0.08 && frameCount % 60 === 0) spawnFalling();
+  for (let i = fallings.length - 1; i >= 0; i--) {
+    const f = fallings[i];
+    f.swing += 0.03;
+    f.x += f.vx + Math.sin(f.swing)*0.5 + windForce * 2;
+    f.y += f.vy; f.rot += f.rotSpeed + windForce * 0.05;
+    if (f.y > horizonY) { fallings.splice(i, 1); continue; }
+    ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot); ctx.globalAlpha = 0.6 + f.z*0.3;
+    ctx.fillStyle = f.hue;
+    ctx.beginPath();
+    for (let p = 0; p < 5; p++) {
+      const a1 = (p*Math.PI*2)/5 - Math.PI/2;
+      const a2 = ((p+0.5)*Math.PI*2)/5 - Math.PI/2;
+      const ox1 = Math.cos(a1)*f.size, oy1 = Math.sin(a1)*f.size;
+      const ox2 = Math.cos(a2)*f.size*0.4, oy2 = Math.sin(a2)*f.size*0.4;
+      if (p===0) ctx.moveTo(ox1, oy1); else ctx.lineTo(ox1, oy1);
+      ctx.quadraticCurveTo(ox2, oy2, Math.cos((p+1)*Math.PI*2/5-Math.PI/2)*f.size, Math.sin((p+1)*Math.PI*2/5-Math.PI/2)*f.size);
+    }
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+
+  // ---- 鸟（随机自然路径）----
+  if (sunVis > 0.3 && !manualMode && Math.random() < CFG.birdChance) spawnBird();
+  for (let i = birds.length - 1; i >= 0; i--) {
+    const b = birds[i];
+    // 沿路点前进：朝当前路点方向移动
+    if (b.wpIdx < b.waypoints.length) {
+      const wp = b.waypoints[b.wpIdx];
+      const dx = wp.x - b.x, dy = wp.y - b.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 30) { b.wpIdx++; }
+      else {
+        const sp = b.speed;
+        b.x += (dx / dist) * sp;
+        // y 用平滑追逐 + 随机 wander
+        b.wanderPhase += b.wanderSpeed;
+        const targetY = wp.y + Math.sin(b.wanderPhase) * b.wanderAmp;
+        b.y += (targetY - b.y) * 0.04;
+      }
+    } else {
+      // 过完所有路点，继续朝飞行方向滑行并缓慢下沉退出
+      b.x += (b.fromLeft ? 1 : -1) * b.speed;
+      b.y += Math.sin(b.wanderPhase) * 0.4;
+      b.wanderPhase += b.wanderSpeed;
+    }
+    b.wingPhase += b.wingSpeed;
+    if (b.x < -60 || b.x > W + 60 || b.y > H + 40) { birds.splice(i, 1); continue; }
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.strokeStyle = `rgba(35,32,45,${0.4 + sunVis*0.4})`; ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    const wy = Math.sin(b.wingPhase) * 4;
+    ctx.moveTo(-5, wy); ctx.quadraticCurveTo(-2.5, wy-4, 0, wy-1);
+    ctx.quadraticCurveTo(2.5, wy-4, 5, wy); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ---- 流星 ----
+  for (let i = meteors.length - 1; i >= 0; i--) {
+    const m = meteors[i]; m.x += m.vx; m.y += m.vy; m.life -= m.decay;
+    if (m.life <= 0) { meteors.splice(i, 1); continue; }
+    const mg = ctx.createLinearGradient(m.x,m.y,m.x-m.vx*3,m.y-m.vy*3);
+    mg.addColorStop(0,`rgba(255,255,255,${m.life})`); mg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.strokeStyle = mg; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(m.x,m.y); ctx.lineTo(m.x-m.vx*3,m.y-m.vy*3); ctx.stroke();
+  }
+
+  // ============================================================
+  //  水面反射
+  // ============================================================
+  ctx.save();
+  ctx.beginPath(); ctx.rect(0, horizonY, W, H - horizonY); ctx.clip();
+  const waterGrad = ctx.createLinearGradient(0, horizonY, 0, H);
+  waterGrad.addColorStop(0, rgb(cBot, 0.92)); waterGrad.addColorStop(1, rgb(cBot, 1.0));
+  ctx.fillStyle = waterGrad; ctx.fillRect(0, horizonY, W, H - horizonY);
+  ctx.fillStyle = `rgba(0,0,0,0.38)`; ctx.fillRect(0, horizonY, W, H - horizonY);
+  const refGrad = ctx.createLinearGradient(0, horizonY, 0, H);
+  refGrad.addColorStop(0, rgb(cBot, 0.3)); refGrad.addColorStop(0.5, rgb(cTop, 0.08)); refGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = refGrad; ctx.fillRect(0, horizonY, W, H - horizonY);
+
+  if (sunVis > 0.01 && elevation > -2) {
+    const pillarH = (H - horizonY) * 0.7;
+    const pillarGrad = ctx.createLinearGradient(0, horizonY, 0, horizonY + pillarH);
+    pillarGrad.addColorStop(0, `rgba(255,250,220,${sunVis * 0.22})`);
+    pillarGrad.addColorStop(1, 'rgba(255,200,100,0)');
+    ctx.fillStyle = pillarGrad;
+    ctx.beginPath();
+    ctx.moveTo(sunPos.x - 3, horizonY); ctx.lineTo(sunPos.x + 3, horizonY);
+    ctx.lineTo(sunPos.x + 25, horizonY + pillarH); ctx.lineTo(sunPos.x - 25, horizonY + pillarH);
+    ctx.closePath(); ctx.fill();
+  }
+  if (moonVis > 0.01) {
+    const pillarH = (H - horizonY) * 0.4;
+    const pillarGrad = ctx.createLinearGradient(0, horizonY, 0, horizonY + pillarH);
+    pillarGrad.addColorStop(0, `rgba(220,225,210,${moonVis * 0.12})`);
+    pillarGrad.addColorStop(1, 'rgba(220,225,210,0)');
+    ctx.fillStyle = pillarGrad;
+    ctx.beginPath();
+    ctx.moveTo(moonPos.x - 2, horizonY); ctx.lineTo(moonPos.x + 2, horizonY);
+    ctx.lineTo(moonPos.x + 12, horizonY + pillarH); ctx.lineTo(moonPos.x - 12, horizonY + pillarH);
+    ctx.closePath(); ctx.fill();
+  }
+  if (sunVis > 0.1) {
+    ctx.save(); ctx.globalAlpha = sunVis * 0.12; ctx.scale(1, -1); ctx.translate(0, -(horizonY * 2));
+    ctx.fillStyle = 'rgba(20,30,50,1)';
+    ctx.beginPath(); ctx.moveTo(0, horizonY);
+    ctx.quadraticCurveTo(W*0.25,horizonY-50,W*0.5,horizonY-30);
+    ctx.quadraticCurveTo(W*0.75,horizonY-55,W,horizonY-20); ctx.lineTo(W,horizonY); ctx.fill();
+    ctx.restore();
+  }
+  if (sunVis > 0.1) {
+    const baseAlpha = Math.min(0.3, 0.08 + sunVis * 0.15);
+    for (const cl of clouds) {
+      const refY = horizonY + (horizonY - cl.y) * 0.4;
+      if (refY > horizonY && refY < H - 20) {
+        ctx.save(); ctx.globalAlpha = baseAlpha * cl.z;
+        ctx.fillStyle = sunVis > 0.5 ? '#fff8f0' : '#dde1eb';
+        ctx.beginPath(); ctx.ellipse(cl.baseX, refY, 30 * cl.scale, 4 * cl.scale, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+  if (curtainVisible && starsDensity > 0.1) {
+    for (let i = 0; i < curtainLines.length; i++) {
+      const line = curtainLines[i], segs = line.segs;
+      for (const star of line.stars) {
+        let sx, sy;
+        if (star.state === 'sliding') {
+          sx = segs[star.segIdx].x + (segs[star.segIdx+1].x - segs[star.segIdx].x) * star.t;
+          sy = segs[star.segIdx].y + (segs[star.segIdx+1].y - segs[star.segIdx].y) * star.t;
+        } else { sx = star.freeX; sy = star.freeY; }
+        if (sy > horizonY - 40) {
+          const refY = horizonY + (horizonY - sy) * 0.5;
+          if (refY > horizonY && refY < H) {
+            const refAlpha = 0.1 * starsDensity * star.baseAlpha;
+            ctx.fillStyle = `rgba(${star.color[0]},${star.color[1]},${star.color[2]},${refAlpha})`;
+            ctx.beginPath(); ctx.arc(sx, refY, star.size * 0.2, 0, Math.PI*2); ctx.fill();
+          }
+        }
+      }
+    }
+  }
+  const sparkleCount = Math.floor(W / 5);
+  for (let i = 0; i < sparkleCount; i++) {
+    const sx = (i / sparkleCount) * W + (Math.random() - 0.5) * 12;
+    const sy = horizonY + 3 + Math.random() * (H - horizonY - 3);
+    const wavePhase = frameCount * 0.025 + sx * 0.04 + sy * 0.015;
+    const waveOffset = Math.sin(wavePhase) * 2 + windForce * 12;
+    const sparkleAlpha = (0.015 + Math.sin(frameCount * 0.015 + i * 0.5) * 0.015) * (0.15 + sunVis * 0.65);
+    if (sparkleAlpha > 0.005) {
+      ctx.fillStyle = `rgba(255,255,255,${sparkleAlpha})`;
+      ctx.beginPath(); ctx.ellipse(sx + waveOffset, sy, 2.5+Math.random()*3, 0.5+Math.random()*0.3, 0, 0, Math.PI*2); ctx.fill();
+    }
+  }
+  ctx.strokeStyle = `rgba(255,255,255,${0.015 + sunVis * 0.025})`; ctx.lineWidth = 0.5;
+  for (let y = horizonY + 4; y < H; y += 6 + Math.random() * 4) {
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 12) {
+      const wave = Math.sin(frameCount * 0.015 + x * 0.008 + y * 0.02) * 1.2;
+      const windShift = windForce * (y - horizonY) * 0.018 * Math.sin(x * 0.01);
+      if (x === 0) ctx.moveTo(x, y + wave + windShift); else ctx.lineTo(x, y + wave + windShift);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // ---- UI ----
+  const now = new Date();
+  if (!manualMode) {
+    document.getElementById('time').textContent = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('status').textContent = sunTimeString;
+  } else {
+    document.getElementById('time').textContent = ' MANUAL ';
+  }
+  requestAnimationFrame(render);
+}
+
+for (let i = 0; i < 3; i++) spawnFalling();
+resize();
+render();
+</script>
+</body>
+</html>
