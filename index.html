@@ -80,9 +80,7 @@ body {
   transition: opacity .6s ease;
 }
 @media (prefers-reduced-motion: reduce) {
-  #bgCanvas {
-    opacity: 0.2;
-  }
+  #bgCanvas { opacity: 0.2; }
 }
 
 /* ─── 主卡片 ─── */
@@ -279,19 +277,37 @@ body {
   transition: background .45s ease;
 }
 
-/* ─── 节点列表 ─── */
-.nodes {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+/* ─── 节点大框 ─── */
+.nodes-shell {
+  background: var(--bg-cream);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: clamp(20px, 5vw, 28px);
+  transition: background .45s ease, border-color .45s ease;
 }
+.nodes-shell-title {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  text-align: center;
+  transition: color .35s ease;
+}
+.nodes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ─── 单个节点 ─── */
 .node {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 18px;
-  border-radius: 16px;
-  background: var(--bg-cream);
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  background: var(--card-white);
   border: 1px solid transparent;
   text-decoration: none;
   color: var(--text-main);
@@ -311,7 +327,7 @@ body {
   transition: opacity .35s ease;
 }
 .node:hover {
-  transform: translateX(4px);
+  transform: translateX(3px);
   box-shadow: var(--shadow-hover);
   border-color: rgba(196, 168, 154, .3);
 }
@@ -319,7 +335,7 @@ body {
   opacity: 1;
 }
 .node.empty {
-  opacity: .38;
+  opacity: .35;
   pointer-events: none;
 }
 .node.empty:hover {
@@ -328,15 +344,15 @@ body {
   border-color: transparent;
 }
 .node-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--card-white);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--bg-cream);
   border: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 11px;
   flex: none;
   color: var(--accent-pink);
   letter-spacing: .06em;
@@ -347,23 +363,29 @@ body {
   min-width: 0;
 }
 .node-title {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-main);
-  letter-spacing: .12em;
+  letter-spacing: .1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: color .35s ease;
 }
 .node-desc {
-  margin-top: 2px;
-  font-size: 11px;
+  margin-top: 1px;
+  font-size: 10px;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: color .35s ease;
 }
 .node-tag {
   flex: none;
-  font-size: 9px;
-  letter-spacing: .22em;
-  padding: 3px 8px;
+  font-size: 8px;
+  letter-spacing: .2em;
+  padding: 2px 6px;
   border: 1px solid var(--line);
   color: var(--text-muted);
   border-radius: 4px;
@@ -372,11 +394,9 @@ body {
 .node-tag.live {
   color: var(--accent-pink);
   border-color: rgba(196, 168, 154, .5);
-  transition: color .35s ease, border-color .45s ease;
 }
 .node-tag.soon {
   opacity: .5;
-  transition: opacity .35s ease;
 }
 
 /* ─── 底部统计 ─── */
@@ -443,56 +463,39 @@ body {
 }
 
 /* ─── 响应式 ─── */
-@media(max-width:480px) {
+@media(max-width:520px) {
+  .nodes { grid-template-columns: 1fr; }
   .topbar-center {
     font-size: 9px;
     letter-spacing: .2em;
   }
-  .topbar-left {
-    font-size: 9px;
-  }
-  .topbar-left .dot {
-    width: 5px;
-    height: 5px;
-  }
-  .ctrl-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
+  .topbar-left { font-size: 9px; }
+  .topbar-left .dot { width: 5px; height: 5px; }
+  .ctrl-btn { width: 32px; height: 32px; font-size: 14px; }
 }
 @media(min-width:640px) {
-  .shell {
-    padding: 48px 44px;
-  }
+  .shell { padding: 48px 44px; }
 }
 
 /* ─── prefers-reduced-motion ─── */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .node:hover {
-    transform: none !important;
-  }
-  .ctrl-btn:hover {
-    transform: none !important;
-  }
+  .node:hover { transform: none !important; }
+  .ctrl-btn:hover { transform: none !important; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ Canvas 动态背景 ═══ -->
 <canvas id="bgCanvas"></canvas>
 
 <div class="shell">
 
-  <!-- ═══ 顶部：左中右三栏 ═══ -->
+  <!-- ═══ 顶部 ═══ -->
   <div class="topbar">
     <div class="topbar-left">
       <span class="dot"></span>
@@ -500,12 +503,8 @@ body {
     </div>
     <div class="topbar-center">Aurevny.Lab</div>
     <div class="topbar-right">
-      <button class="ctrl-btn" id="musicToggle" onclick="toggleMusic()" aria-label="切換背景音樂">
-        ♪
-      </button>
-      <button class="ctrl-btn" id="themeToggle" onclick="toggleTheme()" aria-label="切換深色/淺色模式">
-        🌙
-      </button>
+      <button class="ctrl-btn" id="musicToggle" onclick="toggleMusic()" aria-label="切換背景音樂">♪</button>
+      <button class="ctrl-btn" id="themeToggle" onclick="toggleTheme()" aria-label="切換深色/淺色模式">🌙</button>
     </div>
   </div>
 
@@ -542,45 +541,78 @@ body {
   <!-- ═══ 分隔 ═══ -->
   <div class="divider"></div>
 
-  <!-- ═══ 节点列表 ═══ -->
-  <div class="nodes">
+  <!-- ═══ 节点大框 ═══ -->
+  <div class="nodes-shell">
+    <div class="nodes-shell-title">實驗室 · Lab</div>
+    <div class="nodes">
 
-    <a class="node" href="./about-you/" aria-label="關於你 · 安靜問卷">
-      <div class="node-icon">01</div>
-      <div class="node-body">
-        <div class="node-title">關於你 · A Quiet Portrait</div>
-        <div class="node-desc">一個純前端的安靜問卷。所有回答僅存於本地。</div>
-      </div>
-      <div class="node-tag live">Live</div>
-    </a>
+      <a class="node" href="./about-you/" aria-label="關於你 · 安靜問卷">
+        <div class="node-icon">01</div>
+        <div class="node-body">
+          <div class="node-title">關於你 · A Quiet Portrait</div>
+          <div class="node-desc">一個純前端的安靜問卷。所有回答僅存於本地。</div>
+        </div>
+        <div class="node-tag live">Live</div>
+      </a>
 
-    <a class="node" href="./mood-card/" aria-label="每日一句 × 情緒色卡">
-      <div class="node-icon">02</div>
-      <div class="node-body">
-        <div class="node-title">每日一句 × 情緒色卡</div>
-        <div class="node-desc">80 句話，30 種顏色，打字機逐字出現。</div>
-      </div>
-      <div class="node-tag live">Live</div>
-    </a>
+      <a class="node" href="./mood-card/" aria-label="每日一句 × 情緒色卡">
+        <div class="node-icon">02</div>
+        <div class="node-body">
+          <div class="node-title">每日一句 × 情緒色卡</div>
+          <div class="node-desc">80 句話，30 種顏色，打字機逐字出現。</div>
+        </div>
+        <div class="node-tag live">Live</div>
+      </a>
 
-    <a class="node" href="./node-3/" aria-label="认知棱镜">
-      <div class="node-icon">03</div>
-      <div class="node-body">
-        <div class="node-title">认知棱镜·</div>
-        <div class="node-desc">独家首创SBTI新维度</div>
-      </div>
-      <div class="node-tag live">Live</div>
-    </a>
+      <a class="node" href="./node-3/" aria-label="认知棱镜">
+        <div class="node-icon">03</div>
+        <div class="node-body">
+          <div class="node-title">认知棱镜·</div>
+          <div class="node-desc">独家首创SBTI新维度</div>
+        </div>
+        <div class="node-tag live">Live</div>
+      </a>
 
       <a class="node" href="./node-111223/" aria-label="专注飞行">
-      <div class="node-icon">04</div>
-      <div class="node-body">
-        <div class="node-title">专注飞行</div>
-        <div class="node-desc">飞行上的番茄钟</div>
-      </div>
-      <div class="node-tag live">live</div>
-    </a>
+        <div class="node-icon">04</div>
+        <div class="node-body">
+          <div class="node-title">专注飞行</div>
+          <div class="node-desc">飞行上的番茄钟</div>
+        </div>
+        <div class="node-tag live">live</div>
+      </a>
 
+      <!-- 空白占位 05 -->
+      <div class="node"> href="./node-5/"
+        <div class="node-icon">05</div>
+        <div class="node-body">
+          <div class="SKY·天空🌌">—</div>
+          <div class="node-desc">就绪</div>
+        </div>
+        <div class="node-tag soon">Soon</div>
+      </div>
+
+      <!-- 空白占位 06 -->
+      <div class="node empty">
+        <div class="node-icon">06</div>
+        <div class="node-body">
+          <div class="node-title">—</div>
+          <div class="node-desc">準備中</div>
+        </div>
+        <div class="node-tag soon">Soon</div>
+      </div>
+
+      <!-- 空白占位 07 -->
+      <div class="node empty">
+        <div class="node-icon">07</div>
+        <div class="node-body">
+          <div class="node-title">—</div>
+          <div class="node-desc">準備中</div>
+        </div>
+        <div class="node-tag soon">Soon</div>
+      </div>
+
+    </div>
   </div>
 
   <!-- ═══ 底部 ═══ -->
@@ -599,22 +631,15 @@ body {
 </div><!-- /shell -->
 
 <script>
-// ═══════════════════════════════════════════
-//  1. 主题切换
-// ═══════════════════════════════════════════
+// ═══ 主题切换 ═══
 function applyTheme() {
   const saved = localStorage.getItem('aurevny-theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const isDark = saved === 'dark' || (saved === null && prefersDark);
-
   document.documentElement.classList.toggle('dark-mode', isDark);
-
   const toggle = document.getElementById('themeToggle');
-  if (toggle) {
-    toggle.textContent = isDark ? '☀️' : '🌙';
-  }
+  if (toggle) toggle.textContent = isDark ? '☀️' : '🌙';
 }
-
 function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.classList.toggle('dark-mode');
@@ -623,48 +648,28 @@ function toggleTheme() {
   localStorage.setItem('aurevny-theme', isDark ? 'dark' : 'light');
 }
 
-// ═══════════════════════════════════════════
-//  2. 音乐控制 (Web Audio 环境音)
-// ═══════════════════════════════════════════
-let audioCtx = null;
-let osc = null;
-let lfo = null;
-let gain = null;
-let isPlaying = false;
-
+// ═══ 音乐控制 ═══
+let audioCtx = null, osc = null, lfo = null, gain = null, isPlaying = false;
 function toggleMusic() {
   const btn = document.getElementById('musicToggle');
-
   if (isPlaying) {
-    // 停止
     try {
-      if (osc) { osc.stop();
-        osc.disconnect(); }
-      if (lfo) { lfo.stop();
-        lfo.disconnect(); }
+      if (osc) { osc.stop(); osc.disconnect(); }
+      if (lfo) { lfo.stop(); lfo.disconnect(); }
       if (gain) gain.disconnect();
       if (audioCtx && audioCtx.state !== 'closed') audioCtx.close();
-    } catch (e) { /* ignore */ }
-    osc = null;
-    lfo = null;
-    gain = null;
-    audioCtx = null;
+    } catch(e) {}
+    osc = lfo = gain = audioCtx = null;
     isPlaying = false;
     btn.classList.remove('playing');
     btn.textContent = '♪';
     return;
   }
-
-  // 播放
   try {
-    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-
-    // 主振荡器 (低频, 类似风声)
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     osc = audioCtx.createOscillator();
     osc.type = 'sine';
     osc.frequency.value = 95;
-
-    // LFO 调制频率 (波动感)
     lfo = audioCtx.createOscillator();
     lfo.type = 'sine';
     lfo.frequency.value = 0.35;
@@ -672,51 +677,32 @@ function toggleMusic() {
     lfoGain.gain.value = 6;
     lfo.connect(lfoGain);
     lfoGain.connect(osc.frequency);
-
-    // 音量控制
     gain = audioCtx.createGain();
     gain.gain.value = 0.06;
-
-    // 连接
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
-    // 启动
     osc.start();
     lfo.start();
-
     isPlaying = true;
     btn.classList.add('playing');
     btn.textContent = '♫';
-
-    // 页面关闭时自动停止
     document.addEventListener('visibilitychange', function visHandler() {
-      if (document.hidden && isPlaying) {
-        toggleMusic();
-        document.removeEventListener('visibilitychange', visHandler);
-      }
+      if (document.hidden && isPlaying) { toggleMusic(); document.removeEventListener('visibilitychange', visHandler); }
     });
-
-  } catch (e) {
-    // 静默失败
-    console.warn('Audio init failed:', e);
+  } catch(e) {
     btn.textContent = '♪';
   }
 }
 
-// ═══════════════════════════════════════════
-//  3. 本地统计
-// ═══════════════════════════════════════════
+// ═══ 本地统计 ═══
 function updateStats() {
   let visits = parseInt(localStorage.getItem('aurevny_visits') || '0', 10);
   visits += 1;
   localStorage.setItem('aurevny_visits', String(visits));
   document.getElementById('visitCount').textContent = visits;
-
   let quiz = parseInt(localStorage.getItem('aurevny_quiz_count') || '0', 10);
   document.getElementById('quizCount').textContent = quiz;
 }
-
 function incQuiz() {
   let quiz = parseInt(localStorage.getItem('aurevny_quiz_count') || '0', 10);
   quiz += 1;
@@ -724,115 +710,63 @@ function incQuiz() {
   document.getElementById('quizCount').textContent = quiz;
 }
 
-// ═══════════════════════════════════════════
-//  4. 天气 + 节日 (修复 Bug)
-// ═══════════════════════════════════════════
+// ═══ 天气 ═══
 const WEATHER_ZH = {
-  "Sunny": "晴",
-  "Clear": "晴",
-  "Partly cloudy": "多雲",
-  "Cloudy": "陰",
-  "Overcast": "陰天",
-  "Mist": "薄霧",
-  "Fog": "霧",
-  "Light rain": "小雨",
-  "Rain": "雨",
-  "Heavy rain": "大雨",
-  "Light rain shower": "小陣雨",
-  "Rain shower": "陣雨",
-  "Showers": "陣雨",
-  "Heavy rain shower": "大雨陣雨",
-  "Thunderstorm": "雷陣雨",
-  "Storm": "雷陣雨",
-  "Light snow": "小雪",
-  "Snow": "雪",
-  "Heavy snow": "大雪",
-  "Blizzard": "暴風雪",
-  "Drizzle": "毛毛雨",
-  "Freezing rain": "凍雨",
-  "Sleet": "雨夾雪",
-  "Blowing snow": "吹雪"
+  "Sunny":"晴","Clear":"晴","Partly cloudy":"多雲","Cloudy":"陰","Overcast":"陰天",
+  "Mist":"薄霧","Fog":"霧","Light rain":"小雨","Rain":"雨","Heavy rain":"大雨",
+  "Light rain shower":"小陣雨","Rain shower":"陣雨","Showers":"陣雨","Heavy rain shower":"大雨陣雨",
+  "Thunderstorm":"雷陣雨","Storm":"雷陣雨","Light snow":"小雪","Snow":"雪","Heavy snow":"大雪",
+  "Blizzard":"暴風雪","Drizzle":"毛毛雨","Freezing rain":"凍雨","Sleet":"雨夾雪","Blowing snow":"吹雪"
 };
-
 function weatherDescZh(en) {
   if (!en) return "";
   en = en.trim();
   if (WEATHER_ZH[en]) return WEATHER_ZH[en];
-  for (const k in WEATHER_ZH) {
-    if (en.toLowerCase().includes(k.toLowerCase())) return WEATHER_ZH[k];
-  }
+  for (const k in WEATHER_ZH) { if (en.toLowerCase().includes(k.toLowerCase())) return WEATHER_ZH[k]; }
   return en;
 }
-
-// 修复：正确找到最近的节日
 function getNextFestival() {
   const now = new Date();
   const y = now.getFullYear();
-
   const festivals = [
-    { name: "元旦", m: 0, d: 1 },
-    { name: "春節", m: 0, d: 29 },
-    { name: "清明", m: 3, d: 4 },
-    { name: "端午", m: 5, d: 10 },
-    { name: "中秋", m: 8, d: 15 },
-    { name: "國慶", m: 9, d: 1 },
-    { name: "冬至", m: 11, d: 21 }
+    { name:"元旦", m:0, d:1 },{ name:"春節", m:0, d:29 },{ name:"清明", m:3, d:4 },
+    { name:"端午", m:5, d:10 },{ name:"中秋", m:8, d:15 },{ name:"國慶", m:9, d:1 },{ name:"冬至", m:11, d:21 }
   ];
-
-  let closest = null;
-  let minDays = Infinity;
-
+  let closest = null, minDays = Infinity;
   for (const f of festivals) {
-    // 今年的日期
     let fDate = new Date(y, f.m, f.d);
     let diff = (fDate - now) / 86400000;
-
-    // 如果今年已经过了，尝试明年的日期
-    if (diff < 0) {
-      fDate = new Date(y + 1, f.m, f.d);
-      diff = (fDate - now) / 86400000;
-    }
-
-    // 如果 diff 仍然小于 0，跳过（极端情况）
+    if (diff < 0) { fDate = new Date(y+1, f.m, f.d); diff = (fDate - now) / 86400000; }
     if (diff < 0) continue;
-
-    if (diff < minDays) {
-      minDays = diff;
-      closest = { name: f.name, days: Math.ceil(diff) };
-    }
+    if (diff < minDays) { minDays = diff; closest = { name: f.name, days: Math.ceil(diff) }; }
   }
-
-  return closest || { name: "元旦", days: 1 };
+  return closest || { name:"元旦", days:1 };
 }
-
 function getSeasonText() {
   const now = new Date();
-  const m = now.getMonth(),
-    d = now.getDate();
-  if (m === 7 && d < 7) return { body: "風還溫著" };
-  if (m === 7 && d >= 7) return { body: "白露未至，夜還短" };
-  if (m === 8 && d < 22) return { body: "白露已過，夜開始涼了" };
-  if (m === 8 && d >= 22) return { body: "秋分將至，晝夜漸平" };
-  if (m === 9 && d < 8) return { body: "寒露前，露已寒" };
-  if (m === 9 && d >= 8) return { body: "霜降前，葉將落" };
-  if (m === 10) return { body: "立冬後，第一場雪還遠" };
-  if (m === 11 && d < 21) return { body: "冬至未至，夜還在變長" };
-  if (m === 11 && d >= 21) return { body: "冬至已至，夜最長" };
-  if (m === 0) return { body: "新年伊始，舊事翻篇" };
-  if (m === 1) return { body: "立春前後，等一場風暖" };
-  if (m === 2) return { body: "驚蟄前後，雷還沒來" };
-  if (m === 3 && d < 4) return { body: "清明未至，雨還沒下透" };
-  if (m === 3 && d >= 4) return { body: "穀雨前，茶正嫩" };
-  if (m === 4) return { body: "立夏後，日漸長" };
-  if (m === 5) return { body: "芒種前後，麥黃了" };
-  if (m === 6) return { body: "小暑前後，熱還沒到頂" };
-  return { body: "四時流轉，日子照舊" };
+  const m = now.getMonth(), d = now.getDate();
+  if (m===7 && d<7) return { body:"風還溫著" };
+  if (m===7 && d>=7) return { body:"白露未至，夜還短" };
+  if (m===8 && d<22) return { body:"白露已過，夜開始涼了" };
+  if (m===8 && d>=22) return { body:"秋分將至，晝夜漸平" };
+  if (m===9 && d<8) return { body:"寒露前，露已寒" };
+  if (m===9 && d>=8) return { body:"霜降前，葉將落" };
+  if (m===10) return { body:"立冬後，第一場雪還遠" };
+  if (m===11 && d<21) return { body:"冬至未至，夜還在變長" };
+  if (m===11 && d>=21) return { body:"冬至已至，夜最長" };
+  if (m===0) return { body:"新年伊始，舊事翻篇" };
+  if (m===1) return { body:"立春前後，等一場風暖" };
+  if (m===2) return { body:"驚蟄前後，雷還沒來" };
+  if (m===3 && d<4) return { body:"清明未至，雨還沒下透" };
+  if (m===3 && d>=4) return { body:"穀雨前，茶正嫩" };
+  if (m===4) return { body:"立夏後，日漸長" };
+  if (m===5) return { body:"芒種前後，麥黃了" };
+  if (m===6) return { body:"小暑前後，熱還沒到頂" };
+  return { body:"四時流轉，日子照舊" };
 }
-
 function renderWeather() {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 5000);
-
   fetch("https://wttr.in/?format=j1", { signal: ctrl.signal, cache: "no-store" })
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(data => {
@@ -848,36 +782,28 @@ function renderWeather() {
       if (festival.days <= 1) line = `${desc}，${temp} 度。<br>明日便是${festival.name}。`;
       else if (festival.days <= 7) line = `${desc}，${temp} 度。<br>${season.body}，距${festival.name}還有幾天。`;
       else line = `${desc}，${temp} 度。<br>${season.body}，距${festival.name}還有 ${festival.days} 天。`;
-
       document.getElementById("wBody").innerHTML = line;
     })
     .catch(() => {
       clearTimeout(t);
       const season = getSeasonText();
       const festival = getNextFestival();
-      document.getElementById("wBody").innerHTML =
-        `${season.body}，距${festival.name}還有 ${festival.days} 天。`;
+      document.getElementById("wBody").innerHTML = `${season.body}，距${festival.name}還有 ${festival.days} 天。`;
     });
 }
-
 function renderDate() {
   const d = new Date();
-  const months = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
-  const days = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-  document.getElementById("wDate").textContent =
-    `${d.getFullYear()} · ${months[d.getMonth()]} · ${days[d.getDay()]}`;
+  const months = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+  const days = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+  document.getElementById("wDate").textContent = `${d.getFullYear()} · ${months[d.getMonth()]} · ${days[d.getDay()]}`;
 }
 
-// ═══════════════════════════════════════════
-//  5. Canvas 动态背景 (粒子 + 光晕)
-// ═══════════════════════════════════════════
+// ═══ Canvas 粒子背景 ═══
 (function initParticles() {
   const canvas = document.getElementById('bgCanvas');
   const ctx = canvas.getContext('2d');
-  let width, height;
-  let particles = [];
-  const PARTICLE_COUNT = 35;
-  const MAX_DIST = 120;
+  let width, height, particles = [];
+  const PARTICLE_COUNT = 35, MAX_DIST = 120;
 
   function resize() {
     width = canvas.width = window.innerWidth;
@@ -888,16 +814,10 @@ function renderDate() {
 
   function getColors() {
     const isDark = document.documentElement.classList.contains('dark-mode');
-    return {
-      main: isDark ? 'rgba(212,184,168,' : 'rgba(196,168,154,',
-      line: isDark ? 'rgba(212,184,168,' : 'rgba(196,168,154,'
-    };
+    return { main: isDark ? 'rgba(212,184,168,' : 'rgba(196,168,154,', line: isDark ? 'rgba(212,184,168,' : 'rgba(196,168,154,' };
   }
-
   class Particle {
-    constructor() {
-      this.reset();
-    }
+    constructor() { this.reset(); }
     reset() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
@@ -907,124 +827,58 @@ function renderDate() {
       this.alpha = 0.15 + Math.random() * 0.35;
     }
     update() {
-      this.x += this.vx;
-      this.y += this.vy;
+      this.x += this.vx; this.y += this.vy;
       if (this.x < 0 || this.x > width) this.vx *= -1;
       if (this.y < 0 || this.y > height) this.vy *= -1;
     }
     draw() {
       const colors = getColors();
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = colors.main + this.alpha + ')';
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+      ctx.fillStyle = colors.main + this.alpha + ')'; ctx.fill();
     }
   }
-
-  function initParticles() {
-    particles = [];
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      particles.push(new Particle());
-    }
-  }
-  initParticles();
+  for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
 
   function drawLines() {
     const colors = getColors();
     for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+      for (let j = i+1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
         if (dist < MAX_DIST) {
-          const alpha = (1 - dist / MAX_DIST) * 0.20;
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = colors.line + alpha + ')';
-          ctx.lineWidth = 0.6;
-          ctx.stroke();
+          const alpha = (1 - dist/MAX_DIST) * 0.20;
+          ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = colors.line + alpha + ')'; ctx.lineWidth = 0.6; ctx.stroke();
         }
       }
     }
   }
-
   function animate() {
     ctx.clearRect(0, 0, width, height);
-
-    // 额外光晕 (大圆渐变)
     const colors = getColors();
-    const grad = ctx.createRadialGradient(
-      width * 0.3 + Math.sin(Date.now() * 0.0001) * 80,
-      height * 0.4 + Math.cos(Date.now() * 0.00015) * 60,
-      10,
-      width * 0.3 + Math.sin(Date.now() * 0.0001) * 80,
-      height * 0.4 + Math.cos(Date.now() * 0.00015) * 60,
-      300
-    );
-    grad.addColorStop(0, colors.main + '0.06)');
-    grad.addColorStop(1, colors.main + '0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, width, height);
-
-    const grad2 = ctx.createRadialGradient(
-      width * 0.7 + Math.cos(Date.now() * 0.00008) * 60,
-      height * 0.7 + Math.sin(Date.now() * 0.00012) * 50,
-      10,
-      width * 0.7 + Math.cos(Date.now() * 0.00008) * 60,
-      height * 0.7 + Math.sin(Date.now() * 0.00012) * 50,
-      250
-    );
-    grad2.addColorStop(0, colors.main + '0.04)');
-    grad2.addColorStop(1, colors.main + '0)');
-    ctx.fillStyle = grad2;
-    ctx.fillRect(0, 0, width, height);
-
-    // 粒子
-    for (const p of particles) {
-      p.update();
-      p.draw();
-    }
+    const grad = ctx.createRadialGradient(width*0.3+Math.sin(Date.now()*0.0001)*80, height*0.4+Math.cos(Date.now()*0.00015)*60, 10, width*0.3+Math.sin(Date.now()*0.0001)*80, height*0.4+Math.cos(Date.now()*0.00015)*60, 300);
+    grad.addColorStop(0, colors.main+'0.06)'); grad.addColorStop(1, colors.main+'0)');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, width, height);
+    const grad2 = ctx.createRadialGradient(width*0.7+Math.cos(Date.now()*0.00008)*60, height*0.7+Math.sin(Date.now()*0.00012)*50, 10, width*0.7+Math.cos(Date.now()*0.00008)*60, height*0.7+Math.sin(Date.now()*0.00012)*50, 250);
+    grad2.addColorStop(0, colors.main+'0.04)'); grad2.addColorStop(1, colors.main+'0)');
+    ctx.fillStyle = grad2; ctx.fillRect(0, 0, width, height);
+    for (const p of particles) { p.update(); p.draw(); }
     drawLines();
-
     requestAnimationFrame(animate);
   }
-
   animate();
-
-  // 窗口大小变化重置粒子位置
-  window.addEventListener('resize', () => {
-    resize();
-    for (const p of particles) {
-      p.x = Math.random() * width;
-      p.y = Math.random() * height;
-    }
-  });
-
-  // 主题变化时更新粒子颜色（通过重新绘制自动适应）
-  const observer = new MutationObserver(() => {
-    // 颜色会在下一次绘制时自动使用新主题
-  });
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-  // 减少运动
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    canvas.style.opacity = '0.2';
-  }
+  window.addEventListener('resize', () => { resize(); for (const p of particles) { p.x = Math.random()*width; p.y = Math.random()*height; } });
+  new MutationObserver(() => {}).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) canvas.style.opacity = '0.2';
 })();
 
-// ═══════════════════════════════════════════
-//  6. 初始化
-// ═══════════════════════════════════════════
+// ═══ 初始化 ═══
 document.addEventListener("DOMContentLoaded", () => {
   applyTheme();
   renderDate();
   renderWeather();
   updateStats();
-
-  // 音乐控制按钮初始状态
-  const btn = document.getElementById('musicToggle');
-  btn.textContent = '♪';
+  document.getElementById('musicToggle').textContent = '♪';
 });
 </script>
 
